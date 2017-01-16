@@ -1,18 +1,36 @@
 {
-  "name": "ethnexus-web",
-  "version": "0.1.0",
-  "private": true,
-  "devDependencies": {
-    "react-scripts": "0.8.4"
-  },
-  "dependencies": {
-    "react": "^15.4.1",
-    "react-dom": "^15.4.1"
-  },
+  "name": "ethnexus-server",
+  "version": "1.0.0",
+  "description": "server for ethnexus app",
+  "main": "server.js",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "nodemon server.js",
+    "client": "node start-client.js",
+    "geth": "docker run -it -p 8545:8545 -p 30303:30303 -v ~/.geth:/root/.ethereum ethereum/client-go --rpc --rpcaddr \"0.0.0.0\" ",
+    "test": "mocha test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AntonioJuliano/ethnexus-web.git"
+  },
+  "keywords": [
+    "ethereum"
+  ],
+  "author": "Antonio Juliano",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AntonioJuliano/ethnexus-web/issues"
+  },
+  "homepage": "https://github.com/AntonioJuliano/ethnexus-web#readme",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "express": "^4.14.0",
+    "express-validator": "^3.1.2",
+    "bluebird": "latest"
+  },
+  "devDependencies": {
+    "concurrently": "^3.1.0",
+    "mocha": "^3.2.0"
   }
 }
