@@ -2,10 +2,12 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import Search from './components/Search';
+import Web3 from 'web3';
 
 class App extends Component {
     constructor(props) {
         super(props);
+        this.state = { web3: new Web3() };
     }
 
     render() {

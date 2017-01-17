@@ -17,13 +17,25 @@ class Search extends React.Component {
     }
 
     handleChange(e) {
-        this.setState({ value: e.target.value });
+        const value = e.target.value;
+        this.setState({ value: value });
 
         const thisRef = this;
 
-        if (this.props.web3.isAddress(e.target.value)) {
-            console.log("searching for address " + e.target.value);
-            // TODO make request here
+        if (this.props.web3.isAddress(value)) {
+            console.log("searching for address " + value);
+            const requestPath = `/api/v1/contract?address=${value}`;
+            fetch(requestPath, {method: 'get'}).then(function(response) {
+                    console.log(response);
+                    return response.json();
+                }
+            ).then(function(json) {
+                    console.log(json);
+                    thisRef.setState({ code: json.code })
+                }
+            ).catch(function(error) {
+                console.error(error);
+            });
         }
     }
 
@@ -65,7 +77,7 @@ class Search extends React.Component {
                             this.state.error
                         </Panel>}
                         {this.state.code && <Panel header="Contract" bsStyle="primary">
-                            this.state.code
+                            {this.state.code}
                         </Panel>}
                     </Col>
                 </Row>

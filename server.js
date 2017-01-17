@@ -7,17 +7,7 @@ const expressValidator = require('express-validator');
 const bodyParser = require('body-parser');
 const bluebirdPromise = require("bluebird");
 web3.setProvider(new web3.providers.HttpProvider('http://localhost:8545'));
-// bluebirdPromise.promisifyAll(web3.eth);
-
-const getCode = function (address) {
-    return new Promise(function(resolve,reject){
-        web3.eth.getCode(address,function(err,data){
-            if(err !== null) return reject(err);
-            console.log(data);
-            resolve(data);
-        });
-    });
-};
+bluebirdPromise.promisifyAll(web3.eth);
 
 app.use(bodyParser.json());
 app.use(expressValidator({
@@ -28,8 +18,20 @@ app.use(expressValidator({
     }
 }));
 
+app.use(function(request, response, next) {
+    console.log({
+        message: 'Received request',
+        url: request.url,
+        method: request.method,
+        headers: request.headers,
+        query: request.query,
+        body: request.body
+    })
+    return next();
+});
 
 app.get('/api/v1/contract', (request, response) => {
+    console.log("A");
     request.check({
         'address': {
             in: 'query',
@@ -46,7 +48,7 @@ app.get('/api/v1/contract', (request, response) => {
         }
     }).then(function(result) {
         console.log("Making contract request to geth for address: " + request.query.address);
-        return getCode(request.query.address);
+        return web3.eth.getCodeAsync(request.query.address);
     }).then(function(contract) {
         console.log("Got contract response from geth: " + contract);
 
@@ -57,7 +59,7 @@ app.get('/api/v1/contract', (request, response) => {
             if (error !== 'ignore') {
                 console.error(error);
                 if (!response.headerSent) {
-                    response.status(500).send('Server Error');
+                    response.status(500).json({ error: 'Server Error' });
                 }
             }
         }
@@ -69,6 +71,11 @@ app.use((err, request, response, next) => {
     // log the error, for now just console.log
     console.log(err);
     response.status(500).send('Server Error');
+});
+
+app.use(function(req, res, next) {
+    res.status(404);
+    res.json({ error: "Not Found"});
 });
 
 app.listen(port, (err) => {
