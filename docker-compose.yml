@@ -1,0 +1,22 @@
+version: '2'
+services:
+  geth:
+    image: "ethereum/client-go"
+    ports:
+      - "8545:8545"
+      - "30303:30303"
+    volumes:
+      - "~/.geth:/root/.ethereum ethereum/client-go"
+    cap_add:
+      - SYS_TIME
+      - SYS_NICE
+    command: apk --no-cache update && \
+             apk --no-cache upgrade && \
+             apk --no-cache add openntpd && \
+             ntpd -s && \
+             geth --rpc --rpcaddr "0.0.0.0"
+  mongo:
+    image: "mongo:3.4.1"
+    volumes:
+      - "~/.mongo:/data/db"
+    command: mongod --storageEngine wiredTiger
