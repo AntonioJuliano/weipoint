@@ -12,11 +12,13 @@ function lookupContract(address) {
     return Promise.all([dbPromise, web3Promise]).then(function(results) {
         const dbResult = results[0];
         const web3Result = results[1];
+        console.log(dbResult);
+        console.log(web3Result);
 
         if (dbResult !== null) {
             console.log('found from database');
             return dbResult;
-        } else if (web3Result !== null) {
+        } else if (web3Result !== null && web3Result !== '0x') {
             console.log('found from web3');
 
             const newContract = new Contract({ address: address, code: web3Result });
@@ -25,6 +27,7 @@ function lookupContract(address) {
                 return newContract;
             });
         } else {
+            console.log('contract not found');
             return null;
         }
     })
