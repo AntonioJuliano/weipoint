@@ -17,8 +17,6 @@ const contractSchema = new Schema({
     sourceType: 'string'
 });
 
-// the schema is useless so far
-// we need to create a model using it
 const Contract = mongoose.model('Contract', contractSchema);
 
 // make this available to our users in our Node applications

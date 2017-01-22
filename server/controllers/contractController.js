@@ -19,24 +19,33 @@ router.get('/', (request, response) => {
         if (!result.isEmpty()) {
             response.status(400).json({
                 errors: result.array(),
-                code: errorCodes.invalidArguments
+                errorCode: errorCodes.invalidArguments
             });
             return Promise.reject('ignore');
         }
     }).then(function(result) {
-        console.log("Making contract request for address: " + request.query.address);
-        return contractService.lookupContract(request.query.address);
-    }).then(function(contract) {
+        const address = request.query.address;
+        console.log("Making contract request for address: " + address);
+        return contractService.lookupContract(address);
+    }).then(function(results) {
+        const contract = results.contract;
+        const blockNumber = results.blockNumber;
+
         console.log("Got contract response from geth: " + contract);
 
         if (contract === null) {
             response.status(400).json({
                 error: 'Not Found',
-                code: errorCodes.notFound
+                errorCode: errorCodes.notFound,
+                blockNumber: blockNumber
             })
         } else {
             response.status(200).json({
-                code: contract
+                address: contract.address,
+                source: contract.source,
+                sourceType: contract.sourceType,
+                code: contract.code,
+                blockNumber: blockNumber
             });
         }
     }).catch(function(error) {
@@ -51,7 +60,9 @@ router.get('/', (request, response) => {
 });
 
 router.post('/source', (request, response) => {
-    request.body({
+    let contract;
+    let blockNumber;
+    request.check({
         'address': {
             in: 'body',
             isAddress: true,
@@ -64,7 +75,7 @@ router.post('/source', (request, response) => {
         'sourceType': {
             in: 'body',
             matches: {
-                options: ['solidity', 'serpent']
+                options: 'solidity|serpent'
             }
         }
     });
@@ -72,26 +83,29 @@ router.post('/source', (request, response) => {
         if (!result.isEmpty()) {
             response.status(400).json({
                 errors: result.array(),
-                code: errorCodes.invalidArguments
+                errorCode: errorCodes.invalidArguments
             });
             return Promise.reject('ignore');
         }
     }).then(function(result) {
-        console.log("Making contract request for address: " + request.query.address);
-        return contractService.lookupContract(request.query.address);
-    }).then(function(contract) {
+        console.log("Making contract request for address: " + request.body.address);
+        return contractService.lookupContract(request.body.address);
+    }).then(function(results) {
+        contract = results.contract;
+        blockNumber = results.blockNumber;
         console.log("Got contract response from geth: " + contract);
 
         if (contract === null) {
             response.status(400).json({
                 error: 'Contract not found at address',
-                code: errorCodes.notFound
+                errorCode: errorCodes.notFound
             });
             return Promise.reject('ignore');
-        } else if (contract.code !== null) {
+        } else if (contract.source !== undefined) {
+            console.log("Existing source: " + contract.source);
             response.status(400).json({
                 error: 'Contract already has source',
-                code: errorCodes.sourceAlreadyExists
+                errorCode: errorCodes.sourceAlreadyExists
             });
             return Promise.reject('ignore');
         } else {
@@ -104,7 +118,21 @@ router.post('/source', (request, response) => {
             }
         }
     }).then(function(compileResult) {
-        
+        if (compileResult === contract.source) {
+            contract.code = request.body.source;
+            contract.sourceType = request.body.sourceType;
+            return contract.save();
+        } else {
+            return Promise.reject(new Error('Source did not match code'))
+        }
+    }).then(function(saveResult) {
+        response.status(200).json({
+            address: contract.address,
+            source: contract.source,
+            sourceType: contract.sourceType,
+            code: contract,
+            blockNumber: blockNumber
+        });
     }).catch(function(error) {
             if (error !== 'ignore') {
                 console.error(error);
