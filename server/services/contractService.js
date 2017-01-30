@@ -4,6 +4,8 @@
 
 const Contract = require('../models/contract');
 const web3 = require('../helpers/web3');
+const solc = require('../helpers/solc');
+const errors = require('../helpers/errors');
 
 function lookupContract(address) {
     const blockNumberPromise = web3.eth.getBlockNumberAsync();
@@ -39,4 +41,44 @@ function lookupContract(address) {
     })
 }
 
+function verifySource(contract, source, sourceType, compilerVersion) {
+    if (sourceType === 'solidity') {
+        return compileSolidity(source, compilerVersion).then(function(results) {
+            console.log(results);
+            results.forEach(function(result) {
+                console.log(result);
+                for (const contractName in result.compiled.contracts) {
+                    const compiledContract = result.compiled.contracts[contractName];
+                    console.log(compiledContract);
+                    if (compiledContract.bytecode === contract.code) {
+                        console.log(compiledContract);
+                        return Promise.resolve({
+                            contractName: contractName,
+                            sourceVersion: result.version
+                        });
+                    }
+                }
+            });
+
+            return Promise.reject(new errors.ClientError(
+                "Source did not match contract bytecode",
+                errors.errorCodes.sourceMismatch
+            ));
+        });
+    } else if (request.body.type === 'serpent') {
+        // TODO
+        return Promise.reject(new Error('Serpent not yet supported'));
+    } else {
+        return Promise.reject(new Error('Invalid sourceType'));
+    }
+}
+
+function compileSolidity(source, compilerVersion) {
+    const optPromise = solc.compileOptimized(source, compilerVersion);
+    const unoptPromise = solc.compile(source, compilerVersion);
+
+    return Promise.all([optPromise, unoptPromise]);
+}
+
 module.exports.lookupContract = lookupContract;
+module.exports.verifySource = verifySource;

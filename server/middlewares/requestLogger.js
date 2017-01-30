@@ -1,9 +1,8 @@
-/**
- * Created by antonio on 1/16/17.
- */
+const logger = require('../helpers/logger');
 
 module.exports = function(request, response, next) {
-    console.log({
+    logger.info({
+        at: 'requestLogger#logRequest',
         message: 'Received request',
         url: request.url,
         method: request.method,

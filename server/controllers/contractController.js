@@ -5,7 +5,9 @@ const express = require('express');
 const router = express.Router();
 const web3 = require('../helpers/web3');
 const contractService = require('../services/contractService');
-const errorCodes = require('../helpers/errorCodes');
+const errors = require('../helpers/errors');
+const errorHandler = require('../helpers/errorHandler');
+const logger = require('../helpers/logger');
 
 router.get('/', (request, response) => {
     request.check({
@@ -17,26 +19,31 @@ router.get('/', (request, response) => {
     });
     request.getValidationResult().then(function(result) {
         if (!result.isEmpty()) {
-            response.status(400).json({
-                errors: result.array(),
-                errorCode: errorCodes.invalidArguments
-            });
-            return Promise.reject('ignore');
+            return Promise.reject(new errors.RequestError(result.array()));
         }
     }).then(function(result) {
         const address = request.query.address;
-        console.log("Making contract request for address: " + address);
+        logger.debug({
+            at: 'contractController/',
+            message: "Making contract request for address",
+            address: address
+        });
         return contractService.lookupContract(address);
     }).then(function(results) {
         const contract = results.contract;
         const blockNumber = results.blockNumber;
 
-        console.log("Got contract response from geth: " + contract);
+        logger.debug({
+            at: 'contractController/',
+            message: "Got contract response",
+            address: request.body.address,
+            contract: contract
+        });
 
         if (contract === null) {
             response.status(400).json({
                 error: 'Not Found',
-                errorCode: errorCodes.notFound,
+                errorCode: errors.errorCodes.notFound,
                 blockNumber: blockNumber
             })
         } else {
@@ -49,14 +56,8 @@ router.get('/', (request, response) => {
             });
         }
     }).catch(function(error) {
-            if (error !== 'ignore') {
-                console.error(error);
-                if (!response.headerSent) {
-                    response.status(500).json({ error: 'Server Error' });
-                }
-            }
-        }
-    );
+        errorHandler.handle(error, response);
+    });
 });
 
 router.post('/source', (request, response) => {
@@ -81,67 +82,64 @@ router.post('/source', (request, response) => {
     });
     request.getValidationResult().then(function(result) {
         if (!result.isEmpty()) {
-            response.status(400).json({
-                errors: result.array(),
-                errorCode: errorCodes.invalidArguments
-            });
-            return Promise.reject('ignore');
+            return Promise.reject(new errors.RequestError(result.array()));
         }
     }).then(function(result) {
-        console.log("Making contract request for address: " + request.body.address);
+        logger.debug({
+            at: 'contractController#/source',
+            message: "Making contract request",
+            address: request.body.address
+        });
+
         return contractService.lookupContract(request.body.address);
     }).then(function(results) {
         contract = results.contract;
         blockNumber = results.blockNumber;
-        console.log("Got contract response from geth: " + contract);
+
+        logger.debug({
+            at: 'contractController#/source',
+            message: "Got contract response",
+            address: request.body.address,
+            contract: contract
+        });
 
         if (contract === null) {
-            response.status(400).json({
-                error: 'Contract not found at address',
-                errorCode: errorCodes.notFound
-            });
-            return Promise.reject('ignore');
+            return Promise.reject(new errors.ClientError(
+                'Contract not found at address',
+                errors.errorCodes.notFound
+            ));
         } else if (contract.source !== undefined) {
-            console.log("Existing source: " + contract.source);
-            response.status(400).json({
-                error: 'Contract already has source',
-                errorCode: errorCodes.sourceAlreadyExists
-            });
-            return Promise.reject('ignore');
+            return Promise.reject(new errors.ClientError(
+                'Contract already has source',
+                errors.errorCodes.sourceAlreadyExists
+            ));
         } else {
-            if (request.body.sourceType === 'solidity') {
-                return web3.eth.compile.solidity(request.body.source);
-            } else if (request.body.type === 'serpent') {
-                return web3.eth.compile.serpent(request.body.source);
-            } else {
-                return Promise.reject(new Error('Invalid sourceType'));
-            }
+            return contractService.verifySource(
+                contract,
+                request.body.source,
+                request.body.sourceType,
+                request.body.compilerVersion
+            );
         }
     }).then(function(compileResult) {
-        if (compileResult === contract.source) {
-            contract.code = request.body.source;
-            contract.sourceType = request.body.sourceType;
-            return contract.save();
-        } else {
-            return Promise.reject(new Error('Source did not match code'))
-        }
+        contract.code = request.body.source;
+        contract.sourceType = request.body.sourceType;
+        contract.sourceVersion = compileResult.sourceVersion;
+        contract.name = compileResult.contractName;
+        return contract.save();
     }).then(function(saveResult) {
         response.status(200).json({
             address: contract.address,
             source: contract.source,
             sourceType: contract.sourceType,
-            code: contract,
+            sourceVersion: contract.sourceVersion,
+            name: contract.name,
+            code: contract.code,
             blockNumber: blockNumber
         });
     }).catch(function(error) {
-            if (error !== 'ignore') {
-                console.error(error);
-                if (!response.headerSent) {
-                    response.status(500).json({ error: 'Server Error' });
-                }
-            }
-        }
-    );
+        errorHandler.handle(error, response);
+    });
 });
 
 module.exports = router;

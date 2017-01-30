@@ -14,10 +14,10 @@ const contractSchema = new Schema({
     },
     code: { type: 'string', required: true },
     source: 'string',
-    sourceType: 'string'
+    sourceType: 'string',
+    sourceVersion: 'string'
 });
 
 const Contract = mongoose.model('Contract', contractSchema);
 
-// make this available to our users in our Node applications
 module.exports = Contract;
