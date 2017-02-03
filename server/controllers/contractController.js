@@ -49,6 +49,7 @@ router.get('/', (request, response) => {
         } else {
             response.status(200).json({
                 address: contract.address,
+                name: contract.name,
                 source: contract.source,
                 sourceType: contract.sourceType,
                 code: contract.code,

@@ -7,7 +7,7 @@
     "start": "concurrently \"npm run server\" \"npm run client\"",
     "server": "nodemon server.js --ignore client/",
     "client": "node start-client.js",
-    "geth": "docker run -it -p 8545:8545 -p 30303:30303 -v ~/.geth:/root/.ethereum ethereum/client-go --rpc --rpcaddr \"0.0.0.0\" ",
+    "parity": "docker run -it  -v ~/.parity:/root/.parity -p 8545:8545 ethcore/parity:stable-release --jsonrpc-interface '0.0.0.0' --jsonrpc-hosts all",
     "mongo": "mongod --dbpath ~/.mongo",
     "test": "mocha test"
   },
@@ -36,6 +36,9 @@
   },
   "devDependencies": {
     "concurrently": "^3.1.0",
-    "mocha": "^3.2.0"
+    "css-loader": "^0.26.1",
+    "mocha": "^3.2.0",
+    "npm": "^4.1.2",
+    "style-loader": "^0.13.1"
   }
 }

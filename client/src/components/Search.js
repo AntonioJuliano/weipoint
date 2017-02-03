@@ -2,9 +2,10 @@
  * Created by antonio on 1/2/17.
  */
 import * as React from "react";
-import styles from '../styles/SearchStyle';
+import '../styles/Search.css';
 import SearchBar from './SearchBar';
-import { Grid, Row, Col } from 'react-flexbox-grid'
+import SearchResult from './SearchResult';
+import { Grid, Row, Col } from 'react-flexbox-grid';
 
 class Search extends React.Component {
     constructor(props) {
@@ -12,13 +13,13 @@ class Search extends React.Component {
         this.state = {
             value: '',
             error: null,
-            code: null
+            contract: null
         };
-        this.handleChange = this.handleChange.bind(this)
+        this.handleChange = this.handleChange.bind(this);
     }
 
     handleChange(e) {
-        const value = e.target.value;
+        const value = e.target.value.trim();
         this.setState({ value: value });
 
         const thisRef = this;
@@ -32,7 +33,16 @@ class Search extends React.Component {
                 }
             ).then(function(json) {
                     console.log(json);
-                    thisRef.setState({ code: json.code })
+                    thisRef.setState({
+                        contract: {
+                            address: json.address,
+                            name: json.name,
+                            source: json.source,
+                            sourceType: json.sourceType,
+                            code: json.code,
+                            blockNumber: json.blockNumber
+                        }
+                    })
                 }
             ).catch(function(error) {
                 console.error(error);
@@ -42,15 +52,27 @@ class Search extends React.Component {
 
     render() {
         return (
-            <Grid>
+            <Grid fluid={true}>
                 <Row center='xs'>
-                    <Col xs={6}>
+                    <Col md={5} xs={7}>
                         <SearchBar
                             onChange={this.handleChange}
                             onClick={this.handleClick}
+                            reduced={this.state.contract !== null}
                             />
                     </Col>
                 </Row>
+                { this.state.contract &&
+                    <Row center='xs'>
+                        <Col md={8} xs={10}>
+                            <div className="SearchResults">
+                                <SearchResult
+                                    contract={this.state.contract}
+                                    />
+                            </div>
+                        </Col>
+                    </Row>
+                }
             </Grid>
         );
     }
