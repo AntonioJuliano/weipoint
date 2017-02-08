@@ -15,12 +15,19 @@ class Search extends React.Component {
             error: null,
             contract: null
         };
-        this.handleChange = this.handleChange.bind(this);
+        this.handleSearchBarChange = this.handleSearchBarChange.bind(this);
+        this.handleSearchBarClick = this.handleSearchBarClick.bind(this);
     }
 
-    handleChange(e) {
+    handleSearchBarChange(e) {
         const value = e.target.value.trim();
         this.setState({ value: value });
+    }
+
+    handleSearchBarClick(e) {
+        const value = this.state.value;
+
+        console.log("Clicked with " + value);
 
         const thisRef = this;
 
@@ -28,6 +35,9 @@ class Search extends React.Component {
             console.log("searching for address " + value);
             const requestPath = `/api/v1/contract?address=${value}`;
             fetch(requestPath, {method: 'get'}).then(function(response) {
+                    if (response.status !== 200) {
+                        throw Error("Search request to server failed");
+                    }
                     console.log(response);
                     return response.json();
                 }
@@ -52,28 +62,30 @@ class Search extends React.Component {
 
     render() {
         return (
-            <Grid fluid={true}>
-                <Row center='xs'>
-                    <Col md={5} xs={7}>
-                        <SearchBar
-                            onChange={this.handleChange}
-                            onClick={this.handleClick}
-                            reduced={this.state.contract !== null}
-                            />
-                    </Col>
-                </Row>
-                { this.state.contract &&
+            <div className="search">
+                <Grid fluid={true}>
                     <Row center='xs'>
-                        <Col md={8} xs={10}>
-                            <div className="SearchResults">
-                                <SearchResult
-                                    contract={this.state.contract}
-                                    />
-                            </div>
+                        <Col xs={10}>
+                            <SearchBar
+                                onChange={this.handleSearchBarChange}
+                                onClick={this.handleSearchBarClick}
+                                reduced={this.state.contract !== null}
+                                />
                         </Col>
                     </Row>
-                }
-            </Grid>
+                    { this.state.contract &&
+                        <Row center='xs'>
+                            <Col md={8} xs={10}>
+                                <div className="SearchResults">
+                                    <SearchResult
+                                        contract={this.state.contract}
+                                        />
+                                </div>
+                            </Col>
+                        </Row>
+                    }
+                </Grid>
+            </div>
         );
     }
 }

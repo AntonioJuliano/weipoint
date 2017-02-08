@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Search from './components/Search';
+import './styles/App.css';
 import Web3 from 'web3';
 import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
@@ -19,9 +20,11 @@ class App extends Component {
 
     render() {
         return (
-            <MuiThemeProvider muiTheme={getMuiTheme(lightBaseTheme)}>
-                <Search web3={this.state.web3}/>
-            </MuiThemeProvider>
+            <div className='App'>
+                <MuiThemeProvider muiTheme={getMuiTheme(lightBaseTheme)}>
+                    <Search web3={this.state.web3}/>
+                </MuiThemeProvider>
+            </div>
         );
     }
 }
