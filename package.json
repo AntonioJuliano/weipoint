@@ -10,7 +10,9 @@
     "client": "node start-client.js",
     "parity": "docker run -it  -v ~/.parity:/root/.parity -p 8545:8545 ethcore/parity:stable-release --jsonrpc-interface '0.0.0.0' --jsonrpc-hosts all",
     "mongo": "mongod --dbpath ~/.mongo",
-    "test": "mocha test"
+    "test": "mocha test",
+    "prod_install": "npm install --production && cd client && npm install && cd ..",
+    "prod_build": "cd client && npm run build && rm -rf node_modules scripts src && cd .."
   },
   "repository": {
     "type": "git",

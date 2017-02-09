@@ -1,0 +1,4 @@
+client/node_modules
+client/build
+client/.DS_Store
+server/.DS_Store

@@ -3,18 +3,20 @@ FROM alpine:3.5
 RUN apk update && apk upgrade && \
     apk add --no-cache git nodejs
 
-RUN adduser -S ethnexus
-USER ethnexus
-
-RUN mkdir -p /home/ethnexus/app
+RUN mkdir -p /home/ethnexus/app/client
 WORKDIR /home/ethnexus/app
 
 COPY package.json /home/ethnexus/app/package.json
-RUN npm install --production
+COPY client/package.json /home/ethnexus/app/client/package.json
+RUN npm run prod_install
 
+COPY ./client /home/ethnexus/app/client
+RUN npm run prod_build
 COPY ./server /home/ethnexus/app/server
-COPY ./client/build /home/ethnexus/app/client/build
 
 EXPOSE 3001
+
+RUN adduser -S ethnexus
+USER ethnexus
 
 CMD ["npm","run","prod"]
