@@ -1,7 +1,7 @@
 /**
  * Created by antonio on 1/17/17.
  */
-const mongoose = require('./db');
+const mongoose = require('../helpers/db');
 const Schema = mongoose.Schema;
 
 // create a schema

@@ -1,20 +1,19 @@
 version: '2'
 services:
-  geth:
-    image: "ethereum/client-go"
+  parity:
+    image: "ethcore/parity:stable-release"
     ports:
       - "8545:8545"
-      - "30303:30303"
     volumes:
-      - "~/.geth:/root/.ethereum ethereum/client-go"
+      - "~/.parity:/root/.parity"
     cap_add:
       - SYS_TIME
       - SYS_NICE
-    command: apk --no-cache update && \
-             apk --no-cache upgrade && \
-             apk --no-cache add openntpd && \
-             ntpd -s && \
-             geth --rpc --rpcaddr "0.0.0.0"
+      # apk --no-cache update && \
+      #          apk --no-cache upgrade && \
+      #          apk --no-cache add openntpd && \
+      #          ntpd -s && \
+    command: parity --jsonrpc-interface '0.0.0.0' --jsonrpc-hosts all
   mongo:
     image: "mongo:3.4.1"
     volumes:

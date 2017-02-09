@@ -1,11 +1,21 @@
+const dotenv = require('dotenv');
+dotenv.load();
+
 const express = require('express');
 const app = express();
 const port = 3001;
 const expressValidator = require('express-validator');
 const bodyParser = require('body-parser');
-const web3 = require('./server/helpers/web3');
-const errors = require('./server/helpers/errors');
-const logger = require('./server/helpers/logger');
+const web3 = require('./helpers/web3');
+const errors = require('./helpers/errors');
+const logger = require('./helpers/logger');
+const path = require('path');
+
+app.use(express.static('../client/build'));
+
+app.get('/', function (req, res) {
+  res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
+});
 
 app.use(bodyParser.json());
 app.use(function(error, request, response, next) {
@@ -22,9 +32,9 @@ app.use(expressValidator({
         }
     }
 }));
-app.use(require('./server/middlewares/requestLogger'));
+app.use(require('./middlewares/requestLogger'));
 
-app.use('/', require('./server/controllers/index'));
+app.use('/', require('./controllers/index'));
 
 // Error handler
 app.use((error, request, response, next) => {

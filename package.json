@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "concurrently \"npm run server\" \"npm run client\"",
-    "server": "nodemon server.js --ignore client/",
+    "server": "nodemon server/server.js --ignore client/",
+    "prod": "NODE_ENV=production node server/server.js",
     "client": "node start-client.js",
     "parity": "docker run -it  -v ~/.parity:/root/.parity -p 8545:8545 ethcore/parity:stable-release --jsonrpc-interface '0.0.0.0' --jsonrpc-hosts all",
     "mongo": "mongod --dbpath ~/.mongo",
@@ -27,6 +28,7 @@
   "dependencies": {
     "bluebird": "latest",
     "body-parser": "^1.15.2",
+    "dotenv": "^4.0.0",
     "express": "^4.14.0",
     "express-validator": "^3.1.2",
     "mongoose": "^4.7.7",
