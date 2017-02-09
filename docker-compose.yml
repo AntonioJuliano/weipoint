@@ -6,14 +6,8 @@ services:
       - "8545:8545"
     volumes:
       - "~/.parity:/root/.parity"
-    cap_add:
-      - SYS_TIME
-      - SYS_NICE
-      # apk --no-cache update && \
-      #          apk --no-cache upgrade && \
-      #          apk --no-cache add openntpd && \
-      #          ntpd -s && \
-    command: parity --jsonrpc-interface '0.0.0.0' --jsonrpc-hosts all
+
+    entrypoint: /build/parity/target/release/parity  --jsonrpc-interface '0.0.0.0' --jsonrpc-hosts all
   mongo:
     image: "mongo:3.4.1"
     volumes:
