@@ -1,5 +1,16 @@
 version: '2'
 services:
+  web:
+    build: .
+    environment:
+      - 'MONGO_URL=mongodb://mongo/ethnexus'
+      - 'PARITY_URL=http://parity:8545'
+    ports:
+      - "3001:3001"
+    links:
+      - mongo
+      - parity
+    restart: always
   parity:
     image: "ethcore/parity:stable-release"
     ports:

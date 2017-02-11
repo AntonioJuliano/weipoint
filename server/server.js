@@ -11,12 +11,6 @@ const errors = require('./helpers/errors');
 const logger = require('./helpers/logger');
 const path = require('path');
 
-app.use(express.static('../client/build'));
-
-app.get('/', function (req, res) {
-  res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
-});
-
 app.use(bodyParser.json());
 app.use(function(error, request, response, next) {
     console.log(error);
@@ -33,6 +27,12 @@ app.use(expressValidator({
     }
 }));
 app.use(require('./middlewares/requestLogger'));
+
+app.use(express.static(path.join(__dirname, '../client/build')));
+
+app.get('/', function (req, res) {
+  res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
+});
 
 app.use('/', require('./controllers/index'));
 
