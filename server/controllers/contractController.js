@@ -36,8 +36,8 @@ router.get('/', (request, response) => {
         logger.debug({
             at: 'contractController/',
             message: "Got contract response",
-            address: request.body.address,
-            contract: contract
+            address: request.query.address,
+            contract_id: contract.id
         });
 
         if (contract === null) {

@@ -13,7 +13,7 @@ class SearchBar extends React.Component {
       <div className={ this.props.reduced ? 'SearchBarContainerReduced' : 'SearchBarContainer' }>
         <div className="SearchTextField">
           <Row
-            center={this.props.reduced ? false : 'xs'}>
+            center={this.props.reduced ? null : 'xs'}>
             <Col xs={this.props.reduced ? 6 : 7} md={this.props.reduced ? 5 : 6}>
               <Paper zDepth={2}>
                 <TextField
@@ -29,10 +29,9 @@ class SearchBar extends React.Component {
               <Col xs={1}>
                 <div style={{marginTop: "4px", marginBottom: "4px"}}>
                   <FloatingActionButton
-                    mini={true}>
-                    <SearchIcon
-                      onClick={this.props.onClick}
-                      />
+                    mini={true}
+                    onClick={this.props.onClick}>
+                    <SearchIcon />
                   </FloatingActionButton>
                 </div>
               </Col>
@@ -43,10 +42,8 @@ class SearchBar extends React.Component {
           !this.props.reduced &&
           <Row center={'xs'}>
             <Col xs={1} style={{marginRight: "8px"}}>
-              <FloatingActionButton>
-                <SearchIcon
-                  onClick={this.props.onClick}
-                  />
+              <FloatingActionButton onClick={this.props.onClick}>
+                <SearchIcon />
               </FloatingActionButton>
             </Col>
             <Col xs={1} style={{marginLeft: "8px"}}>

@@ -5,6 +5,7 @@ import * as React from "react";
 import '../styles/Search.css';
 import SearchBar from './SearchBar';
 import SearchResult from './SearchResult';
+import PendingSearch from './PendingSearch';
 import { Grid, Row, Col } from 'react-flexbox-grid';
 
 class Search extends React.Component {
@@ -13,7 +14,8 @@ class Search extends React.Component {
         this.state = {
             value: '',
             error: null,
-            contract: null
+            contract: null,
+            searchState: 'initialized'
         };
         this.handleSearchBarChange = this.handleSearchBarChange.bind(this);
         this.handleSearchBarClick = this.handleSearchBarClick.bind(this);
@@ -33,6 +35,8 @@ class Search extends React.Component {
 
         if (this.props.web3.isAddress(value)) {
             console.log("searching for address " + value);
+            this.setState({ searchState: 'searching' });
+
             const requestPath = `/api/v1/contract?address=${value}`;
             fetch(requestPath, {method: 'get'}).then(function(response) {
                     if (response.status !== 200) {
@@ -51,7 +55,8 @@ class Search extends React.Component {
                             sourceType: json.sourceType,
                             code: json.code,
                             blockNumber: json.blockNumber
-                        }
+                        },
+                        searchState: 'completed'
                     })
                 }
             ).catch(function(error) {
@@ -69,20 +74,29 @@ class Search extends React.Component {
                             <SearchBar
                                 onChange={this.handleSearchBarChange}
                                 onClick={this.handleSearchBarClick}
-                                reduced={this.state.contract !== null}
+                                reduced={this.state.searchState !== 'initialized'}
                                 />
                         </Col>
                     </Row>
-                    { this.state.contract &&
-                        <Row center='xs'>
-                            <Col md={8} xs={10}>
-                                <div className="SearchResults">
-                                    <SearchResult
-                                        contract={this.state.contract}
-                                        />
-                                </div>
-                            </Col>
-                        </Row>
+                    { (this.state.searchState === 'searching') &&
+                      <Row center='xs'>
+                        <Col md={8} xs={10}>
+                          <div className="SearchResults">
+                            <PendingSearch />
+                          </div>
+                        </Col>
+                      </Row>
+                    }
+                    { (this.state.searchState === 'completed') &&
+                      <Row center='xs'>
+                        <Col md={8} xs={10}>
+                          <div className="SearchResults">
+                            <SearchResult
+                              contract={this.state.contract}
+                              />
+                          </div>
+                        </Col>
+                      </Row>
                     }
                 </Grid>
             </div>
