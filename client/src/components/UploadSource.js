@@ -7,6 +7,12 @@ import Dialog from 'material-ui/Dialog';
 import { Row, Col } from 'react-flexbox-grid';
 import Paper from 'material-ui/Paper';
 import TextField from 'material-ui/TextField';
+import {
+  Step,
+  Stepper,
+  StepButton,
+} from 'material-ui/Stepper';
+import RaisedButton from 'material-ui/RaisedButton';
 
 class UploadSource extends React.Component {
     constructor(props) {
@@ -14,52 +20,86 @@ class UploadSource extends React.Component {
         this.state = {
             value: '',
             error: null,
-            code: null
+            code: null,
+            stepIndex: 0,
+            visited: []
         };
-        this.handleChange = this.handleChange.bind(this);
-        this.uploadSource = this.uploadSource.bind(this);
     }
 
-    handleChange(e) {
+    handleChange = (e) => {
+        const key = e.target.id;
         const value = e.target.value;
-        this.setState({ value: value });
-
-        const thisRef = this;
-
-        if (this.props.web3.isAddress(value)) {
-            console.log("searching for address " + value);
-            const requestPath = `/api/v1/contract?address=${value}`;
-            fetch(requestPath, {method: 'get'}).then(function(response) {
-                    console.log(response);
-                    return response.json();
-                }
-            ).then(function(json) {
-                    console.log(json);
-                    thisRef.setState({ code: json.code })
-                }
-            ).catch(function(error) {
-                console.error(error);
-            });
-        }
+        let pair = {};
+        pair[key] = value;
+        this.setState(pair);
     }
 
-    uploadSource() {
+    uploadSource = () => {
 
+    }
+
+    componentWillMount() {
+      const {stepIndex, visited} = this.state;
+      this.setState({visited: visited.concat(stepIndex)});
+    }
+
+    componentWillUpdate(nextProps, nextState) {
+      const {stepIndex, visited} = nextState;
+      if (visited.indexOf(stepIndex) === -1) {
+        this.setState({visited: visited.concat(stepIndex)});
+      }
+    }
+
+    handleNext = () => {
+      const {stepIndex} = this.state;
+      if (stepIndex < 2) {
+        this.setState({stepIndex: stepIndex + 1});
+      }
+    };
+
+    handlePrev = () => {
+      const {stepIndex} = this.state;
+      if (stepIndex > 0) {
+        this.setState({stepIndex: stepIndex - 1});
+      }
+    };
+
+    getStepContent(stepIndex) {
+      switch (stepIndex) {
+        case 0:
+          return <div>
+              <Paper zDepth={1}>
+                <TextField
+                  onChange={this.handleChange}
+                  style={{ width: "95%", paddingLeft: 5, overflow: 'auto', maxHeight: 300 }}
+                  id='codeField'
+                  multiLine={true}
+                  underlineShow={false}
+                  rows={20}
+                  value={this.state.codeField}
+                />
+              </Paper>
+            </div>;
+        case 1:
+          return "B";
+        default:
+          return null;
+      }
     }
 
     render() {
       const actions = [
         <FlatButton
-          label="Cancel"
-          primary={true}
-          onTouchTap={this.props.close}
+          label="Back"
+          disabled={this.state.stepIndex === 0}
+          onTouchTap={this.handlePrev}
+          style={{ marginRight: 10 }}
         />,
-        <FlatButton
-          label="Upload"
+        <RaisedButton
+          label="Next"
           primary={true}
-          keyboardFocused={true}
-          onTouchTap={this.uploadSource}
-        />,
+          onTouchTap={this.handleNext}
+        />
       ];
       return (
         <div>
@@ -71,29 +111,34 @@ class UploadSource extends React.Component {
             onRequestClose={this.props.close}
             >
             <Row center='xs'>
-              <Col xs={10}>
-                <div style={{marginTop: '5px', marginBottom: '5px'}}>
-                  Upload the Solidity source code for this contract. After upload we will verify
-                  that the supplied source code matches the bytecode of the contract.
-                </div>
-              </Col>
-              <Col xs={10}>
-                <Paper zDepth={1}>
-                  <TextField
-                    id='contractSourceField'
-                    multiLine={true}
-                    onChange={this.props.onChange}
-                    underlineShow={false}
-                    rows={20}
-                    style={
-                      {marginLeft: "5px",
-                       marginRight: "0px",
-                       maxHeight: "200px",
-                       width: "95%"}}
-                    />
-                </Paper>
+              <Col xs={10} md={8}>
+                <Stepper linear={false} activeStep={this.state.stepIndex}>
+                  <Step
+                    completed={this.state.visited.indexOf(0) !== -1}
+                    active={this.state.stepIndex === 0}
+                  >
+                    <StepButton onClick={() => this.setState({stepIndex: 0})}>
+                      Code
+                    </StepButton>
+                  </Step>
+                  <Step
+                    completed={this.state.visited.indexOf(1) !== -1}
+                    active={this.state.stepIndex === 1}
+                  >
+                    <StepButton onClick={() => this.setState({stepIndex: 1})}>
+                      Version
+                    </StepButton>
+                  </Step>
+                </Stepper>
               </Col>
             </Row>
+            <div>
+              <Row center='xs'>
+                <Col xs={10}>
+                  {this.getStepContent(this.state.stepIndex)}
+                </Col>
+              </Row>
+            </div>
           </Dialog>
         </div>
       );
