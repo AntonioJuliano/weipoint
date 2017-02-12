@@ -33,11 +33,12 @@ router.get('/', (request, response) => {
         const contract = results.contract;
         const blockNumber = results.blockNumber;
 
+        const id = contract === null ? null : contract.id;
         logger.debug({
             at: 'contractController/',
             message: "Got contract response",
             address: request.query.address,
-            contract_id: contract.id
+            contract_id: id
         });
 
         if (contract === null) {
@@ -97,11 +98,12 @@ router.post('/source', (request, response) => {
         contract = results.contract;
         blockNumber = results.blockNumber;
 
+        const id = contract === null ? null : contract.id;
         logger.debug({
             at: 'contractController#/source',
             message: "Got contract response",
             address: request.body.address,
-            contract: contract
+            contract_id: id
         });
 
         if (contract === null) {

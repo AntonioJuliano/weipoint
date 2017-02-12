@@ -2,8 +2,11 @@
  * Created by antonio on 1/2/17.
  */
 import * as React from "react";
-import './ContractSearch.css';
-import { FormGroup, FormControl, HelpBlock, ControlLabel, Grid, Row, Col, Panel } from 'react-bootstrap';
+import FlatButton from 'material-ui/FlatButton';
+import Dialog from 'material-ui/Dialog';
+import { Row, Col } from 'react-flexbox-grid';
+import Paper from 'material-ui/Paper';
+import TextField from 'material-ui/TextField';
 
 class UploadSource extends React.Component {
     constructor(props) {
@@ -13,7 +16,8 @@ class UploadSource extends React.Component {
             error: null,
             code: null
         };
-        this.handleChange = this.handleChange.bind(this)
+        this.handleChange = this.handleChange.bind(this);
+        this.uploadSource = this.uploadSource.bind(this);
     }
 
     handleChange(e) {
@@ -39,51 +43,61 @@ class UploadSource extends React.Component {
         }
     }
 
-    getValidationState() {
-        if (this.props.web3.isAddress(this.state.value)) {
-            return 'success';
-        } else {
-            return 'warning';
-        }
+    uploadSource() {
+
     }
 
     render() {
-        return (
-            <Grid>
-                <Row>
-                    <Col xsOffset={3} xs={6}>
-                        <form>
-                            <FormGroup
-                                controlId="formBasicText"
-                                validationState={this.getValidationState()}
-                            >
-                                <ControlLabel>Ethnexus</ControlLabel>
-                                <FormControl
-                                    type="text"
-                                    value={this.state.value}
-                                    placeholder="Enter text"
-                                    onChange={this.handleChange}
-                                    className="Search-Bar"
-                                />
-                                <FormControl.Feedback />
-                                <HelpBlock>Search for an ethereum contract by address or name</HelpBlock>
-                            </FormGroup>
-                        </form>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col xsOffset={2} xs={8}>
-                        {this.state.error && <Panel header="Error" bsStyle="danger">
-                            this.state.error
-                        </Panel>}
-                        {this.state.code && <Panel header="Contract" bsStyle="primary">
-                            {this.state.code}
-                        </Panel>}
-                    </Col>
-                </Row>
-            </Grid>
-        );
+      const actions = [
+        <FlatButton
+          label="Cancel"
+          primary={true}
+          onTouchTap={this.props.close}
+        />,
+        <FlatButton
+          label="Upload"
+          primary={true}
+          keyboardFocused={true}
+          onTouchTap={this.uploadSource}
+        />,
+      ];
+      return (
+        <div>
+          <Dialog
+            title="Upload Contract Source"
+            actions={actions}
+            modal={false}
+            open={this.props.open}
+            onRequestClose={this.props.close}
+            >
+            <Row center='xs'>
+              <Col xs={10}>
+                <div style={{marginTop: '5px', marginBottom: '5px'}}>
+                  Upload the Solidity source code for this contract. After upload we will verify
+                  that the supplied source code matches the bytecode of the contract.
+                </div>
+              </Col>
+              <Col xs={10}>
+                <Paper zDepth={1}>
+                  <TextField
+                    id='contractSourceField'
+                    multiLine={true}
+                    onChange={this.props.onChange}
+                    underlineShow={false}
+                    rows={20}
+                    style={
+                      {marginLeft: "5px",
+                       marginRight: "0px",
+                       maxHeight: "200px",
+                       width: "95%"}}
+                    />
+                </Paper>
+              </Col>
+            </Row>
+          </Dialog>
+        </div>
+      );
     }
 }
 
-export default Search;
+export default UploadSource;

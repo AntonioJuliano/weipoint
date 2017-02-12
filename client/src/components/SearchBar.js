@@ -30,7 +30,9 @@ class SearchBar extends React.Component {
                 <div style={{marginTop: "4px", marginBottom: "4px"}}>
                   <FloatingActionButton
                     mini={true}
-                    onClick={this.props.onClick}>
+                    onClick={this.props.onClick}
+                    keyboardFocused={true}
+                    >
                     <SearchIcon />
                   </FloatingActionButton>
                 </div>
@@ -42,7 +44,10 @@ class SearchBar extends React.Component {
           !this.props.reduced &&
           <Row center={'xs'}>
             <Col xs={1} style={{marginRight: "8px"}}>
-              <FloatingActionButton onClick={this.props.onClick}>
+              <FloatingActionButton
+                onClick={this.props.onClick}
+                keyboardFocused={true}
+                >
                 <SearchIcon />
               </FloatingActionButton>
             </Col>
