@@ -4,15 +4,45 @@
 import * as React from "react";
 import FlatButton from 'material-ui/FlatButton';
 import Dialog from 'material-ui/Dialog';
-import { Row, Col } from 'react-flexbox-grid';
+import { Grid, Row, Col } from 'react-flexbox-grid';
 import Paper from 'material-ui/Paper';
-import TextField from 'material-ui/TextField';
 import {
   Step,
   Stepper,
   StepButton,
 } from 'material-ui/Stepper';
 import RaisedButton from 'material-ui/RaisedButton';
+import TextField from 'material-ui/TextField';
+import AutoComplete from 'material-ui/AutoComplete';
+import Toggle from 'material-ui/Toggle';
+
+
+const fruit = [
+  'Apple', 'Apricot', 'Avocado',
+  'Banana', 'Bilberry', 'Blackberry', 'Blackcurrant', 'Blueberry',
+  'Boysenberry', 'Blood Orange',
+  'Cantaloupe', 'Currant', 'Cherry', 'Cherimoya', 'Cloudberry',
+  'Coconut', 'Cranberry', 'Clementine',
+  'Damson', 'Date', 'Dragonfruit', 'Durian',
+  'Elderberry',
+  'Feijoa', 'Fig',
+  'Goji berry', 'Gooseberry', 'Grape', 'Grapefruit', 'Guava',
+  'Honeydew', 'Huckleberry',
+  'Jabouticaba', 'Jackfruit', 'Jambul', 'Jujube', 'Juniper berry',
+  'Kiwi fruit', 'Kumquat',
+  'Lemon', 'Lime', 'Loquat', 'Lychee',
+  'Nectarine',
+  'Mango', 'Marion berry', 'Melon', 'Miracle fruit', 'Mulberry', 'Mandarine',
+  'Olive', 'Orange',
+  'Papaya', 'Passionfruit', 'Peach', 'Pear', 'Persimmon', 'Physalis', 'Plum', 'Pineapple',
+  'Pumpkin', 'Pomegranate', 'Pomelo', 'Purple Mangosteen',
+  'Quince',
+  'Raspberry', 'Raisin', 'Rambutan', 'Redcurrant',
+  'Salal berry', 'Satsuma', 'Star fruit', 'Strawberry', 'Squash', 'Salmonberry',
+  'Tamarillo', 'Tamarind', 'Tomato', 'Tangerine',
+  'Ugli fruit',
+  'Watermelon',
+];
 
 class UploadSource extends React.Component {
     constructor(props) {
@@ -20,8 +50,9 @@ class UploadSource extends React.Component {
         this.state = {
             value: '',
             error: null,
-            code: null,
+            code: "",
             stepIndex: 0,
+            version: "",
             visited: []
         };
     }
@@ -34,8 +65,45 @@ class UploadSource extends React.Component {
         this.setState(pair);
     }
 
-    uploadSource = () => {
+    handleCodeChanged = (e, v) => {
+      this.setState({ code: v });
+    }
 
+    handleVersionChanged = (v) => {
+      this.setState({ version: v.trim() });
+    }
+
+    uploadSource = () => {
+      const request = {
+        address: this.props.contract.address,
+      	source: this.state.code,
+      	sourceType: "solidity",
+      	compilerVersion: this.state.version
+      };
+      console.log("Uploading contract");
+      console.log(request);
+      this.setState({ searchState: 'uploading' });
+
+      const requestPath = `/api/v1/contract/source`;
+      fetch(requestPath, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request)
+      }).then(function(response) {
+              if (response.status !== 200) {
+                  throw Error("Search request to server failed");
+              }
+              return response.json();
+          }
+      ).then(function(json) {
+        console.log(json);
+      }
+      ).catch(function(error) {
+          console.error(error);
+      });
     }
 
     componentWillMount() {
@@ -68,20 +136,39 @@ class UploadSource extends React.Component {
       switch (stepIndex) {
         case 0:
           return <div>
+              Add contract source code here.
+              <p style={{ fontSize: '75%'}}>
+                Note: currently only Solidity source code is supported
+              </p>
               <Paper zDepth={1}>
                 <TextField
-                  onChange={this.handleChange}
+                  onChange={this.handleCodeChanged}
                   style={{ width: "95%", paddingLeft: 5, overflow: 'auto', maxHeight: 300 }}
                   id='codeField'
                   multiLine={true}
                   underlineShow={false}
                   rows={20}
-                  value={this.state.codeField}
+                  value={this.state.code}
                 />
               </Paper>
             </div>;
         case 1:
-          return "B";
+          return <div>
+              <Grid style={{ width: '90%' }}>
+                <Row center='xs'>
+                  <Col xs={6}>
+                    <AutoComplete
+                      floatingLabelText="Solidity version"
+                      filter={AutoComplete.fuzzyFilter}
+                      dataSource={fruit}
+                      onUpdateInput={this.handleVersionChanged}
+                      searchText={this.state.version}
+                      maxSearchResults={5}
+                    />
+                  </Col>
+                </Row>
+              </Grid>
+            </div>;
         default:
           return null;
       }
@@ -96,9 +183,9 @@ class UploadSource extends React.Component {
           style={{ marginRight: 10 }}
         />,
         <RaisedButton
-          label="Next"
+          label={this.state.stepIndex === 1 ? "Submit" : "Next"}
           primary={true}
-          onTouchTap={this.handleNext}
+          onTouchTap={this.state.stepIndex === 1 ? this.uploadSource : this.handleNext}
         />
       ];
       return (

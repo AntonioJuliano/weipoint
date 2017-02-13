@@ -55,6 +55,7 @@ class SearchResult extends React.Component {
             </CopyToClipboard>
           </CardActions>
           <UploadSource
+            contract={this.props.contract}
             open={this.state.uploadSourceOpen}
             close={this.uploadSourceClosed}/>
         </Card>
