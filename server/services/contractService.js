@@ -46,7 +46,6 @@ function verifySource(contract, source, sourceType, compilerVersion) {
         return compileSolidity(source, compilerVersion).then(function(results) {
             console.log(results);
             results.forEach(function(result) {
-                console.log(result);
                 for (const contractName in result.compiled.contracts) {
                     const compiledContract = result.compiled.contracts[contractName];
                     console.log(compiledContract);
@@ -75,9 +74,9 @@ function verifySource(contract, source, sourceType, compilerVersion) {
 
 function compileSolidity(source, compilerVersion) {
     const optPromise = solc.compileOptimized(source, compilerVersion);
-    const unoptPromise = solc.compile(source, compilerVersion);
+    // const unoptPromise = solc.compile(source, compilerVersion);
 
-    return Promise.all([optPromise, unoptPromise]);
+    return Promise.all([optPromise]);
 }
 
 module.exports.lookupContract = lookupContract;
