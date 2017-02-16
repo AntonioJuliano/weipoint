@@ -14,7 +14,6 @@ import {
 import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
 import AutoComplete from 'material-ui/AutoComplete';
-import Toggle from 'material-ui/Toggle';
 
 
 const fruit = [
