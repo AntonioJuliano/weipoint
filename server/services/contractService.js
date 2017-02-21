@@ -1,11 +1,8 @@
-/**
- * Created by antonio on 1/18/17.
- */
-
 const Contract = require('../models/contract');
 const web3 = require('../helpers/web3');
-const solc = require('../helpers/solc');
+const compilerService = require('./compilerService');
 const errors = require('../helpers/errors');
+const logger = require('../helpers/logger');
 
 function lookupContract(address) {
     const blockNumberPromise = web3.eth.getBlockNumberAsync();
@@ -20,22 +17,20 @@ function lookupContract(address) {
     }).then(function(results) {
         const dbResult = results[0];
         const web3Result = results[1];
-        console.log(dbResult);
-        console.log(web3Result);
 
         if (dbResult !== null) {
-            console.log('found from database');
             return { contract: dbResult, blockNumber: globalBlockNumber };
         } else if (web3Result !== null && web3Result !== '0x') {
-            console.log('found from web3');
-
             const newContract = new Contract({ address: address, code: web3Result });
             return newContract.save().then(function(result) {
-                console.log('saved to db');
+                logger.info({
+                  at: 'contractService#lookupContract',
+                  message: 'Saving new contract to db',
+                  address: address
+                });
                 return { contract: newContract, blockNumber: globalBlockNumber };
             });
         } else {
-            console.log('contract not found');
             return { contract: null, blockNumber: globalBlockNumber };
         }
     })
@@ -43,26 +38,25 @@ function lookupContract(address) {
 
 function verifySource(contract, source, sourceType, compilerVersion) {
     if (sourceType === 'solidity') {
-        return compileSolidity(source, compilerVersion).then(function(results) {
-            console.log(results);
-            results.forEach(function(result) {
-                for (const contractName in result.compiled.contracts) {
-                    const compiledContract = result.compiled.contracts[contractName];
-                    console.log(compiledContract);
-                    if (compiledContract.bytecode === contract.code) {
-                        console.log(compiledContract);
-                        return Promise.resolve({
-                            contractName: contractName,
-                            sourceVersion: result.version
-                        });
-                    }
-                }
-            });
-
-            return Promise.reject(new errors.ClientError(
-                "Source did not match contract bytecode",
-                errors.errorCodes.sourceMismatch
-            ));
+      return compilerService.compileSolidity(source, compilerVersion, true)
+        .then(function(contracts) {
+          for (const contractName in contracts) {
+            const compiledContract = contracts[contractName];
+            if (compiledContract.runtimeBytecode === contract.code.replace('0x', '')) {
+              logger.info({
+                at: 'contractService#verifySource',
+                message: 'Found matching source code for contract',
+                address: contract.address
+              });
+              return Promise.resolve({
+                  contractName: contractName
+              });
+            }
+          }
+          return Promise.reject(new errors.ClientError(
+              "Source did not match contract bytecode",
+              errors.errorCodes.sourceMismatch
+          ));
         });
     } else if (request.body.type === 'serpent') {
         // TODO
@@ -70,13 +64,6 @@ function verifySource(contract, source, sourceType, compilerVersion) {
     } else {
         return Promise.reject(new Error('Invalid sourceType'));
     }
-}
-
-function compileSolidity(source, compilerVersion) {
-    const optPromise = solc.compileOptimized(source, compilerVersion);
-    // const unoptPromise = solc.compile(source, compilerVersion);
-
-    return Promise.all([optPromise]);
 }
 
 module.exports.lookupContract = lookupContract;

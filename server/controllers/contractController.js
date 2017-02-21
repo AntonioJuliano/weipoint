@@ -125,9 +125,9 @@ router.post('/source', (request, response) => {
             );
         }
     }).then(function(compileResult) {
-        contract.code = request.body.source;
+        contract.source = request.body.source;
         contract.sourceType = request.body.sourceType;
-        contract.sourceVersion = compileResult.sourceVersion;
+        contract.sourceVersion = request.body.compilerVersion;
         contract.name = compileResult.contractName;
         return contract.save();
     }).then(function(saveResult) {

@@ -1,16 +1,5 @@
 version: '2'
 services:
-  web:
-    build: .
-    environment:
-      - 'MONGO_URL=mongodb://mongo/ethnexus'
-      - 'PARITY_URL=http://parity:8545'
-    ports:
-      - "3001:3001"
-    links:
-      - mongo
-      - parity
-    restart: always
   parity:
     image: "ethcore/parity:stable-release"
     ports:
@@ -23,4 +12,13 @@ services:
     image: "mongo:3.4.1"
     volumes:
       - "~/.mongo:/data/db"
+    ports:
+      - "27017:27017"
     command: mongod --storageEngine wiredTiger
+  # compiler:
+  #   image: antoniojuliano/ethnexus-compiler
+  #   ports:
+  #     - "3002:3002"
+  #   volumes:
+  #     - "~/.ethnexus-compiler:/home/ethnexus/app/bin/soljson/"
+  #   restart: always
