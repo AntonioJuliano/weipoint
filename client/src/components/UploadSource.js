@@ -15,6 +15,7 @@ import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
+import CircularProgress from 'material-ui/CircularProgress';
 
 class UploadSource extends React.Component {
     constructor(props) {
@@ -26,7 +27,8 @@ class UploadSource extends React.Component {
             stepIndex: 0,
             versionIndex: null,
             visited: [],
-            compilerVersions: []
+            compilerVersions: [],
+            uploadState: 'initialized'
         };
         this.loadCompilerVersions();
     }
@@ -73,7 +75,8 @@ class UploadSource extends React.Component {
       };
       console.log("Uploading contract");
       console.log(request);
-      this.setState({ searchState: 'uploading' });
+      this.setState({ uploadState: 'uploading' });
+      const thisRef = this;
 
       const requestPath = `/api/v1/contract/source`;
       fetch(requestPath, {
@@ -84,16 +87,16 @@ class UploadSource extends React.Component {
         },
         body: JSON.stringify(request)
       }).then(function(response) {
-              if (response.status !== 200) {
-                  throw Error("Search request to server failed");
-              }
-              return response.json();
-          }
-      ).then(function(json) {
-        console.log(json);
-      }
-      ).catch(function(error) {
-          console.error(error);
+        if (response.status !== 200) {
+            throw Error("Search request to server failed");
+        }
+        return response.json();
+      }).then(function(json) {
+        thisRef.setState({ uploadState: 'completed' });
+        thisRef.props.sourceUploaded(json);
+      }).catch(function(error) {
+        thisRef.setState({ uploadState: 'error' });
+        console.error(error);
       });
     }
 
@@ -186,6 +189,87 @@ class UploadSource extends React.Component {
           onTouchTap={this.state.stepIndex === 1 ? this.uploadSource : this.handleNext}
         />
       ];
+
+      const uploadForm = <div>
+          <Row center='xs'>
+            <Col xs={10} md={8}>
+              <Stepper linear={false} activeStep={this.state.stepIndex}>
+                <Step
+                  completed={this.state.visited.indexOf(0) !== -1}
+                  active={this.state.stepIndex === 0}
+                >
+                  <StepButton onClick={() => this.setState({stepIndex: 0})}>
+                    Code
+                  </StepButton>
+                </Step>
+                <Step
+                  completed={this.state.visited.indexOf(1) !== -1}
+                  active={this.state.stepIndex === 1}
+                >
+                  <StepButton onClick={() => this.setState({stepIndex: 1})}>
+                    Version
+                  </StepButton>
+                </Step>
+              </Stepper>
+            </Col>
+          </Row>
+          <div>
+            <Row center='xs'>
+              <Col xs={10}>
+                {this.getStepContent(this.state.stepIndex)}
+              </Col>
+            </Row>
+          </div>
+        </div>;
+
+      const spinner = <Row center={'xs'}>
+        <Col xs={4}>
+          <div
+            style={{
+              marginTop: 50,
+              marginBottom: 50
+            }}
+            >
+            <CircularProgress
+              size={60}
+              thickness={6} />
+          </div>
+        </Col>
+      </Row>;
+
+      const success = <div
+        style={{
+          marginTop: 50,
+          marginBottom: 50,
+          marginLeft: 'auto',
+          marginRight: 'auto'
+        }}
+        >
+          {'Success!'}
+        </div>;
+
+      const error = <div
+        style={{
+          marginTop: 50,
+          marginBottom: 50,
+          marginLeft: 'auto',
+          marginRight: 'auto'
+        }}
+        >
+          {'Error!'}
+        </div>;
+
+      let current;
+      console.log(this.state.uploadState);
+      if (this.state.uploadState === 'initialized') {
+        current = uploadForm;
+      } else if (this.state.uploadState === 'uploading') {
+        current = spinner;
+      } else if (this.state.uploadState === 'completed') {
+        current = success;
+      } else {
+        current = error;
+      }
       return (
         <div>
           <Dialog
@@ -195,35 +279,7 @@ class UploadSource extends React.Component {
             open={this.props.open}
             onRequestClose={this.props.close}
             >
-            <Row center='xs'>
-              <Col xs={10} md={8}>
-                <Stepper linear={false} activeStep={this.state.stepIndex}>
-                  <Step
-                    completed={this.state.visited.indexOf(0) !== -1}
-                    active={this.state.stepIndex === 0}
-                  >
-                    <StepButton onClick={() => this.setState({stepIndex: 0})}>
-                      Code
-                    </StepButton>
-                  </Step>
-                  <Step
-                    completed={this.state.visited.indexOf(1) !== -1}
-                    active={this.state.stepIndex === 1}
-                  >
-                    <StepButton onClick={() => this.setState({stepIndex: 1})}>
-                      Version
-                    </StepButton>
-                  </Step>
-                </Stepper>
-              </Col>
-            </Row>
-            <div>
-              <Row center='xs'>
-                <Col xs={10}>
-                  {this.getStepContent(this.state.stepIndex)}
-                </Col>
-              </Row>
-            </div>
+            {current}
           </Dialog>
         </div>
       );
