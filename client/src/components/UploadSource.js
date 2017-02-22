@@ -13,35 +13,8 @@ import {
 } from 'material-ui/Stepper';
 import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
-import AutoComplete from 'material-ui/AutoComplete';
-
-
-const fruit = [
-  'Apple', 'Apricot', 'Avocado',
-  'Banana', 'Bilberry', 'Blackberry', 'Blackcurrant', 'Blueberry',
-  'Boysenberry', 'Blood Orange',
-  'Cantaloupe', 'Currant', 'Cherry', 'Cherimoya', 'Cloudberry',
-  'Coconut', 'Cranberry', 'Clementine',
-  'Damson', 'Date', 'Dragonfruit', 'Durian',
-  'Elderberry',
-  'Feijoa', 'Fig',
-  'Goji berry', 'Gooseberry', 'Grape', 'Grapefruit', 'Guava',
-  'Honeydew', 'Huckleberry',
-  'Jabouticaba', 'Jackfruit', 'Jambul', 'Jujube', 'Juniper berry',
-  'Kiwi fruit', 'Kumquat',
-  'Lemon', 'Lime', 'Loquat', 'Lychee',
-  'Nectarine',
-  'Mango', 'Marion berry', 'Melon', 'Miracle fruit', 'Mulberry', 'Mandarine',
-  'Olive', 'Orange',
-  'Papaya', 'Passionfruit', 'Peach', 'Pear', 'Persimmon', 'Physalis', 'Plum', 'Pineapple',
-  'Pumpkin', 'Pomegranate', 'Pomelo', 'Purple Mangosteen',
-  'Quince',
-  'Raspberry', 'Raisin', 'Rambutan', 'Redcurrant',
-  'Salal berry', 'Satsuma', 'Star fruit', 'Strawberry', 'Squash', 'Salmonberry',
-  'Tamarillo', 'Tamarind', 'Tomato', 'Tangerine',
-  'Ugli fruit',
-  'Watermelon',
-];
+import SelectField from 'material-ui/SelectField';
+import MenuItem from 'material-ui/MenuItem';
 
 class UploadSource extends React.Component {
     constructor(props) {
@@ -51,9 +24,28 @@ class UploadSource extends React.Component {
             error: null,
             code: "",
             stepIndex: 0,
-            version: "",
-            visited: []
+            versionIndex: null,
+            visited: [],
+            compilerVersions: []
         };
+        this.loadCompilerVersions();
+    }
+
+    loadCompilerVersions() {
+      const requestPath = '/api/v1/contract/compilerVersions';
+      const thisRef = this;
+      fetch(requestPath, { method: 'get'})
+        .then(function(response) {
+          return response.json();
+        }).then(function(json) {
+          console.log(json);
+          const compilerVersions = json.versions;
+          let menuItems = [];
+          for (let i = 0; i < compilerVersions.length; i++ ) {
+            menuItems.push(<MenuItem value={i} key={compilerVersions[i]} primaryText={compilerVersions[i]} />);
+          }
+          thisRef.setState({ compilerVersions: menuItems });
+        });
     }
 
     handleChange = (e) => {
@@ -68,16 +60,16 @@ class UploadSource extends React.Component {
       this.setState({ code: v });
     }
 
-    handleVersionChanged = (v) => {
-      this.setState({ version: v.trim() });
-    }
+    handleVersionChanged = (event, index, value) => {
+      this.setState({ versionIndex: value });
+    };
 
     uploadSource = () => {
       const request = {
         address: this.props.contract.address,
       	source: this.state.code,
       	sourceType: "solidity",
-      	compilerVersion: this.state.version
+        compilerVersion: this.state.compilerVersions[this.state.versionIndex].key
       };
       console.log("Uploading contract");
       console.log(request);
@@ -155,15 +147,21 @@ class UploadSource extends React.Component {
           return <div>
               <Grid style={{ width: '90%' }}>
                 <Row center='xs'>
-                  <Col xs={6}>
-                    <AutoComplete
-                      floatingLabelText="Solidity version"
-                      filter={AutoComplete.fuzzyFilter}
-                      dataSource={fruit}
-                      onUpdateInput={this.handleVersionChanged}
-                      searchText={this.state.version}
-                      maxSearchResults={5}
-                    />
+                  <Col xs={6} style={{ minWidth: 200 }}>
+                    <SelectField
+                      value={this.state.versionIndex}
+                      onChange={this.handleVersionChanged}
+                      maxHeight={200}
+                      floatingLabelText="Solidity Version"
+                      style={{
+                        width: 200,
+                        textAlign: 'left',
+                        marginLeft: 'auto',
+                        marginRight: 'auto'
+                      }}
+                      >
+                      {this.state.compilerVersions}
+                    </SelectField>
                   </Col>
                 </Row>
               </Grid>
@@ -184,6 +182,7 @@ class UploadSource extends React.Component {
         <RaisedButton
           label={this.state.stepIndex === 1 ? "Submit" : "Next"}
           primary={true}
+          disabled={this.state.stepIndex === 1 && this.state.versionIndex === null}
           onTouchTap={this.state.stepIndex === 1 ? this.uploadSource : this.handleNext}
         />
       ];

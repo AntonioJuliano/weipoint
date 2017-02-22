@@ -8,6 +8,7 @@ const contractService = require('../services/contractService');
 const errors = require('../helpers/errors');
 const errorHandler = require('../helpers/errorHandler');
 const logger = require('../helpers/logger');
+const compilerService = require('../services/compilerService');
 
 router.get('/', (request, response) => {
     request.check({
@@ -57,6 +58,15 @@ router.get('/', (request, response) => {
                 blockNumber: blockNumber
             });
         }
+    }).catch(function(error) {
+        errorHandler.handle(error, response);
+    });
+});
+
+router.get('/compilerVersions', (request, response) => {
+  return compilerService.getSolidityCompilerVersions()
+    .then(function(result) {
+      response.status(200).json(result);
     }).catch(function(error) {
         errorHandler.handle(error, response);
     });
