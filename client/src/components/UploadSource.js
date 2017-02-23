@@ -16,6 +16,7 @@ import TextField from 'material-ui/TextField';
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
 import CircularProgress from 'material-ui/CircularProgress';
+import Toggle from 'material-ui/Toggle';
 
 class UploadSource extends React.Component {
     constructor(props) {
@@ -28,7 +29,8 @@ class UploadSource extends React.Component {
             versionIndex: null,
             visited: [],
             compilerVersions: [],
-            uploadState: 'initialized'
+            uploadState: 'initialized',
+            optimized: true
         };
         this.loadCompilerVersions();
     }
@@ -120,11 +122,19 @@ class UploadSource extends React.Component {
     };
 
     handlePrev = () => {
+      if (this.state.uploadState === 'error') {
+        this.setState({ stepIndex: 0, uploadState: 'initialized' });
+        return;
+      }
       const {stepIndex} = this.state;
       if (stepIndex > 0) {
         this.setState({stepIndex: stepIndex - 1});
       }
     };
+
+    handleOptimizedChanged = (e, optimized) => {
+      this.setState({ optimized: optimized });
+    }
 
     getStepContent(stepIndex) {
       switch (stepIndex) {
@@ -167,6 +177,17 @@ class UploadSource extends React.Component {
                     </SelectField>
                   </Col>
                 </Row>
+                <Row center='xs' style={{ marginTop: 20 }}>
+                  <Col xs={6} style={{ minWidth: 200 }}>
+                    <Toggle
+                      label="Optimized"
+                      labelStyle={{ width: 100 }}
+                      toggled={this.state.optimized}
+                      onToggle={this.handleOptimizedChanged}
+                      style={{ marginLeft: 'auto', marginRight: 'auto' }}
+                    />
+                  </Col>
+                </Row>
               </Grid>
             </div>;
         default:
@@ -175,17 +196,19 @@ class UploadSource extends React.Component {
     }
 
     render() {
+      const submitDisabled = (this.state.stepIndex === 1 && this.state.versionIndex === null)
+        || this.state.uploadState === 'error' || this.state.uploadState === 'uploading';
       const actions = [
         <FlatButton
           label="Back"
-          disabled={this.state.stepIndex === 0}
+          disabled={this.state.stepIndex === 0 || this.state.uploadState === 'uplaoding'}
           onTouchTap={this.handlePrev}
           style={{ marginRight: 10 }}
         />,
         <RaisedButton
           label={this.state.stepIndex === 1 ? "Submit" : "Next"}
           primary={true}
-          disabled={this.state.stepIndex === 1 && this.state.versionIndex === null}
+          disabled={submitDisabled}
           onTouchTap={this.state.stepIndex === 1 ? this.uploadSource : this.handleNext}
         />
       ];
@@ -237,27 +260,31 @@ class UploadSource extends React.Component {
         </Col>
       </Row>;
 
-      const success = <div
-        style={{
-          marginTop: 50,
-          marginBottom: 50,
-          marginLeft: 'auto',
-          marginRight: 'auto'
-        }}
-        >
-          {'Success!'}
-        </div>;
+      const success = <Row center={'xs'}>
+        <div
+          style={{
+            marginTop: 50,
+            marginBottom: 50,
+            marginLeft: 'auto',
+            marginRight: 'auto'
+          }}
+          >
+            {'Contract source code verified'}
+          </div>
+        </Row>;
 
-      const error = <div
-        style={{
-          marginTop: 50,
-          marginBottom: 50,
-          marginLeft: 'auto',
-          marginRight: 'auto'
-        }}
-        >
-          {'Error!'}
-        </div>;
+      const error = <Row center={'xs'}>
+        <div
+          style={{
+            marginTop: 50,
+            marginBottom: 50,
+            marginLeft: 'auto',
+            marginRight: 'auto'
+          }}
+          >
+            {'Error verifying contract source code. Please check your input and try again'}
+          </div>
+        </Row>;
 
       let current;
       console.log(this.state.uploadState);
