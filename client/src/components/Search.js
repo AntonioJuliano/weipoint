@@ -48,14 +48,7 @@ class Search extends React.Component {
           ).then(function(json) {
                   console.log(json);
                   thisRef.setState({
-                      contract: {
-                          address: json.address,
-                          name: json.name,
-                          source: json.source,
-                          sourceType: json.sourceType,
-                          code: json.code,
-                          blockNumber: json.blockNumber
-                      },
+                      contract: json,
                       searchState: 'completed'
                   })
               }

@@ -29,10 +29,21 @@ class UploadSource extends React.Component {
             versionIndex: null,
             visited: [],
             compilerVersions: [],
-            uploadState: 'initialized',
-            optimized: true
+            optimized: true,
+            uploadState: this.props.uploadState
         };
         this.loadCompilerVersions();
+
+        this.handleChange = this.handleChange.bind(this);
+        this.handleCodeChanged = this.handleCodeChanged.bind(this);
+        this.handleVersionChanged = this.handleVersionChanged.bind(this);
+        this.componentWillMount = this.componentWillMount.bind(this);
+        this.componentWillUpdate = this.componentWillUpdate.bind(this);
+        this.handleNext = this.handleNext.bind(this);
+        this.handlePrev = this.handlePrev.bind(this);
+        this.handleOptimizedChanged = this.handleOptimizedChanged.bind(this);
+        this.uploadSource = this.uploadSource.bind(this);
+        this.getStepContent = this.getStepContent.bind(this);
     }
 
     loadCompilerVersions() {
@@ -42,7 +53,6 @@ class UploadSource extends React.Component {
         .then(function(response) {
           return response.json();
         }).then(function(json) {
-          console.log(json);
           const compilerVersions = json.versions;
           let menuItems = [];
           for (let i = 0; i < compilerVersions.length; i++ ) {
@@ -52,7 +62,7 @@ class UploadSource extends React.Component {
         });
     }
 
-    handleChange = (e) => {
+    handleChange(e) {
         const key = e.target.id;
         const value = e.target.value;
         let pair = {};
@@ -60,51 +70,25 @@ class UploadSource extends React.Component {
         this.setState(pair);
     }
 
-    handleCodeChanged = (e, v) => {
+    handleCodeChanged(e, v) {
       this.setState({ code: v });
     }
 
-    handleVersionChanged = (event, index, value) => {
+    handleVersionChanged(event, index, value) {
       this.setState({ versionIndex: value });
     };
-
-    uploadSource = () => {
-      const request = {
-        address: this.props.contract.address,
-      	source: this.state.code,
-      	sourceType: "solidity",
-        compilerVersion: this.state.compilerVersions[this.state.versionIndex].key
-      };
-      console.log("Uploading contract");
-      console.log(request);
-      this.setState({ uploadState: 'uploading' });
-      const thisRef = this;
-
-      const requestPath = `/api/v1/contract/source`;
-      fetch(requestPath, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(request)
-      }).then(function(response) {
-        if (response.status !== 200) {
-            throw Error("Search request to server failed");
-        }
-        return response.json();
-      }).then(function(json) {
-        thisRef.setState({ uploadState: 'completed' });
-        thisRef.props.sourceUploaded(json);
-      }).catch(function(error) {
-        thisRef.setState({ uploadState: 'error' });
-        console.error(error);
-      });
-    }
 
     componentWillMount() {
       const {stepIndex, visited} = this.state;
       this.setState({visited: visited.concat(stepIndex)});
+    }
+
+    componentWillReceiveProps(nextProps) {
+      const keepOldState = (nextProps.uploadState === 'error'
+        && this.state.uploadState !== 'uploading');
+      if (!keepOldState) {
+        this.setState({ uploadState: nextProps.uploadState });
+      }
     }
 
     componentWillUpdate(nextProps, nextState) {
@@ -114,14 +98,14 @@ class UploadSource extends React.Component {
       }
     }
 
-    handleNext = () => {
-      const {stepIndex} = this.state;
+    handleNext() {
+      const stepIndex = this.state.stepIndex;
       if (stepIndex < 2) {
         this.setState({stepIndex: stepIndex + 1});
       }
     };
 
-    handlePrev = () => {
+    handlePrev() {
       if (this.state.uploadState === 'error') {
         this.setState({ stepIndex: 0, uploadState: 'initialized' });
         return;
@@ -132,8 +116,18 @@ class UploadSource extends React.Component {
       }
     };
 
-    handleOptimizedChanged = (e, optimized) => {
+    handleOptimizedChanged(e, optimized) {
       this.setState({ optimized: optimized });
+    }
+
+    uploadSource() {
+      this.setState({ uploadState: 'uploading' });
+      this.props.uploadSource(
+        this.state.code,
+        "solidity",
+        this.state.compilerVersions[this.state.versionIndex].key,
+        this.state.optimized
+      );
     }
 
     getStepContent(stepIndex) {
@@ -158,7 +152,23 @@ class UploadSource extends React.Component {
             </div>;
         case 1:
           return <div>
+              Specify Solidity version used to compile contract
+              <p style={{ fontSize: '75%'}}>
+                Note: currently only release versions are supported
+              </p>
               <Grid style={{ width: '90%' }}>
+                <Row center='xs' style={{ marginTop: 20 }}>
+                  <Col xs={6} style={{ minWidth: 200 }}>
+                    <div style={{ marginLeft: 'auto', marginRight: 'auto', width: 150 }}>
+                      <Toggle
+                        label="Optimized"
+                        labelStyle={{ width: 100 }}
+                        toggled={this.state.optimized}
+                        onToggle={this.handleOptimizedChanged}
+                      />
+                    </div>
+                  </Col>
+                </Row>
                 <Row center='xs'>
                   <Col xs={6} style={{ minWidth: 200 }}>
                     <SelectField
@@ -177,17 +187,6 @@ class UploadSource extends React.Component {
                     </SelectField>
                   </Col>
                 </Row>
-                <Row center='xs' style={{ marginTop: 20 }}>
-                  <Col xs={6} style={{ minWidth: 200 }}>
-                    <Toggle
-                      label="Optimized"
-                      labelStyle={{ width: 100 }}
-                      toggled={this.state.optimized}
-                      onToggle={this.handleOptimizedChanged}
-                      style={{ marginLeft: 'auto', marginRight: 'auto' }}
-                    />
-                  </Col>
-                </Row>
               </Grid>
             </div>;
         default:
@@ -197,11 +196,17 @@ class UploadSource extends React.Component {
 
     render() {
       const submitDisabled = (this.state.stepIndex === 1 && this.state.versionIndex === null)
-        || this.state.uploadState === 'error' || this.state.uploadState === 'uploading';
+        || this.state.uploadState === 'error'
+        || this.state.uploadState === 'uploading'
+        || this.state.uploadState === 'completed'
+        || this.state.code.trim() === '';
+      const backDisabled = this.state.stepIndex === 0
+        || this.state.uploadState === 'uplaoding'
+        || this.state.uploadState === 'completed';
       const actions = [
         <FlatButton
           label="Back"
-          disabled={this.state.stepIndex === 0 || this.state.uploadState === 'uplaoding'}
+          disabled={backDisabled}
           onTouchTap={this.handlePrev}
           style={{ marginRight: 10 }}
         />,
@@ -215,10 +220,10 @@ class UploadSource extends React.Component {
 
       const uploadForm = <div>
           <Row center='xs'>
-            <Col xs={10} md={8}>
+            <Col xs={8} md={6}>
               <Stepper linear={false} activeStep={this.state.stepIndex}>
                 <Step
-                  completed={this.state.visited.indexOf(0) !== -1}
+                  completed={this.state.visited.indexOf(0) !== -1 && this.state.stepIndex !== 0}
                   active={this.state.stepIndex === 0}
                 >
                   <StepButton onClick={() => this.setState({stepIndex: 0})}>
@@ -226,8 +231,9 @@ class UploadSource extends React.Component {
                   </StepButton>
                 </Step>
                 <Step
-                  completed={this.state.visited.indexOf(1) !== -1}
+                  completed={this.state.visited.indexOf(1) !== -1 && this.state.stepIndex !== 1}
                   active={this.state.stepIndex === 1}
+                  disabled={this.state.code.trim() === ''}
                 >
                   <StepButton onClick={() => this.setState({stepIndex: 1})}>
                     Version
@@ -245,20 +251,27 @@ class UploadSource extends React.Component {
           </div>
         </div>;
 
-      const spinner = <Row center={'xs'}>
-        <Col xs={4}>
-          <div
-            style={{
-              marginTop: 50,
-              marginBottom: 50
-            }}
-            >
-            <CircularProgress
-              size={60}
-              thickness={6} />
-          </div>
-        </Col>
-      </Row>;
+      const spinner = <div>
+        <Row center={'xs'} style={{marginTop: 15}}>
+          <p>
+            Verifying source code matches contract on blockchain...
+          </p>
+        </Row>
+        <Row center={'xs'}>
+          <Col xs={4}>
+            <div
+              style={{
+                marginTop: 50,
+                marginBottom: 50
+              }}
+              >
+              <CircularProgress
+                size={60}
+                thickness={6} />
+            </div>
+          </Col>
+        </Row>
+      </div>;
 
       const success = <Row center={'xs'}>
         <div
@@ -281,13 +294,12 @@ class UploadSource extends React.Component {
             marginLeft: 'auto',
             marginRight: 'auto'
           }}
-          >
+        >
             {'Error verifying contract source code. Please check your input and try again'}
           </div>
         </Row>;
 
       let current;
-      console.log(this.state.uploadState);
       if (this.state.uploadState === 'initialized') {
         current = uploadForm;
       } else if (this.state.uploadState === 'uploading') {
@@ -305,7 +317,7 @@ class UploadSource extends React.Component {
             modal={false}
             open={this.props.open}
             onRequestClose={this.props.close}
-            >
+          >
             {current}
           </Dialog>
         </div>

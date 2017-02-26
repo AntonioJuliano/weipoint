@@ -54,7 +54,9 @@ router.get('/', (request, response) => {
                 name: contract.name,
                 source: contract.source,
                 sourceType: contract.sourceType,
+                optimized: contract.optimized,
                 code: contract.code,
+                sourceVersion: contract.sourceVersion,
                 blockNumber: blockNumber
             });
         }
@@ -139,6 +141,7 @@ router.post('/source', (request, response) => {
         contract.sourceType = request.body.sourceType;
         contract.sourceVersion = request.body.compilerVersion;
         contract.name = compileResult.contractName;
+        contract.abi = compileResult.abi;
         return contract.save();
     }).then(function(saveResult) {
         response.status(200).json({
@@ -146,6 +149,7 @@ router.post('/source', (request, response) => {
             source: contract.source,
             sourceType: contract.sourceType,
             sourceVersion: contract.sourceVersion,
+            optimized: contract.optimized,
             name: contract.name,
             code: contract.code,
             blockNumber: blockNumber

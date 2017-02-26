@@ -12,11 +12,14 @@ class SearchResult extends React.Component {
     super(props);
     this.state = {
       bytecodeButtonText: initialBytecodeButtonText,
-      uploadSourceOpen: false
+      uploadSourceOpen: false,
+      contract: this.props.contract,
+      uploadState: 'initialized'
     };
     this.copyBytecodeClicked = this.copyBytecodeClicked.bind(this);
     this.uploadSourceClicked = this.uploadSourceClicked.bind(this);
     this.uploadSourceClosed = this.uploadSourceClosed.bind(this);
+    this.uploadSource = this.uploadSource.bind(this);
   }
 
   copyBytecodeClicked(e) {
@@ -35,29 +38,77 @@ class SearchResult extends React.Component {
     this.setState({ uploadSourceOpen: false });
   }
 
+  componentWillReceiveProps(nextProps) {
+    this.setState({ contract: this.props.contract });
+  }
+
+  uploadSource(code, sourceType, compilerVersion, optimized) {
+    const request = {
+      address: this.state.contract.address,
+      source: code,
+      sourceType: sourceType,
+      compilerVersion: compilerVersion,
+      optimized: optimized
+    };
+    const thisRef = this;
+
+    const requestPath = `/api/v1/contract/source`;
+    fetch(requestPath, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(request)
+    }).then(function(response) {
+      if (response.status !== 200) {
+          throw Error("Search request to server failed");
+      }
+      return response.json();
+    }).then(function(contract) {
+      thisRef.setState({
+        uploadState: 'completed',
+        contract: contract
+      });
+    }).catch(function(error) {
+      thisRef.setState({ uploadState: 'error' });
+      console.error(error);
+    });
+  }
+
   render() {
+    const showUploadSource = this.state.contract.source === undefined;
+    const uploadSourceButton = showUploadSource ?
+      <FlatButton
+        label="Upload Source Code"
+        onClick={this.uploadSourceClicked}/> : null;
+
+    // const viewSourceButton = showUploadSource ? null :
+    //   <FlatButton
+    //     label="View Source Code"
+    //     onClick={this.viewSourceClicked}/>;
+
     return (
       <div className="SearchResultContainer">
         <Card>
           <CardTitle
-            title={this.props.contract.name || "Contract"}
-            subtitle={this.props.contract.address}
+            title={this.state.contract.name || "Contract"}
+            subtitle={this.state.contract.address}
           />
           <CardActions>
-            <FlatButton
-              label="Upload Source"
-              onClick={this.uploadSourceClicked}/>
+            {uploadSourceButton}
             <FlatButton label="Send Transaction" />
-            <CopyToClipboard text={this.props.contract.code}>
+            <CopyToClipboard text={this.state.contract.code}>
               <FlatButton
                 label={this.state.bytecodeButtonText}
                 onClick={this.copyBytecodeClicked}/>
             </CopyToClipboard>
           </CardActions>
           <UploadSource
-            contract={this.props.contract}
             open={this.state.uploadSourceOpen}
-            close={this.uploadSourceClosed}/>
+            close={this.uploadSourceClosed}
+            uploadSource={this.uploadSource}
+            uploadState={this.state.uploadState}/>
         </Card>
       </div>
     );

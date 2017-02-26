@@ -42,14 +42,19 @@ function verifySource(contract, source, sourceType, compilerVersion) {
         .then(function(contracts) {
           for (const contractName in contracts) {
             const compiledContract = contracts[contractName];
-            if (compiledContract.runtimeBytecode === contract.code.replace('0x', '')) {
+            const compiledRuntimeBytecode = compiledContract.runtimeBytecode;
+            const existingRuntimeCode = contract.code.replace('0x', '');
+            if (compiledRuntimeBytecode === existingRuntimeCode
+                  || removeMetadata(compiledRuntimeBytecode) ===
+                     removeMetadata(existingRuntimeCode)) {
               logger.info({
                 at: 'contractService#verifySource',
                 message: 'Found matching source code for contract',
                 address: contract.address
               });
               return Promise.resolve({
-                  contractName: contractName
+                  contractName: contractName,
+                  abi: JSON.parse(contracts[contractName].interface)
               });
             }
           }
@@ -64,6 +69,12 @@ function verifySource(contract, source, sourceType, compilerVersion) {
     } else {
         return Promise.reject(new Error('Invalid sourceType'));
     }
+}
+
+// Some solidity contract bytecodes include a swarm hash at the end which seems to not
+// be deterministic. For now allow it to be ignored
+function removeMetadata(bytecode) {
+  return bytecode.replace(/a165627a7a72305820([0-9a-f]{64})0029$/, '');
 }
 
 module.exports.lookupContract = lookupContract;
