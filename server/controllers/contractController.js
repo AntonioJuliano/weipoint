@@ -8,6 +8,7 @@ const contractService = require('../services/contractService');
 const errors = require('../helpers/errors');
 const errorHandler = require('../helpers/errorHandler');
 const logger = require('../helpers/logger');
+const compilerService = require('../services/compilerService');
 
 router.get('/', (request, response) => {
     request.check({
@@ -33,11 +34,12 @@ router.get('/', (request, response) => {
         const contract = results.contract;
         const blockNumber = results.blockNumber;
 
+        const id = contract === null ? null : contract.id;
         logger.debug({
             at: 'contractController/',
             message: "Got contract response",
             address: request.query.address,
-            contract_id: contract.id
+            contract_id: id
         });
 
         if (contract === null) {
@@ -52,10 +54,21 @@ router.get('/', (request, response) => {
                 name: contract.name,
                 source: contract.source,
                 sourceType: contract.sourceType,
+                optimized: contract.optimized,
                 code: contract.code,
+                sourceVersion: contract.sourceVersion,
                 blockNumber: blockNumber
             });
         }
+    }).catch(function(error) {
+        errorHandler.handle(error, response);
+    });
+});
+
+router.get('/compilerVersions', (request, response) => {
+  return compilerService.getSolidityCompilerVersions()
+    .then(function(result) {
+      response.status(200).json(result);
     }).catch(function(error) {
         errorHandler.handle(error, response);
     });
@@ -97,11 +110,12 @@ router.post('/source', (request, response) => {
         contract = results.contract;
         blockNumber = results.blockNumber;
 
+        const id = contract === null ? null : contract.id;
         logger.debug({
             at: 'contractController#/source',
             message: "Got contract response",
             address: request.body.address,
-            contract: contract
+            contract_id: id
         });
 
         if (contract === null) {
@@ -123,10 +137,11 @@ router.post('/source', (request, response) => {
             );
         }
     }).then(function(compileResult) {
-        contract.code = request.body.source;
+        contract.source = request.body.source;
         contract.sourceType = request.body.sourceType;
-        contract.sourceVersion = compileResult.sourceVersion;
+        contract.sourceVersion = request.body.compilerVersion;
         contract.name = compileResult.contractName;
+        contract.abi = compileResult.abi;
         return contract.save();
     }).then(function(saveResult) {
         response.status(200).json({
@@ -134,6 +149,7 @@ router.post('/source', (request, response) => {
             source: contract.source,
             sourceType: contract.sourceType,
             sourceVersion: contract.sourceVersion,
+            optimized: contract.optimized,
             name: contract.name,
             code: contract.code,
             blockNumber: blockNumber

@@ -29,39 +29,27 @@ class Search extends React.Component {
     handleSearchBarClick(e) {
         const value = this.state.value;
 
-        console.log("Clicked with " + value);
-
         const thisRef = this;
 
         if (this.props.web3.isAddress(value)) {
-            console.log("searching for address " + value);
-            this.setState({ searchState: 'searching' });
+          this.setState({ searchState: 'searching' });
 
-            const requestPath = `/api/v1/contract?address=${value}`;
-            fetch(requestPath, {method: 'get'}).then(function(response) {
-                    if (response.status !== 200) {
-                        throw Error("Search request to server failed");
-                    }
-                    console.log(response);
-                    return response.json();
-                }
-            ).then(function(json) {
-                    console.log(json);
-                    thisRef.setState({
-                        contract: {
-                            address: json.address,
-                            name: json.name,
-                            source: json.source,
-                            sourceType: json.sourceType,
-                            code: json.code,
-                            blockNumber: json.blockNumber
-                        },
-                        searchState: 'completed'
-                    })
-                }
-            ).catch(function(error) {
-                console.error(error);
-            });
+          const requestPath = `/api/v1/contract?address=${value}`;
+          fetch(requestPath, {method: 'get'}).then(function(response) {
+                  if (response.status !== 200) {
+                      throw Error("Search request to server failed");
+                  }
+                  return response.json();
+              }
+          ).then(function(json) {
+                  thisRef.setState({
+                      contract: json,
+                      searchState: 'completed'
+                  })
+              }
+          ).catch(function(error) {
+              console.error(error);
+          });
         }
     }
 

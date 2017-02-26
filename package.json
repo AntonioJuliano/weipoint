@@ -8,8 +8,6 @@
     "server": "nodemon server/server.js --ignore client/",
     "prod": "NODE_ENV=production node server/server.js",
     "client": "node start-client.js",
-    "parity": "docker run -it  -v ~/.parity:/root/.parity -p 8545:8545 ethcore/parity:stable-release --jsonrpc-interface '0.0.0.0' --jsonrpc-hosts all",
-    "mongo": "mongod --dbpath ~/.mongo",
     "test": "mocha test",
     "prod_install": "npm install --production && cd client && npm install && cd ..",
     "prod_build": "cd client && npm run build && rm -rf node_modules scripts src && cd .."
@@ -34,6 +32,8 @@
     "express": "^4.14.0",
     "express-validator": "^3.1.2",
     "mongoose": "^4.7.7",
+    "node-fetch": "^1.6.3",
+    "safe-eval": "^0.3.0",
     "solc": "^0.4.8",
     "web3": "^0.18.2",
     "winston": "^2.3.1"
