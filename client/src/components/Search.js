@@ -29,12 +29,9 @@ class Search extends React.Component {
     handleSearchBarClick(e) {
         const value = this.state.value;
 
-        console.log("Clicked with " + value);
-
         const thisRef = this;
 
         if (this.props.web3.isAddress(value)) {
-          console.log("searching for address " + value);
           this.setState({ searchState: 'searching' });
 
           const requestPath = `/api/v1/contract?address=${value}`;
@@ -42,11 +39,9 @@ class Search extends React.Component {
                   if (response.status !== 200) {
                       throw Error("Search request to server failed");
                   }
-                  console.log(response);
                   return response.json();
               }
           ).then(function(json) {
-                  console.log(json);
                   thisRef.setState({
                       contract: json,
                       searchState: 'completed'
