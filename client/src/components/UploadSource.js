@@ -1,7 +1,7 @@
 /**
  * Created by antonio on 1/2/17.
  */
-import * as React from "react";
+import React from "react";
 import FlatButton from 'material-ui/FlatButton';
 import Dialog from 'material-ui/Dialog';
 import { Grid, Row, Col } from 'react-flexbox-grid';
