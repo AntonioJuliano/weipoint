@@ -51,6 +51,7 @@ router.get('/', async(request, response) => {
         sourceType: contract.sourceType,
         optimized: contract.optimized,
         code: contract.code,
+        abi: contract.abi,
         sourceVersion: contract.sourceVersion,
         blockNumber: blockNumber
       });
@@ -138,9 +139,83 @@ router.post('/source', async(request, response) => {
       sourceVersion: contract.sourceVersion,
       optimized: contract.optimized,
       name: contract.name,
+      abi: contract.abi,
       code: contract.code,
       libraries: contract.libraries,
       blockNumber: blockNumber
+    });
+  } catch (e) {
+    errorHandler.handle(e, response);
+  }
+});
+
+router.post('/constantFunction', (request, response) => {
+    request.check({
+        'address': {
+            in: 'body',
+            isAddress: true,
+            errorMessage: 'Invalid Address'
+        },
+        'functionName': {
+            in: 'body',
+            notEmpty: true
+        },
+        'arguments': {
+            in: 'body',
+            isArray: true,
+            errorMessage: 'Invalid Arguments'
+        }
+    });
+    request.getValidationResult().then(function(result) {
+        if (!result.isEmpty()) {
+            return Promise.reject(new errors.RequestError(result.array()));
+        }
+    }).then(function(result) {
+        logger.debug({
+            at: 'contractController#constantFunction',
+            message: "Making contract request",
+            address: request.body.address
+        });
+
+        return contractService.lookupContract(request.body.address);
+    }).then(function(results) {
+        contract = results.contract;
+        blockNumber = results.blockNumber;
+
+        const id = contract === null ? null : contract.id;
+        logger.debug({
+            at: 'contractController#constantFunction',
+            message: "Got contract response",
+            address: request.body.address,
+            contract_id: id
+        });
+
+        if (contract === null) {
+            return Promise.reject(new errors.ClientError(
+                'Contract not found at address',
+                errors.errorCodes.notFound
+            ));
+        }
+
+        if (contract.abi === null || contract.abi === undefined) {
+            return Promise.reject(new errors.ClientError(
+                'Contract does not have source code',
+                errors.errorCodes.sourceNotAvailable
+            ));
+        }
+
+        return contractService.callConstantFunction(
+            contract,
+            request.body.functionName,
+            request.body.arguments
+        );
+    }).then(function(result) {
+      response.status(200).json({
+          address: contract.address,
+          result: result
+      });
+    }).catch(function(error) {
+        errorHandler.handle(error, response);
     });
   } catch (e) {
     errorHandler.handle(e, response);

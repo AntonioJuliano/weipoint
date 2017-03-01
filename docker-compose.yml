@@ -6,7 +6,6 @@ services:
       - "8545:8545"
     volumes:
       - "~/.parity:/root/.parity"
-
     entrypoint: /parity/parity --jsonrpc-interface '0.0.0.0' --jsonrpc-hosts all
   mongo:
     image: "mongo:3.4.1"

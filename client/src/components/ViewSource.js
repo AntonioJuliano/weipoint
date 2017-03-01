@@ -15,7 +15,6 @@ class ViewSource extends React.Component {
         open={this.props.open}
         onRequestClose={this.props.close}
         bodyStyle={{
-          backgroundColor: '#272822',
           paddingLeft: 0,
           paddingRight: 0,
           paddingTop: 0,

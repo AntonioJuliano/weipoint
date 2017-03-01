@@ -3,6 +3,7 @@ const web3 = require('../helpers/web3');
 const optimusService = require('./optimusService');
 const errors = require('../helpers/errors');
 const logger = require('../helpers/logger');
+const Promise = require('bluebird');
 
 /**
  * Lookup a contract by address on the blockchain. Will query both db
@@ -103,6 +104,34 @@ async function verifySource(contract, source, sourceType, compilerVersion) {
   }
 }
 
+function callConstantFunction(contract, functionName, args) {
+  const Contract = web3.eth.contract(contract.abi);
+  const contractInstance = Contract.at(contract.address);
+  Promise.promisifyAll(contractInstance);
+
+  const func = contractInstance[functionName + 'Async'];
+  if (typeof func === 'function') {
+    return func.apply(null, args).catch(function (err) {
+      logger.error({
+        at: 'contractService#callConstantFunction',
+        message: 'calling contract threw error',
+        err: err
+      });
+      return Promise.reject(
+        new errors.ClientError(
+          'Function call threw error',
+          errors.errorCodes.contractFunctionThrewError
+        )
+      );
+    });
+  } else {
+    return Promise.reject(new errors.ClientError(
+        'Invalid function name',
+        errors.errorCodes.invalidArguments
+    ));
+  }
+}
+
 /*
  * Some solidity contract bytecodes include a swarm hash at the end which seems
  * to not be deterministic. For now allow it to be ignored
@@ -154,3 +183,4 @@ function _autoLinkLibraries(compiledBytecode, existingBytecode) {
 
 module.exports.lookupContract = lookupContract;
 module.exports.verifySource = verifySource;
+module.exports.callConstantFunction = callConstantFunction;

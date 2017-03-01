@@ -5,6 +5,7 @@ import '../styles/SearchResult.css';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import UploadSource from './UploadSource';
 import ViewSource from './ViewSource';
+import CallContractFunction from './CallContractFunction';
 
 const initialBytecodeButtonText = "Copy Bytecode";
 
@@ -15,14 +16,17 @@ class SearchResult extends React.Component {
       bytecodeButtonText: initialBytecodeButtonText,
       uploadSourceOpen: false,
       viewSourceOpen: false,
+      callFunctionOpen: false,
       contract: this.props.contract,
       uploadState: 'initialized'
     };
     this.copyBytecodeClicked = this.copyBytecodeClicked.bind(this);
     this.uploadSourceClicked = this.uploadSourceClicked.bind(this);
     this.viewSourceClicked = this.viewSourceClicked.bind(this);
+    this.callFunctionClicked = this.callFunctionClicked.bind(this);
     this.uploadSourceClosed = this.uploadSourceClosed.bind(this);
     this.viewSourceClosed = this.viewSourceClosed.bind(this);
+    this.callFunctionClosed = this.callFunctionClosed.bind(this);
     this.uploadSource = this.uploadSource.bind(this);
   }
 
@@ -48,6 +52,14 @@ class SearchResult extends React.Component {
 
   viewSourceClosed(e) {
     this.setState({ viewSourceOpen: false });
+  }
+
+  callFunctionClicked(e) {
+    this.setState({ callFunctionOpen: true });
+  }
+
+  callFunctionClosed(e) {
+    this.setState({ callFunctionOpen: false });
   }
 
   componentWillReceiveProps(nextProps) {
@@ -100,6 +112,11 @@ class SearchResult extends React.Component {
         label="View Source Code"
         onClick={this.viewSourceClicked}/>;
 
+    const callFunctionButton = showUploadSource ? null :
+      <FlatButton
+        label="Call Contract Function"
+        onClick={this.callFunctionClicked}/>;
+
     return (
       <div className="SearchResultContainer">
         <Card>
@@ -110,7 +127,7 @@ class SearchResult extends React.Component {
           <CardActions>
             {uploadSourceButton}
             {viewSourceButton}
-            <FlatButton label="Send Transaction" />
+            {callFunctionButton}
             <CopyToClipboard text={this.state.contract.code}>
               <FlatButton
                 label={this.state.bytecodeButtonText}
@@ -127,6 +144,12 @@ class SearchResult extends React.Component {
             open={this.state.viewSourceOpen}
             close={this.viewSourceClosed}
             source={this.state.contract.source}
+          />
+          <CallContractFunction
+            abi={this.state.contract.abi}
+            open={this.state.callFunctionOpen}
+            close={this.callFunctionClosed}
+            address={this.state.contract.address}
           />
         </Card>
       </div>
