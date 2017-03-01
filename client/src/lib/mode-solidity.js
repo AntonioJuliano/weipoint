@@ -1,9 +1,8 @@
 // Copied from https://github.com/ethereum/browser-solidity/blob/ab0593386a761e9755e3c79968767ffa8ad2fd82/src/mode-solidity.js
-
+/* eslint-disable */
 var ace = window.ace;
 
 ace.define("ace/mode/doc_comment_highlight_rules",["require","exports","module","ace/lib/oop","ace/mode/text_highlight_rules"], function(acequire, exports, module) {
-"use strict";
 
 var oop = acequire("../lib/oop");
 var TextHighlightRules = acequire("./text_highlight_rules").TextHighlightRules;
@@ -348,18 +347,18 @@ var JavaScriptHighlightRules = function(options) {
     if (!options || !options.noES6) {
         this.$rules.no_regex.unshift({
             regex: "[{}]", onMatch: function(val, state, stack) {
-                this.next = val == "{" ? this.nextState : "";
-                if (val == "{" && stack.length) {
+                this.next = val === "{" ? this.nextState : "";
+                if (val === "{" && stack.length) {
                     stack.unshift("start", state);
                     return "paren";
                 }
-                if (val == "}" && stack.length) {
+                if (val === "}" && stack.length) {
                     stack.shift();
                     this.next = stack.shift();
-                    if (this.next.indexOf("string") != -1)
+                    if (this.next.indexOf("string") !== -1)
                         return "paren.quasi.end";
                 }
-                return val == "{" ? "paren.lparen" : "paren.rparen";
+                return val === "{" ? "paren.lparen" : "paren.rparen";
             },
             nextState: "start"
         }, {
@@ -418,7 +417,7 @@ var MatchingBraceOutdent = function() {};
         var column = match[1].length;
         var openBracePos = doc.findMatchingBracket({row: row, column: column});
 
-        if (!openBracePos || openBracePos.row == row) return 0;
+        if (!openBracePos || openBracePos.row === row) return 0;
 
         var indent = this.$getIndent(doc.getLine(openBracePos.row));
         doc.replace(new Range(row, 0, row, column-1), indent);
@@ -472,7 +471,7 @@ var CstyleBehaviour = function() {
     this.add("braces", "insertion", function(state, action, editor, session, text) {
         var cursor = editor.getCursorPosition();
         var line = session.doc.getLine(cursor.row);
-        if (text == '{') {
+        if (text === '{') {
             initContext(editor);
             var selection = editor.getSelectionRange();
             var selected = session.doc.getTextRange(selection);
@@ -496,10 +495,10 @@ var CstyleBehaviour = function() {
                     };
                 }
             }
-        } else if (text == '}') {
+        } else if (text === '}') {
             initContext(editor);
             var rightChar = line.substring(cursor.column, cursor.column + 1);
-            if (rightChar == '}') {
+            if (rightChar === '}') {
                 var matching = session.$findOpeningBracket('}', {column: cursor.column + 1, row: cursor.row});
                 if (matching !== null && CstyleBehaviour.isAutoInsertedClosing(cursor, line, text)) {
                     CstyleBehaviour.popAutoInsertedClosing();
@@ -509,7 +508,7 @@ var CstyleBehaviour = function() {
                     };
                 }
             }
-        } else if (text == "\n" || text == "\r\n") {
+        } else if (text === "\n" || text === "\r\n") {
             initContext(editor);
             var closing = "";
             if (CstyleBehaviour.isMaybeInsertedClosing(cursor, line)) {
@@ -541,11 +540,11 @@ var CstyleBehaviour = function() {
 
     this.add("braces", "deletion", function(state, action, editor, session, range) {
         var selected = session.doc.getTextRange(range);
-        if (!range.isMultiLine() && selected == '{') {
+        if (!range.isMultiLine() && selected === '{') {
             initContext(editor);
             var line = session.doc.getLine(range.start.row);
             var rightChar = line.substring(range.end.column, range.end.column + 1);
-            if (rightChar == '}') {
+            if (rightChar === '}') {
                 range.end.column++;
                 return range;
             } else {
@@ -555,7 +554,7 @@ var CstyleBehaviour = function() {
     });
 
     this.add("parens", "insertion", function(state, action, editor, session, text) {
-        if (text == '(') {
+        if (text === '(') {
             initContext(editor);
             var selection = editor.getSelectionRange();
             var selected = session.doc.getTextRange(selection);
@@ -571,12 +570,12 @@ var CstyleBehaviour = function() {
                     selection: [1, 1]
                 };
             }
-        } else if (text == ')') {
+        } else if (text === ')') {
             initContext(editor);
             var cursor = editor.getCursorPosition();
             var line = session.doc.getLine(cursor.row);
             var rightChar = line.substring(cursor.column, cursor.column + 1);
-            if (rightChar == ')') {
+            if (rightChar === ')') {
                 var matching = session.$findOpeningBracket(')', {column: cursor.column + 1, row: cursor.row});
                 if (matching !== null && CstyleBehaviour.isAutoInsertedClosing(cursor, line, text)) {
                     CstyleBehaviour.popAutoInsertedClosing();
@@ -591,11 +590,11 @@ var CstyleBehaviour = function() {
 
     this.add("parens", "deletion", function(state, action, editor, session, range) {
         var selected = session.doc.getTextRange(range);
-        if (!range.isMultiLine() && selected == '(') {
+        if (!range.isMultiLine() && selected === '(') {
             initContext(editor);
             var line = session.doc.getLine(range.start.row);
             var rightChar = line.substring(range.start.column + 1, range.start.column + 2);
-            if (rightChar == ')') {
+            if (rightChar === ')') {
                 range.end.column++;
                 return range;
             }
@@ -603,7 +602,7 @@ var CstyleBehaviour = function() {
     });
 
     this.add("brackets", "insertion", function(state, action, editor, session, text) {
-        if (text == '[') {
+        if (text === '[') {
             initContext(editor);
             var selection = editor.getSelectionRange();
             var selected = session.doc.getTextRange(selection);
@@ -619,12 +618,12 @@ var CstyleBehaviour = function() {
                     selection: [1, 1]
                 };
             }
-        } else if (text == ']') {
+        } else if (text === ']') {
             initContext(editor);
             var cursor = editor.getCursorPosition();
             var line = session.doc.getLine(cursor.row);
             var rightChar = line.substring(cursor.column, cursor.column + 1);
-            if (rightChar == ']') {
+            if (rightChar === ']') {
                 var matching = session.$findOpeningBracket(']', {column: cursor.column + 1, row: cursor.row});
                 if (matching !== null && CstyleBehaviour.isAutoInsertedClosing(cursor, line, text)) {
                     CstyleBehaviour.popAutoInsertedClosing();
@@ -639,11 +638,11 @@ var CstyleBehaviour = function() {
 
     this.add("brackets", "deletion", function(state, action, editor, session, range) {
         var selected = session.doc.getTextRange(range);
-        if (!range.isMultiLine() && selected == '[') {
+        if (!range.isMultiLine() && selected === '[') {
             initContext(editor);
             var line = session.doc.getLine(range.start.row);
             var rightChar = line.substring(range.start.column + 1, range.start.column + 2);
-            if (rightChar == ']') {
+            if (rightChar === ']') {
                 range.end.column++;
                 return range;
             }
@@ -651,12 +650,12 @@ var CstyleBehaviour = function() {
     });
 
     this.add("string_dquotes", "insertion", function(state, action, editor, session, text) {
-        if (text == '"' || text == "'") {
+        if (text === '"' || text === "'") {
             initContext(editor);
             var quote = text;
             var selection = editor.getSelectionRange();
             var selected = session.doc.getTextRange(selection);
-            if (selected !== "" && selected !== "'" && selected != '"' && editor.getWrapBehavioursEnabled()) {
+            if (selected !== "" && selected !== "'" && selected !== '"' && editor.getWrapBehavioursEnabled()) {
                 return {
                     text: quote + selected + quote,
                     selection: false
@@ -665,7 +664,7 @@ var CstyleBehaviour = function() {
                 var cursor = editor.getCursorPosition();
                 var line = session.doc.getLine(cursor.row);
                 var leftChar = line.substring(cursor.column-1, cursor.column);
-                if (leftChar == '\\') {
+                if (leftChar === '\\') {
                     return null;
                 }
                 var tokens = session.getTokens(selection.start.row);
@@ -674,7 +673,7 @@ var CstyleBehaviour = function() {
 
                 for (var x = 0; x < tokens.length; x++) {
                     token = tokens[x];
-                    if (token.type == "string") {
+                    if (token.type === "string") {
                       quotepos = -1;
                     } else if (quotepos < 0) {
                       quotepos = token.value.indexOf(quote);
@@ -706,11 +705,11 @@ var CstyleBehaviour = function() {
 
     this.add("string_dquotes", "deletion", function(state, action, editor, session, range) {
         var selected = session.doc.getTextRange(range);
-        if (!range.isMultiLine() && (selected == '"' || selected == "'")) {
+        if (!range.isMultiLine() && (selected === '"' || selected === "'")) {
             initContext(editor);
             var line = session.doc.getLine(range.start.row);
             var rightChar = line.substring(range.start.column + 1, range.start.column + 2);
-            if (rightChar == selected) {
+            if (rightChar === selected) {
                 range.end.column++;
                 return range;
             }
@@ -769,7 +768,7 @@ CstyleBehaviour.isMaybeInsertedClosing = function(cursor, line) {
     return context.maybeInsertedBrackets > 0 &&
         cursor.row === context.maybeInsertedRow &&
         line.substr(cursor.column) === context.maybeInsertedLineEnd &&
-        line.substr(0, cursor.column) == context.maybeInsertedLineStart;
+        line.substr(0, cursor.column) === context.maybeInsertedLineStart;
 };
 
 CstyleBehaviour.popAutoInsertedClosing = function() {
@@ -792,7 +791,6 @@ exports.CstyleBehaviour = CstyleBehaviour;
 });
 
 ace.define("ace/mode/folding/cstyle",["require","exports","module","ace/lib/oop","ace/range","ace/mode/folding/fold_mode"], function(acequire, exports, module) {
-"use strict";
 
 var oop = acequire("../../lib/oop");
 var Range = acequire("../../range").Range;

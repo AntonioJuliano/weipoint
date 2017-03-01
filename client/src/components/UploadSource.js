@@ -17,6 +17,7 @@ import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
 import CircularProgress from 'material-ui/CircularProgress';
 import Toggle from 'material-ui/Toggle';
+import Editor from './Editor';
 
 class UploadSource extends React.Component {
     constructor(props) {
@@ -70,8 +71,8 @@ class UploadSource extends React.Component {
         this.setState(pair);
     }
 
-    handleCodeChanged(e, v) {
-      this.setState({ code: v });
+    handleCodeChanged(value) {
+      this.setState({ code: value });
     }
 
     handleVersionChanged(event, index, value) {
@@ -138,15 +139,13 @@ class UploadSource extends React.Component {
               <p style={{ fontSize: '75%'}}>
                 Note: currently only Solidity source code is supported
               </p>
-              <Paper zDepth={1}>
-                <TextField
-                  onChange={this.handleCodeChanged}
-                  style={{ width: "95%", paddingLeft: 5, overflow: 'auto', maxHeight: 300 }}
-                  id='codeField'
-                  multiLine={true}
-                  underlineShow={false}
-                  rows={20}
+              <Paper zDepth={2}>
+                <Editor
+                  readOnly={false}
+                  name='viewSource'
                   value={this.state.code}
+                  onChange={this.handleCodeChanged}
+                  maxHeight={400}
                 />
               </Paper>
             </div>;

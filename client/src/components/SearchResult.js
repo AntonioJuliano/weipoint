@@ -43,12 +43,10 @@ class SearchResult extends React.Component {
   }
 
   viewSourceClicked(e) {
-    console.log('clicked');
     this.setState({ viewSourceOpen: true });
   }
 
   viewSourceClosed(e) {
-    console.log('closed');
     this.setState({ viewSourceOpen: false });
   }
 
