@@ -151,7 +151,6 @@ router.post('/source', async(request, response) => {
 
 router.post('/constantFunction', async (request, response) => {
   try {
-    request.check({
         'address': {
             in: 'body',
             isAddress: true,
