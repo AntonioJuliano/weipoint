@@ -3,7 +3,8 @@ import {Card, CardActions, CardTitle} from 'material-ui/Card';
 import FlatButton from 'material-ui/FlatButton';
 import '../styles/SearchResult.css';
 import CopyToClipboard from 'react-copy-to-clipboard';
-import UploadSource from './UploadSource'
+import UploadSource from './UploadSource';
+import ViewSource from './ViewSource';
 
 const initialBytecodeButtonText = "Copy Bytecode";
 
@@ -13,12 +14,15 @@ class SearchResult extends React.Component {
     this.state = {
       bytecodeButtonText: initialBytecodeButtonText,
       uploadSourceOpen: false,
+      viewSourceOpen: false,
       contract: this.props.contract,
       uploadState: 'initialized'
     };
     this.copyBytecodeClicked = this.copyBytecodeClicked.bind(this);
     this.uploadSourceClicked = this.uploadSourceClicked.bind(this);
+    this.viewSourceClicked = this.viewSourceClicked.bind(this);
     this.uploadSourceClosed = this.uploadSourceClosed.bind(this);
+    this.viewSourceClosed = this.viewSourceClosed.bind(this);
     this.uploadSource = this.uploadSource.bind(this);
   }
 
@@ -36,6 +40,14 @@ class SearchResult extends React.Component {
 
   uploadSourceClosed(e) {
     this.setState({ uploadSourceOpen: false });
+  }
+
+  viewSourceClicked(e) {
+    this.setState({ viewSourceOpen: true });
+  }
+
+  viewSourceClosed(e) {
+    this.setState({ viewSourceOpen: false });
   }
 
   componentWillReceiveProps(nextProps) {
@@ -83,10 +95,10 @@ class SearchResult extends React.Component {
         label="Upload Source Code"
         onClick={this.uploadSourceClicked}/> : null;
 
-    // const viewSourceButton = showUploadSource ? null :
-    //   <FlatButton
-    //     label="View Source Code"
-    //     onClick={this.viewSourceClicked}/>;
+    const viewSourceButton = showUploadSource ? null :
+      <FlatButton
+        label="View Source Code"
+        onClick={this.viewSourceClicked}/>;
 
     return (
       <div className="SearchResultContainer">
@@ -97,6 +109,7 @@ class SearchResult extends React.Component {
           />
           <CardActions>
             {uploadSourceButton}
+            {viewSourceButton}
             <FlatButton label="Send Transaction" />
             <CopyToClipboard text={this.state.contract.code}>
               <FlatButton
@@ -108,7 +121,13 @@ class SearchResult extends React.Component {
             open={this.state.uploadSourceOpen}
             close={this.uploadSourceClosed}
             uploadSource={this.uploadSource}
-            uploadState={this.state.uploadState}/>
+            uploadState={this.state.uploadState}
+          />
+          <ViewSource
+            open={this.state.viewSourceOpen}
+            close={this.viewSourceClosed}
+            source={this.state.contract.source}
+          />
         </Card>
       </div>
     );
