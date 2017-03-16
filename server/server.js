@@ -14,6 +14,17 @@ const logger = require('./helpers/logger');
 const path = require('path');
 const errorHandler = require('./helpers/errorHandler');
 
+process.on('unhandledRejection', (reason, p) => {
+  console.log('Unhandled promise rejection');
+  console.log(p);
+  logger.error({
+    at: 'errorHandler#unhandledRejection',
+    message: 'Unhandled Promise Rejection',
+    promise: p,
+    error: reason
+  });
+});
+
 app.use(bodyParser.json());
 app.use(function(error, request, response, next) {
   console.log(error);

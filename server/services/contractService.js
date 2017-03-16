@@ -32,7 +32,7 @@ async function lookupContract(address) {
 
 async function verifySource(contract, source, sourceType, compilerVersion) {
   if (sourceType === 'solidity') {
-    const contracts = optimusService.compileSolidity(source, compilerVersion, true);
+    const contracts = await optimusService.compileSolidity(source, compilerVersion, true);
     for (const contractName in contracts) {
       const compiledContract = contracts[contractName];
       const compiledRuntimeBytecode = compiledContract.runtimeBytecode;

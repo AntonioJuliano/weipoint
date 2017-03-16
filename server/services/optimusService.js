@@ -37,7 +37,7 @@ async function compileSolidity(source, version, optimized) {
 
 async function getSolidityCompilerVersions() {
   const response = await fetch(compilerServiceUrl + getSolidityCompilerVersionsPath);
-  return await result.json();
+  return await response.json();
 }
 
 module.exports.compileSolidity = compileSolidity;

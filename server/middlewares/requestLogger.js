@@ -1,3 +1,5 @@
+'use strict';
+
 const logger = require('../helpers/logger');
 
 module.exports = function(request, response, next) {
