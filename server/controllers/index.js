@@ -1,6 +1,5 @@
-/**
- * Created by antonio on 1/16/17.
- */
+'use strict';
+
 const express = require('express');
 const router = express.Router();
 

@@ -1,4 +1,4 @@
-version: '2'
+version: '3'
 services:
   parity:
     image: "ethcore/parity:stable-release"
@@ -7,7 +7,7 @@ services:
     volumes:
       - "~/.parity:/root/.parity"
 
-    entrypoint: /build/parity/target/release/parity  --jsonrpc-interface '0.0.0.0' --jsonrpc-hosts all
+    entrypoint: /parity/parity --jsonrpc-interface '0.0.0.0' --jsonrpc-hosts all
   mongo:
     image: "mongo:3.4.1"
     volumes:
@@ -15,10 +15,10 @@ services:
     ports:
       - "27017:27017"
     command: mongod --storageEngine wiredTiger
-  compiler:
-    image: antoniojuliano/ethnexus-compiler
+  optimus:
+    image: antoniojuliano/optimus
     ports:
       - "3002:3002"
     volumes:
-      - "~/.ethnexus-compiler:/home/ethnexus/app/bin/soljson/"
+      - "~/.optimus:/home/ethnexus/app/bin/soljson/"
     restart: always

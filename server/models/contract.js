@@ -1,10 +1,8 @@
-/**
- * Created by antonio on 1/17/17.
- */
+'use strict';
+
 const mongoose = require('../helpers/db');
 const Schema = mongoose.Schema;
 
-// create a schema
 const contractSchema = new Schema({
     name: 'string',
     address: {
@@ -17,7 +15,8 @@ const contractSchema = new Schema({
     sourceType: 'string',
     sourceVersion: 'string',
     optimized: 'boolean',
-    abi: 'array'
+    abi: 'array',
+    libraries: 'mixed'
 });
 
 const Contract = mongoose.model('Contract', contractSchema);
