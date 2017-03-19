@@ -1,22 +1,22 @@
-FROM alpine:3.5
+FROM node:7.7.3-alpine
 
 RUN apk update && apk upgrade && \
-    apk add --no-cache git nodejs
+    apk add --no-cache git
 
-RUN mkdir -p /home/ethnexus/app/client
-WORKDIR /home/ethnexus/app
+RUN mkdir -p /home/weipoint/app/client
+WORKDIR /home/weipoint/app
 
-COPY package.json /home/ethnexus/app/package.json
-COPY client/package.json /home/ethnexus/app/client/package.json
+COPY package.json /home/weipoint/app/package.json
+COPY client/package.json /home/weipoint/app/client/package.json
 RUN npm run prod_install
 
-COPY ./client /home/ethnexus/app/client
+COPY ./client /home/weipoint/app/client
 RUN npm run prod_build
-COPY ./server /home/ethnexus/app/server
+COPY ./server /home/weipoint/app/server
 
 EXPOSE 3001
 
-RUN adduser -S ethnexus
-USER ethnexus
+RUN adduser -S weipoint
+USER weipoint
 
 CMD ["npm","run","prod"]
