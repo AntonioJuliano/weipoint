@@ -1,4 +1,4 @@
-version: '2'
+version: '3'
 services:
   parity:
     image: "ethcore/parity:stable-release"
@@ -7,7 +7,7 @@ services:
     volumes:
       - "~/.parity:/root/.parity"
 
-    entrypoint: /build/parity/target/release/parity  --jsonrpc-interface '0.0.0.0' --jsonrpc-hosts all
+    entrypoint: /parity/parity --jsonrpc-interface '0.0.0.0' --jsonrpc-hosts all
   mongo:
     image: "mongo:3.4.1"
     volumes:

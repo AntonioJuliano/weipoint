@@ -131,6 +131,7 @@ router.post('/source', async (request, response) => {
     contract.sourceVersion = request.body.compilerVersion;
     contract.name = compileResult.contractName;
     contract.abi = compileResult.abi;
+    contract.libraries = compileResult.libraries;
     const saveResult = await contract.save();
     return response.status(200).json({
       address: contract.address,
@@ -140,6 +141,7 @@ router.post('/source', async (request, response) => {
       optimized: contract.optimized,
       name: contract.name,
       code: contract.code,
+      libraries: contract.libraries,
       blockNumber: blockNumber
     });
   } catch (e) {

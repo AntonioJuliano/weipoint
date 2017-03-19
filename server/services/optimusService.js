@@ -8,7 +8,7 @@ const getSolidityCompilerVersionsPath = '/api/v1/solidity/versions';
 const Promise = require('bluebird');
 const errors = require('../helpers/errors');
 
-async function compileSolidity(source, version, optimized) {
+async function compileSolidity(source, version, optimized, libraries) {
   const response = await fetch(
       compilerServiceUrl + compileSolidityPath,
       {
@@ -20,7 +20,8 @@ async function compileSolidity(source, version, optimized) {
         body: JSON.stringify({
           source: source,
           version: version,
-          optimized: optimized
+          optimized: optimized,
+          libraries: libraries
         })
       }
     );

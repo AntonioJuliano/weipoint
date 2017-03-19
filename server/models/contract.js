@@ -15,7 +15,8 @@ const contractSchema = new Schema({
     sourceType: 'string',
     sourceVersion: 'string',
     optimized: 'boolean',
-    abi: 'array'
+    abi: 'array',
+    libraries: 'mixed'
 });
 
 const Contract = mongoose.model('Contract', contractSchema);

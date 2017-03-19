@@ -37,18 +37,26 @@ async function verifySource(contract, source, sourceType, compilerVersion) {
       const compiledContract = contracts[contractName];
       const compiledRuntimeBytecode = compiledContract.runtimeBytecode;
       const existingRuntimeCode = contract.code.replace('0x', '');
-      if (compiledRuntimeBytecode === existingRuntimeCode
-            || removeMetadata(compiledRuntimeBytecode) ===
-               removeMetadata(existingRuntimeCode)) {
-        logger.info({
-          at: 'contractService#verifySource',
-          message: 'Found matching source code for contract',
-          address: contract.address
-        });
-        return {
-            contractName: contractName,
-            abi: JSON.parse(contracts[contractName].interface)
-        };
+
+      const strippedCompiled = removeMetadata(compiledRuntimeBytecode);
+      const strippedExisting = removeMetadata(existingRuntimeCode);
+
+      if (strippedCompiled.length === strippedExisting.length) {
+        const linkResult = autoLinkLibraries(strippedCompiled, strippedExisting);
+        const linkedCompiled = linkResult.linked;
+        if (compiledRuntimeBytecode === existingRuntimeCode
+              || linkedCompiled === strippedExisting) {
+          logger.info({
+            at: 'contractService#verifySource',
+            message: 'Found matching source code for contract',
+            address: contract.address
+          });
+          return {
+              contractName: contractName,
+              libraries: linkResult.libraries,
+              abi: JSON.parse(contracts[contractName].interface)
+          };
+        }
       }
     }
     throw new errors.ClientError(
@@ -67,6 +75,48 @@ async function verifySource(contract, source, sourceType, compilerVersion) {
 // be deterministic. For now allow it to be ignored
 function removeMetadata(bytecode) {
   return bytecode.replace(/a165627a7a72305820([0-9a-f]{64})0029$/, '');
+}
+
+/**
+ * Function to automatically find and link libraries in bytecode returned by the compiler
+ * Note: if solidity changes how it compiles this may not always work...
+ */
+function autoLinkLibraries(compiledBytecode, existingBytecode) {
+  console.log("ALL");
+  let compiledCurrent = compiledBytecode;
+  let existingCurrent = existingBytecode;
+  let result = "";
+  let libraries = {};
+
+  console.log(compiledCurrent);
+  let index = compiledCurrent.search(/__[a-zA-Z0-9_]{36}__/);
+  while (index !== -1) {
+    const address = existingCurrent.slice(index, index + 40);
+    const libraryName = compiledCurrent.slice(index, index + 40);
+
+    if (web3.isAddress('0x' + address)) {
+      if (libraries.hasOwnProperty(libraryName)) {
+        if (libraries[libraryName] !== address) {
+          return compiledBytecode;
+        }
+      } else {
+        libraries[libraryName] = address
+      }
+
+      result = result + compiledCurrent.slice(0, index);
+      result = result + address;
+      compiledCurrent = compiledCurrent.slice(index + 40);
+      existingCurrent = existingCurrent.slice(index + 40);
+      index = compiledCurrent.search(/__[a-zA-Z0-9_]{36}__/);
+    } else {
+      return compiledBytecode;
+    }
+  }
+
+  return {
+    linked: result + compiledCurrent,
+    libraries: libraries
+  };
 }
 
 module.exports.lookupContract = lookupContract;
