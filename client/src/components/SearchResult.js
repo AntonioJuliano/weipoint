@@ -5,7 +5,7 @@ import '../styles/SearchResult.css';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import UploadSource from './UploadSource';
 import ViewSource from './ViewSource';
-import CallContractFunction from './CallContractFunction';
+import ContractProperties from './ContractProperties';
 
 const initialBytecodeButtonText = "Copy Bytecode";
 
@@ -112,9 +112,9 @@ class SearchResult extends React.Component {
         label="View Source Code"
         onClick={this.viewSourceClicked}/>;
 
-    const callFunctionButton = showUploadSource ? null :
+    const readPropertiesButton = showUploadSource ? null :
       <FlatButton
-        label="Call Contract Function"
+        label="View Contract Properies"
         onClick={this.callFunctionClicked}/>;
 
     return (
@@ -127,7 +127,7 @@ class SearchResult extends React.Component {
           <CardActions>
             {uploadSourceButton}
             {viewSourceButton}
-            {callFunctionButton}
+            {readPropertiesButton}
             <CopyToClipboard text={this.state.contract.code}>
               <FlatButton
                 label={this.state.bytecodeButtonText}
@@ -145,7 +145,7 @@ class SearchResult extends React.Component {
             close={this.viewSourceClosed}
             source={this.state.contract.source}
           />
-          <CallContractFunction
+          <ContractProperties
             abi={this.state.contract.abi}
             open={this.state.callFunctionOpen}
             close={this.callFunctionClosed}

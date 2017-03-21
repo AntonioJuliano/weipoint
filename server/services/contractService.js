@@ -104,31 +104,39 @@ async function verifySource(contract, source, sourceType, compilerVersion) {
   }
 }
 
-function callConstantFunction(contract, functionName, args) {
+async function callConstantFunction(contract, functionName, args) {
   const Contract = web3.eth.contract(contract.abi);
   const contractInstance = Contract.at(contract.address);
   Promise.promisifyAll(contractInstance);
 
+  logger.debug({
+    at: 'contractService#callConstantFunction',
+    message: 'calling constant contract function',
+    address: contract.address,
+    functionName: functionName,
+    args: args
+  });
+
   const func = contractInstance[functionName + 'Async'];
   if (typeof func === 'function') {
-    return func.apply(null, args).catch(function (err) {
+    try {
+      return await func.apply(null, args);
+    } catch (e) {
       logger.error({
         at: 'contractService#callConstantFunction',
         message: 'calling contract threw error',
-        err: err
+        err: e
       });
-      return Promise.reject(
-        new errors.ClientError(
-          'Function call threw error',
-          errors.errorCodes.contractFunctionThrewError
-        )
+      throw new errors.ClientError(
+        'Function call threw error',
+        errors.errorCodes.contractFunctionThrewError
       );
-    });
+    }
   } else {
-    return Promise.reject(new errors.ClientError(
+    throw new errors.ClientError(
         'Invalid function name',
         errors.errorCodes.invalidArguments
-    ));
+    );
   }
 }
 

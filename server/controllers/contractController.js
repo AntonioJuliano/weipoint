@@ -149,7 +149,8 @@ router.post('/source', async(request, response) => {
   }
 });
 
-router.post('/constantFunction', (request, response) => {
+router.post('/constantFunction', async (request, response) => {
+  try {
     request.check({
         'address': {
             in: 'body',
@@ -166,56 +167,47 @@ router.post('/constantFunction', (request, response) => {
             errorMessage: 'Invalid Arguments'
         }
     });
-    request.getValidationResult().then(function(result) {
-        if (!result.isEmpty()) {
-            return Promise.reject(new errors.RequestError(result.array()));
-        }
-    }).then(function(result) {
-        logger.debug({
-            at: 'contractController#constantFunction',
-            message: "Making contract request",
-            address: request.body.address
-        });
+    const validationResult = await request.getValidationResult();
+    if (!validationResult.isEmpty()) {
+      throw new errors.RequestError(validationResult.array());
+    }
+    logger.debug({
+      at: 'contractController#constantFunction',
+      message: "Making contract request",
+      address: request.body.address
+    });
 
-        return contractService.lookupContract(request.body.address);
-    }).then(function(results) {
-        contract = results.contract;
-        blockNumber = results.blockNumber;
+    const { contract, blockNumber } = await contractService.lookupContract(request.body.address);
+    const id = contract === null ? null : contract.id;
+    logger.debug({
+      at: 'contractController#constantFunction',
+      message: "Got contract response",
+      address: request.body.address,
+      contract_id: id
+    });
 
-        const id = contract === null ? null : contract.id;
-        logger.debug({
-            at: 'contractController#constantFunction',
-            message: "Got contract response",
-            address: request.body.address,
-            contract_id: id
-        });
+    if (contract === null) {
+      throw new errors.ClientError(
+        'Contract not found at address',
+        errors.errorCodes.notFound
+      );
+    }
+    if (contract.abi === null || contract.abi === undefined) {
+      throw new errors.ClientError(
+        'Contract does not have source code',
+        errors.errorCodes.sourceNotAvailable
+      );
+    }
 
-        if (contract === null) {
-            return Promise.reject(new errors.ClientError(
-                'Contract not found at address',
-                errors.errorCodes.notFound
-            ));
-        }
+    const callResult = await contractService.callConstantFunction(
+      contract,
+      request.body.functionName,
+      request.body.arguments
+    );
 
-        if (contract.abi === null || contract.abi === undefined) {
-            return Promise.reject(new errors.ClientError(
-                'Contract does not have source code',
-                errors.errorCodes.sourceNotAvailable
-            ));
-        }
-
-        return contractService.callConstantFunction(
-            contract,
-            request.body.functionName,
-            request.body.arguments
-        );
-    }).then(function(result) {
-      response.status(200).json({
-          address: contract.address,
-          result: result
-      });
-    }).catch(function(error) {
-        errorHandler.handle(error, response);
+    response.status(200).json({
+      address: contract.address,
+      result: callResult
     });
   } catch (e) {
     errorHandler.handle(e, response);
