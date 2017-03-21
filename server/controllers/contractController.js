@@ -151,20 +151,21 @@ router.post('/source', async(request, response) => {
 
 router.post('/constantFunction', async (request, response) => {
   try {
-        'address': {
-            in: 'body',
-            isAddress: true,
-            errorMessage: 'Invalid Address'
-        },
-        'functionName': {
-            in: 'body',
-            notEmpty: true
-        },
-        'arguments': {
-            in: 'body',
-            isArray: true,
-            errorMessage: 'Invalid Arguments'
-        }
+    request.check({
+      'address': {
+        in: 'body',
+        isAddress: true,
+        errorMessage: 'Invalid Address'
+      },
+      'functionName': {
+        in: 'body',
+        notEmpty: true
+      },
+      'arguments': {
+        in: 'body',
+        isArray: true,
+        errorMessage: 'Invalid Arguments'
+      }
     });
     const validationResult = await request.getValidationResult();
     if (!validationResult.isEmpty()) {
@@ -206,7 +207,8 @@ router.post('/constantFunction', async (request, response) => {
 
     response.status(200).json({
       address: contract.address,
-      result: callResult
+      result: callResult,
+      blockNumber: blockNumber
     });
   } catch (e) {
     errorHandler.handle(e, response);

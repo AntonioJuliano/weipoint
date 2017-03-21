@@ -1,31 +1,37 @@
 import React from "react";
 import TextField from 'material-ui/TextField';
-import { Grid, Row, Col } from 'react-flexbox-grid';
-import FlatButton from 'material-ui/FlatButton';
+import { Row, Col } from 'react-flexbox-grid';
+import RaisedButton from 'material-ui/RaisedButton';
+import ArrowForwardIcon from 'react-material-icons/icons/navigation/arrow-forward';
 
 class ContractFunction extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      result: null,
-      requestState: 'initialized',
-      args: {},
-    };
-    this.getInputs = this.getInputs.bind(this);
-    this.handleArgChange = this.handleArgChange.bind(this);
-    this.callContractFunction = this.callContractFunction.bind(this);
-  }
-
-  componentWillReceiveProps(nextProps) {
     let args = {};
     for (let i = 0; i < this.props.abi.inputs.length; i++) {
       args["arg_" + i] = "";
     }
-    this.setState({ args: args });
+
+    const noArgs = this.props.abi.inputs.length === 0;
+    this.state = {
+      result: null,
+      requestState: noArgs ? 'requesting' : 'initialized',
+      args: args,
+      noArgs: noArgs
+    };
+    this.getInputs = this.getInputs.bind(this);
+    this.handleArgChange = this.handleArgChange.bind(this);
+    this.callContractFunction = this.callContractFunction.bind(this);
+
+    if (noArgs) {
+      this.callContractFunction(false);
+    }
   }
 
-  async callContractFunction() {
-    this.setState({ requestState: 'requesting', result: null });
+  async callContractFunction(setState) {
+    if (setState) {
+      this.setState({ requestState: 'requesting', result: null });
+    }
     const request = {
       address: this.props.address,
       functionName: this.props.abi.name,
@@ -45,7 +51,6 @@ class ContractFunction extends React.Component {
       return;
     }
     const json = await response.json();
-    console.log(json);
     this.setState({ requestState: 'completed', result: json.result });
   }
 
@@ -60,12 +65,14 @@ class ContractFunction extends React.Component {
     const thisRef = this;
     return this.props.abi.inputs.map(function(value, i) {
       return <Row key={i}>
-          <TextField
-            floatingLabelText={value.name}
-            id={'arg_' + i}
-            value={thisRef.state.args['arg_' + i]}
-            onChange={thisRef.handleArgChange}
-          />
+          <Col xsOffset={2}>
+            <TextField
+              floatingLabelText={value.name}
+              id={'arg_' + i}
+              value={thisRef.state.args['arg_' + i]}
+              onChange={thisRef.handleArgChange}
+            />
+          </Col>
         </Row>;
     });
   }
@@ -79,31 +86,49 @@ class ContractFunction extends React.Component {
       }
     }
 
+    let argumentInputs = <div>
+      { this.getInputs() }
+      <RaisedButton
+        label='Call'
+        primary={true}
+        onTouchTap={ e => this.callContractFunction(true) }
+        disabled={callDisabled}
+        />
+    </div>
+
     let resultData;
     if (Array.isArray(this.state.result)) {
       resultData = this.state.result.map(function(v, i) {
+          console.log(thisRef.props.abi.outputs[i]);
+          let identifier = thisRef.props.abi.outputs[i].name;
+          if (identifier !== null && identifier !== undefined && identifier !== '') {
+            identifier += ': ';
+          }
+
           return <Row key={i}>
               <div>
-                {thisRef.getConstantFunctions()[thisRef.state.index].outputs[i].name + ': ' + v}
+                {identifier + v}
               </div>
             </Row>;
         });
     } else {
-      resultData = <Row>
-          {this.state.result}
-        </Row>;
+      resultData = this.state.result;
     }
     return (
-      <Grid>
+      <div>
         <Row style={{ marginTop: 5, marginBottom: 5 }}>
           <Col xsOffset={1} xs={4}>
-            {this.props.abi.name}
+            { this.props.abi.name }
           </Col>
-          <Col xsOffset={4} xs={3}>
-            {this.props.name}
+          <Col xs={1}>
+            <ArrowForwardIcon />
+          </Col>
+          <Col xs={6}>
+            { resultData }
           </Col>
         </Row>
-      </Grid>
+        { this.props.active && !this.state.noArgs && argumentInputs }
+      </div>
     );
   }
 }
