@@ -1,20 +1,15 @@
-'use strict';
-
 const express = require('express');
 const router = express.Router();
-const web3 = require('../helpers/web3');
 const contractService = require('../services/contractService');
 const errors = require('../helpers/errors');
 const errorHandler = require('../helpers/errorHandler');
 const logger = require('../helpers/logger');
 const optimusService = require('../services/optimusService');
-const Promise = require('bluebird');
 
-router.get('/', async (request, response) => {
+router.get('/', async(request, response) => {
   try {
     request.check({
-      'address': {
-        in: 'query',
+      'address': { in: 'query',
         isAddress: true,
         errorMessage: 'Invalid Address'
       }
@@ -30,13 +25,16 @@ router.get('/', async (request, response) => {
       message: "Making contract request for address",
       address: address
     });
-    const {contract, blockNumber} = await contractService.lookupContract(address);
+    const {
+      contract,
+      blockNumber
+    } = await contractService.lookupContract(address);
     const id = contract === null ? null : contract.id;
     logger.debug({
-        at: 'contractController/',
-        message: "Got contract response",
-        address: request.query.address,
-        contract_id: id
+      at: 'contractController/',
+      message: "Got contract response",
+      address: request.query.address,
+      contract_id: id
     });
 
     if (contract === null) {
@@ -62,7 +60,7 @@ router.get('/', async (request, response) => {
   }
 });
 
-router.get('/compilerVersions', async (request, response) => {
+router.get('/compilerVersions', async(request, response) => {
   try {
     const compilerVersions = await optimusService.getSolidityCompilerVersions();
     response.status(200).json(compilerVersions);
@@ -71,20 +69,17 @@ router.get('/compilerVersions', async (request, response) => {
   }
 });
 
-router.post('/source', async (request, response) => {
+router.post('/source', async(request, response) => {
   try {
     request.check({
-      'address': {
-        in: 'body',
+      'address': { in: 'body',
         isAddress: true,
         errorMessage: 'Invalid Address'
       },
-      'source': {
-        in: 'body',
+      'source': { in: 'body',
         notEmpty: true
       },
-      'sourceType': {
-        in: 'body',
+      'sourceType': { in: 'body',
         matches: {
           options: 'solidity|serpent'
         }
@@ -99,7 +94,10 @@ router.post('/source', async (request, response) => {
       message: "Making contract request",
       address: request.body.address
     });
-    const { contract, blockNumber } = await contractService.lookupContract(request.body.address);
+    const {
+      contract,
+      blockNumber
+    } = await contractService.lookupContract(request.body.address);
     const id = contract === null ? null : contract.id;
     logger.debug({
       at: 'contractController#/source',
@@ -132,7 +130,7 @@ router.post('/source', async (request, response) => {
     contract.name = compileResult.contractName;
     contract.abi = compileResult.abi;
     contract.libraries = compileResult.libraries;
-    const saveResult = await contract.save();
+    await contract.save();
     return response.status(200).json({
       address: contract.address,
       source: contract.source,
