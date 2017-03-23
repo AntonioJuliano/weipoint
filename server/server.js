@@ -1,5 +1,3 @@
-'use strict';
-
 const dotenv = require('dotenv');
 dotenv.load();
 
@@ -15,8 +13,6 @@ const path = require('path');
 const errorHandler = require('./helpers/errorHandler');
 
 process.on('unhandledRejection', (reason, p) => {
-  console.log('Unhandled promise rejection');
-  console.log(p);
   logger.error({
     at: 'errorHandler#unhandledRejection',
     message: 'Unhandled Promise Rejection',
@@ -26,8 +22,7 @@ process.on('unhandledRejection', (reason, p) => {
 });
 
 app.use(bodyParser.json());
-app.use(function(error, request, response, next) {
-  console.log(error);
+app.use(function(error, request, response) {
   response.status(400).json({
     error: 'Invalid Request',
     errorCode: errors.errorCodes.invalidArguments
@@ -44,19 +39,22 @@ app.use(require('./middlewares/requestLogger'));
 
 app.use(express.static(path.join(__dirname, '../client/build')));
 
-app.get('/', function (req, res) {
+app.get('/', function(req, res) {
   res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
 });
 
 app.use('/', require('./controllers/index'));
 
 // Error handler
-app.use((error, request, response, next) => {
+app.use((error, request, response) => {
   errorHandler.handle(error, response);
 });
 
-app.use(function(req, res, next) {
-  res.status(404).json({ error: "Not Found", errorCode: errors.errorCodes.notFound });
+app.use(function(req, res) {
+  res.status(404).json({
+    error: "Not Found",
+    errorCode: errors.errorCodes.notFound
+  });
 });
 
 app.listen(port, (error) => {

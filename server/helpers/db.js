@@ -1,15 +1,12 @@
-'use strict';
-
 const mongoose = require('mongoose');
 const logger = require('./logger');
 
 const mongoUrl = process.env.MONGO_URL;
 mongoose.Promise = require('bluebird');
-const Promise = require('bluebird');
 
-const connectWithRetry = async () => {
+const connectWithRetry = async() => {
   try {
-    const connectResult = await mongoose.connect(mongoUrl);
+    await mongoose.connect(mongoUrl);
   } catch (e) {
     logger.error({
       at: 'db#connectWithRetry',

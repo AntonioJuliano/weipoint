@@ -2,7 +2,7 @@ import React from "react";
 import {Card} from 'material-ui/Card';
 import '../styles/SearchResult.css';
 import RefreshIndicator from 'material-ui/RefreshIndicator';
-import { Row, Col } from 'react-flexbox-grid';
+import {Row, Col} from 'react-flexbox-grid';
 
 const style = {
   refresh: {
@@ -10,7 +10,7 @@ const style = {
     position: 'relative',
     marginTop: '100px',
     marginBottom: '100px'
-  },
+  }
 };
 
 class PendingSearch extends React.Component {
@@ -26,14 +26,17 @@ class PendingSearch extends React.Component {
                 top={0}
                 loadingColor="#FF9800"
                 status="loading"
-                style={style.refresh}
-                />
+                style={style.refresh}/>
             </Col>
           </Row>
         </Card>
       </div>
     );
   }
+}
+
+export default PendingSearch;
+}
 }
 
 export default PendingSearch;

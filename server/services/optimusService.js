@@ -1,30 +1,26 @@
-'use strict';
-
 const fetch = require('node-fetch');
 
 const compilerServiceUrl = process.env.OPTIMUS_URL;
 const compileSolidityPath = '/api/v1/solidity/compile';
 const getSolidityCompilerVersionsPath = '/api/v1/solidity/versions';
-const Promise = require('bluebird');
 const errors = require('../helpers/errors');
 
 async function compileSolidity(source, version, optimized, libraries) {
   const response = await fetch(
-      compilerServiceUrl + compileSolidityPath,
-      {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          source: source,
-          version: version,
-          optimized: optimized,
-          libraries: libraries
-        })
-      }
-    );
+    compilerServiceUrl + compileSolidityPath, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        source: source,
+        version: version,
+        optimized: optimized,
+        libraries: libraries
+      })
+    }
+  );
 
   if (response.status !== 200) {
     if (response.status === 400) {
@@ -38,7 +34,7 @@ async function compileSolidity(source, version, optimized, libraries) {
 
 async function getSolidityCompilerVersions() {
   const response = await fetch(compilerServiceUrl + getSolidityCompilerVersionsPath);
-  return await response.json();
+  return response.json();
 }
 
 module.exports.compileSolidity = compileSolidity;
