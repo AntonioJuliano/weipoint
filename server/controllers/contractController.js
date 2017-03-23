@@ -8,7 +8,6 @@ const errors = require('../helpers/errors');
 const errorHandler = require('../helpers/errorHandler');
 const logger = require('../helpers/logger');
 const optimusService = require('../services/optimusService');
-const Promise = require('bluebird');
 
 router.get('/', async (request, response) => {
   try {

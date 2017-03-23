@@ -71,5 +71,5 @@ app.listen(port, (error) => {
   logger.info({
     at: 'server#start',
     message: `server is listening on ${port}`
-  })
+  });
 });

@@ -6,27 +6,46 @@ const optimusService = require('./optimusService');
 const errors = require('../helpers/errors');
 const logger = require('../helpers/logger');
 
+/**
+ * desc
+ * @param  {[type]} address [description]
+ * @return [type]           [description]
+ */
 async function lookupContract(address) {
   const blockNumber = await web3.eth.getBlockNumberAsync();
 
-  const dbPromise = Contract.findOne({ address: address }).exec();
+  const dbPromise = Contract.findOne({
+    address: address
+  }).exec();
   const web3Promise = web3.eth.getCodeAsync(address, blockNumber);
 
   const [dbResult, web3Result] = await Promise.all([dbPromise, web3Promise]);
 
   if (dbResult !== null) {
-    return { contract: dbResult, blockNumber: blockNumber };
+    return {
+      contract: dbResult,
+      blockNumber: blockNumber
+    };
   } else if (web3Result !== null && web3Result !== '0x') {
-    const newContract = new Contract({ address: address, code: web3Result });
+    const newContract = new Contract({
+      address: address,
+      code: web3Result
+    });
     await newContract.save();
     logger.info({
       at: 'contractService#lookupContract',
       message: 'Saved new contract to db',
       address: address
     });
-    return { contract: newContract, blockNumber: blockNumber };
+    return {
+      contract: newContract,
+      blockNumber: blockNumber
+    };
   } else {
-    return { contract: null, blockNumber: blockNumber };
+    return {
+      contract: null,
+      blockNumber: blockNumber
+    };
   }
 }
 
@@ -44,30 +63,30 @@ async function verifySource(contract, source, sourceType, compilerVersion) {
       if (strippedCompiled.length === strippedExisting.length) {
         const linkResult = autoLinkLibraries(strippedCompiled, strippedExisting);
         const linkedCompiled = linkResult.linked;
-        if (compiledRuntimeBytecode === existingRuntimeCode
-              || linkedCompiled === strippedExisting) {
+        if (compiledRuntimeBytecode === existingRuntimeCode ||
+          linkedCompiled === strippedExisting) {
           logger.info({
             at: 'contractService#verifySource',
             message: 'Found matching source code for contract',
             address: contract.address
           });
           return {
-              contractName: contractName,
-              libraries: linkResult.libraries,
-              abi: JSON.parse(contracts[contractName].interface)
+            contractName: contractName,
+            libraries: linkResult.libraries,
+            abi: JSON.parse(contracts[contractName].interface)
           };
         }
       }
     }
     throw new errors.ClientError(
-        "Source did not match contract bytecode",
-        errors.errorCodes.sourceMismatch
+      "Source did not match contract bytecode",
+      errors.errorCodes.sourceMismatch
     );
   } else if (request.body.type === 'serpent') {
-      // TODO
-      throw new Error('Serpent not yet supported');
+    // TODO
+    throw new Error('Serpent not yet supported');
   } else {
-      throw new Error('Invalid sourceType');
+    throw new Error('Invalid sourceType');
   }
 }
 
