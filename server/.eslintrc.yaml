@@ -59,3 +59,6 @@ rules:
   no-const-assign: error
   no-duplicate-imports: error
   no-var: error
+  no-unused-vars:
+    - error
+    - argsIgnorePattern: "^_"

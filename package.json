@@ -1,7 +1,7 @@
 {
-  "name": "ethnexus-server",
+  "name": "weipoint",
   "version": "1.0.0",
-  "description": "server for ethnexus app",
+  "description": "server for weipoint app",
   "main": "server.js",
   "scripts": {
     "start": "concurrently \"npm run server\" \"npm run client\"",
@@ -11,12 +11,12 @@
     "test": "mocha test",
     "prod_install": "npm install --production && cd client && npm install && cd ..",
     "prod_build": "cd client && npm run build && rm -rf node_modules scripts src && cd ..",
-    "lint": "eslint --ignore-path .gitignore server/**"
+    "lint": "eslint --ext .js --ignore-path .gitignore server/**"
   },
   "pre-commit": [ "lint" ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AntonioJuliano/ethnexus-web.git"
+    "url": "git+https://github.com/AntonioJuliano/weipoint.git"
   },
   "keywords": [
     "ethereum"
@@ -24,9 +24,9 @@
   "author": "Antonio Juliano",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/AntonioJuliano/ethnexus-web/issues"
+    "url": "https://github.com/AntonioJuliano/weipoint/issues"
   },
-  "homepage": "https://github.com/AntonioJuliano/ethnexus-web#readme",
+  "homepage": "https://github.com/AntonioJuliano/weipoint#readme",
   "dependencies": {
     "bluebird": "latest",
     "body-parser": "^1.15.2",
@@ -43,12 +43,9 @@
   "devDependencies": {
     "babel-eslint": "^7.2.1",
     "concurrently": "^3.1.0",
-    "css-loader": "^0.26.1",
     "eslint": "^3.18.0",
-    "jshint": "^2.9.4",
     "mocha": "^3.2.0",
     "npm": "^4.1.2",
-    "pre-commit": "^1.2.2",
-    "style-loader": "^0.13.1"
+    "pre-commit": "^1.2.2"
   }
 }

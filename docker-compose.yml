@@ -15,10 +15,10 @@ services:
     ports:
       - "27017:27017"
     command: mongod --storageEngine wiredTiger
-  optimus:
-    image: antoniojuliano/optimus
-    ports:
-      - "3002:3002"
-    volumes:
-      - "~/.optimus:/home/ethnexus/app/bin/soljson/"
-    restart: always
+  # optimus:
+  #   image: antoniojuliano/optimus
+  #   ports:
+  #     - "3002:3002"
+  #   volumes:
+  #     - "~/.optimus:/home/ethnexus/app/bin/soljson/"
+  #   restart: always
