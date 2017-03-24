@@ -22,12 +22,12 @@ process.on('unhandledRejection', (reason, p) => {
 });
 
 app.use(bodyParser.json());
-app.use(function(error, request, response) {
+app.use(function(error, request, response, _next) {
   response.status(400).json({
     error: 'Invalid Request',
     errorCode: errors.errorCodes.invalidArguments
   });
-});
+})
 app.use(expressValidator({
   customValidators: {
     isAddress: function(value) {
@@ -46,7 +46,7 @@ app.get('/', function(req, res) {
 app.use('/', require('./controllers/index'));
 
 // Error handler
-app.use((error, request, response) => {
+app.use((error, request, response, _next) => {
   errorHandler.handle(error, response);
 });
 

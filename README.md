@@ -1,13 +1,15 @@
-## Ethnexus
+## Weipoint
 
-### Setup
-
-Pull docker geth:
-```docker pull ethereum/client-go```
- 
- 
 ### Development
+
+## install
 ```
-npm run geth
+npm install
+npm install -g nodemon
+```
+
+## Run
+```
+docker-compose up
 npm start
 ```

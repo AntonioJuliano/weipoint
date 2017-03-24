@@ -36,7 +36,3 @@ class PendingSearch extends React.Component {
 }
 
 export default PendingSearch;
-}
-}
-
-export default PendingSearch;
