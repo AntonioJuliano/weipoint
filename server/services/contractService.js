@@ -125,10 +125,10 @@ async function callConstantFunction(contract, functionName, args) {
       logger.error({
         at: 'contractService#callConstantFunction',
         message: 'calling contract threw error',
-        err: e
+        err: e.toString()
       });
       throw new errors.ClientError(
-        'Function call threw error',
+        e.toString(),
         errors.errorCodes.contractFunctionThrewError
       );
     }

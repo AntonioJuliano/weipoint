@@ -7,7 +7,7 @@ logger.info({
   at: 'web3#connect',
   message: 'Connecting to web3 provider',
   url: providerPath
-})
+});
 web3.setProvider(new web3.providers.HttpProvider(providerPath));
 Promise.promisifyAll(web3.eth);
 Promise.promisifyAll(web3.eth.compile);
