@@ -15,7 +15,8 @@ class ContractFunction extends React.Component {
       args["arg_" + i] = {
         value: "",
         valid: true,
-        errorMessage: ""
+        errorMessage: "",
+        type: this.props.abi.inputs[i].type
       };
     }
 
@@ -45,7 +46,7 @@ class ContractFunction extends React.Component {
     const request = {
       address: this.props.address,
       functionName: this.props.abi.name,
-      arguments: Object.values(this.getArgValues())
+      arguments: this.getArgValues()
     };
     const requestPath = '/api/v1/contract/constantFunction';
     const response = await fetch(requestPath, {
@@ -62,30 +63,45 @@ class ContractFunction extends React.Component {
       this.setState({ requestState: 'error', error: json.message });
       return;
     }
-    this.setState({ requestState: 'completed', result: json.result });
+    let result = json.result;
+    if (json.result === false) {
+      result = 'false';
+    } else if (json.result === true) {
+      result = 'true';
+    }
+    this.setState({ requestState: 'completed', result: result });
   }
 
   handleArgChange(event, newValue) {
     const id = event.target.id;
     let newArgs = this.state.args;
-    newArgs[id].value = newValue;
-    const isValid = this.validateArgChange(newValue, event.target.argType);
-    console.log(isValid);
+    const type = this.state.args[id].type;
+    if (type === 'bool' && newValue === 'true') {
+      newArgs[id].value = '1';
+    } else if (type === 'bool' && newValue === 'false') {
+      newArgs[id].value = '0';
+    } else {
+      newArgs[id].value = newValue;
+    }
+    const isValid = this.validateArgChange(newValue, type);
     newArgs[id].valid = isValid;
-    if (!isValid) {
-      newArgs[id].errorMessage = "Invalid argument for type " + event.target.argType;
+    if (newValue === '') {
+      newArgs[id].errorMessage = "Cannot be empty";
+    } else if (!isValid) {
+      newArgs[id].errorMessage = "Invalid argument for type " + type;
+    } else {
+      newArgs[id].errorMessage = "";
     }
     this.setState({ args: newArgs })
   }
 
   validateArgChange(value, type) {
-    console.log(type);
     if (type.match(/^uint/)) {
       return value.match(/^[0-9]+$/);
     } else if (type.match(/^int/)) {
       value.match(/^-?[0-9]+$/);
     } else if (type === 'bool') {
-      return value === '0' || value === '1';
+      return value === '0' || value === '1' || value === 'true' || value === 'false';
     } else if (type === 'address') {
       return this.web3.isAddress(value);
     }
@@ -94,9 +110,14 @@ class ContractFunction extends React.Component {
   }
 
   getArgValues() {
-    return Object.values(this.state.args).map(function(v) {
-      return v.value;
-    });
+    let values = [];
+    for (const key in this.state.args) {
+      if (Object.prototype.hasOwnProperty.call(this.state.args, key)) {
+        values.push(this.state.args[key].value);
+      }
+    }
+
+    return values;
   }
 
   getInputs() {
@@ -108,8 +129,15 @@ class ContractFunction extends React.Component {
               floatingLabelText={value.name + ' [' + value.type + ']'}
               id={'arg_' + i}
               value={thisRef.state.args['arg_' + i].value}
-              argType={value.type}
               onChange={thisRef.handleArgChange}
+              errorText={thisRef.state.args['arg_' + i].errorMessage}
+              inputStyle={{ fontSize: 12, marginTop: 12 }}
+              floatingLabelShrinkStyle={{ fontSize: 12, marginTop: -1 }}
+              floatingLabelFocusStyle={{ fontSize: 12 }}
+              hintStyle={{ fontSize: 12 }}
+              floatingLabelStyle={{ fontSize: 12, marginTop: -7 }}
+              style={{ height: 60 }}
+              errorStyle={{ fontSize: 12 }}
             />
           </Col>
         </Row>;
@@ -120,7 +148,7 @@ class ContractFunction extends React.Component {
     let callDisabled = false;
     const thisRef = this;
     for (const key in this.state.args) {
-      if (!this.state.args[key].valid) {
+      if (!this.state.args[key].valid || this.state.args[key].value === '') {
         callDisabled = true;
       }
     }

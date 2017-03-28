@@ -6,6 +6,7 @@ import '../styles/Search.css';
 import SearchBar from './SearchBar';
 import SearchResult from './SearchResult';
 import PendingSearch from './PendingSearch';
+import SearchError from './SearchError';
 import { Grid, Row, Col } from 'react-flexbox-grid';
 
 class Search extends React.Component {
@@ -35,7 +36,8 @@ class Search extends React.Component {
         const requestPath = `/api/v1/contract?address=${value}`;
         const response = await fetch(requestPath, {method: 'get'});
         if (response.status !== 200) {
-            throw Error("Search request to server failed");
+            this.setState({ searchState: 'error' });
+            return;
         }
         const json = await response.json();
         this.setState({
@@ -74,6 +76,15 @@ class Search extends React.Component {
                           <SearchResult
                             contract={this.state.contract}
                             />
+                        </div>
+                      </Col>
+                    </Row>
+                  }
+                  { (this.state.searchState === 'error') &&
+                    <Row center='xs'>
+                      <Col md={8} xs={10}>
+                        <div className="SearchResults">
+                          <SearchError />
                         </div>
                       </Col>
                     </Row>

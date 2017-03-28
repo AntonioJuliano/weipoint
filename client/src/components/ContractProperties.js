@@ -1,6 +1,7 @@
 import React from "react";
 import Dialog from 'material-ui/Dialog';
 import Divider from 'material-ui/Divider';
+import { Row, Col } from 'react-flexbox-grid';
 import ContractFunction from './ContractFunction';
 
 class ContractProperties extends React.Component {
@@ -23,12 +24,12 @@ class ContractProperties extends React.Component {
         style={{ width: '90%', margin: 'auto' }}
         onClick={ e => thisRef.setActive(i) }
         >
+        <Divider />
         <ContractFunction
           abi={value}
           address={thisRef.props.address}
           active={i === thisRef.state.active }
           />
-        <Divider />
       </div>;
     });
   }
@@ -48,6 +49,12 @@ class ContractProperties extends React.Component {
         style={{ minWidth: '850px', overflow: 'hidden' }}
       >
         <div className='propertiesList'>
+          <Row style={{ marginTop: 10, marginBottom: 25 }} center='xs'>
+            <Col xs={10}>
+              Here you can view properties defined by this contract. Click on a property to expand
+              the parameters it takes, and call it with a given set of parameters.
+            </Col>
+          </Row>
           {this.getConstantFunctions()}
         </div>
       </Dialog>
