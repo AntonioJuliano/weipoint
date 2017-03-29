@@ -19,7 +19,8 @@ class ViewSource extends React.Component {
           paddingRight: 0,
           paddingTop: 0,
           paddingBottom: 0,
-          overflow: 'hidden'
+          overflow: 'hidden',
+          maxHeight: 800
         }}
       >
         <Editor

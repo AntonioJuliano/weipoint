@@ -12,43 +12,41 @@ const Promise = require('bluebird');
  * then return
  *
  * @param  {string}     address address of contract
- * @return {Object}     Object containing contract and blockNumber
+ * @return {Contract}   the contract
  */
 async function lookupContract(address) {
-  const blockNumber = await web3.eth.getBlockNumberAsync();
-
-  const dbPromise = Contract.findOne({
+  const dbResult = await Contract.findOne({
     address: address
   }).exec();
-  const web3Promise = web3.eth.getCodeAsync(address, blockNumber);
-
-  const [dbResult, web3Result] = await Promise.all([dbPromise, web3Promise]);
-
   if (dbResult !== null) {
-    return {
-      contract: dbResult,
-      blockNumber: blockNumber
-    };
-  } else if (web3Result !== null && web3Result !== '0x') {
+    return dbResult;
+  }
+
+  const web3Result = await web3.eth.getCodeAsync(address);
+  if (web3Result !== null && web3Result !== '0x') {
     const newContract = new Contract({
       address: address,
       code: web3Result
     });
-    await newContract.save();
-    logger.info({
-      at: 'contractService#lookupContract',
-      message: 'Saved new contract to db',
-      address: address
+
+    // Don't need to wait for this to finish
+    newContract.save().then(function() {
+      logger.info({
+        at: 'contractService#lookupContract',
+        message: 'Saved new contract to db',
+        address: address
+      });
+    }).catch(function(err) {
+      logger.error({
+        at: 'contractService#lookupContract',
+        message: 'saving contract async failed',
+        error: err.toString()
+      });
     });
-    return {
-      contract: newContract,
-      blockNumber: blockNumber
-    };
+
+    return newContract;
   } else {
-    return {
-      contract: null,
-      blockNumber: blockNumber
-    };
+    return null;
   }
 }
 

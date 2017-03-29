@@ -25,10 +25,7 @@ router.get('/', async(request, response) => {
       message: "Making contract request for address",
       address: address
     });
-    const {
-      contract,
-      blockNumber
-    } = await contractService.lookupContract(address);
+    const contract = await contractService.lookupContract(address);
     const id = contract === null ? null : contract.id;
     logger.debug({
       at: 'contractController/',
@@ -40,8 +37,7 @@ router.get('/', async(request, response) => {
     if (contract === null) {
       return response.status(400).json({
         error: 'Not Found',
-        errorCode: errors.errorCodes.notFound,
-        blockNumber: blockNumber
+        errorCode: errors.errorCodes.notFound
       })
     } else {
       return response.status(200).json({
@@ -52,8 +48,7 @@ router.get('/', async(request, response) => {
         optimized: contract.optimized,
         code: contract.code,
         abi: contract.abi,
-        sourceVersion: contract.sourceVersion,
-        blockNumber: blockNumber
+        sourceVersion: contract.sourceVersion
       });
     }
   } catch (e) {
@@ -95,10 +90,7 @@ router.post('/source', async(request, response) => {
       message: "Making contract request",
       address: request.body.address
     });
-    const {
-      contract,
-      blockNumber
-    } = await contractService.lookupContract(request.body.address);
+    const contract = await contractService.lookupContract(request.body.address);
     const id = contract === null ? null : contract.id;
     logger.debug({
       at: 'contractController#/source',
@@ -141,8 +133,7 @@ router.post('/source', async(request, response) => {
       name: contract.name,
       abi: contract.abi,
       code: contract.code,
-      libraries: contract.libraries,
-      blockNumber: blockNumber
+      libraries: contract.libraries
     });
   } catch (e) {
     errorHandler.handle(e, response);
@@ -177,7 +168,7 @@ router.post('/constantFunction', async (request, response) => {
       address: request.body.address
     });
 
-    const { contract, blockNumber } = await contractService.lookupContract(request.body.address);
+    const contract = await contractService.lookupContract(request.body.address);
     const id = contract === null ? null : contract.id;
     logger.debug({
       at: 'contractController#constantFunction',
@@ -207,8 +198,7 @@ router.post('/constantFunction', async (request, response) => {
 
     response.status(200).json({
       address: contract.address,
-      result: callResult,
-      blockNumber: blockNumber
+      result: callResult
     });
   } catch (e) {
     errorHandler.handle(e, response);

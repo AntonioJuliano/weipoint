@@ -58,7 +58,6 @@ class ContractFunction extends React.Component {
       body: JSON.stringify(request)
     });
     const json = await response.json();
-    console.log(json);
     if (response.status !== 200) {
       this.setState({ requestState: 'error', error: json.message });
       return;
@@ -99,7 +98,7 @@ class ContractFunction extends React.Component {
     if (type.match(/^uint/)) {
       return value.match(/^[0-9]+$/);
     } else if (type.match(/^int/)) {
-      value.match(/^-?[0-9]+$/);
+      return value.match(/^-?[0-9]+$/);
     } else if (type === 'bool') {
       return value === '0' || value === '1' || value === 'true' || value === 'false';
     } else if (type === 'address') {
@@ -124,7 +123,7 @@ class ContractFunction extends React.Component {
     const thisRef = this;
     return this.props.abi.inputs.map(function(value, i) {
       return <Row key={i}>
-          <Col xsOffset={2}>
+          <Col xsOffset={1}>
             <TextField
               floatingLabelText={value.name + ' [' + value.type + ']'}
               id={'arg_' + i}
@@ -136,7 +135,7 @@ class ContractFunction extends React.Component {
               floatingLabelFocusStyle={{ fontSize: 12 }}
               hintStyle={{ fontSize: 12 }}
               floatingLabelStyle={{ fontSize: 12, marginTop: -7 }}
-              style={{ height: 60 }}
+              style={{ height: 60, marginTop: -10 }}
               errorStyle={{ fontSize: 12 }}
             />
           </Col>
@@ -155,12 +154,16 @@ class ContractFunction extends React.Component {
 
     let argumentInputs = <div>
       { this.getInputs() }
-      <RaisedButton
-        label='Call'
-        primary={true}
-        onTouchTap={ e => this.callContractFunction(true) }
-        disabled={callDisabled}
-        />
+      <Row style={{ marginTop: 10, marginBottom: 10 }}>
+        <Col xsOffset={1}>
+          <RaisedButton
+            label='Call'
+            primary={true}
+            onTouchTap={ e => this.callContractFunction(true) }
+            disabled={callDisabled}
+            />
+        </Col>
+      </Row>
     </div>
 
     let resultData;
@@ -187,6 +190,7 @@ class ContractFunction extends React.Component {
     } else {
       resultData = this.state.result;
     }
+
     return (
       <div style={{ fontSize: 12 }}>
         <Row style={{ marginTop: 5, marginBottom: 5 }}>
