@@ -102,6 +102,13 @@ async function verifySource(contract, source, sourceType, compilerVersion) {
   }
 }
 
+/**
+ * Call a constant function on a solidity contract
+ * @param  {Contract} contract    the contract to call
+ * @param  {string} functionName  name of the function to call
+ * @param  {Array} args           list of arguments to pass to the function
+ * @return {Object}               value returned by the function
+ */
 async function callConstantFunction(contract, functionName, args) {
   const Contract = web3.eth.contract(contract.abi);
   const contractInstance = Contract.at(contract.address);
@@ -136,6 +143,16 @@ async function callConstantFunction(contract, functionName, args) {
         errors.errorCodes.invalidArguments
     );
   }
+}
+
+/**
+ * Gets the balance in ether of the account at an address
+ * @param  {string} address address of the account
+ * @return {Number} balance in ether of the account
+ */
+async function getBalance(address) {
+  const balance = await web3.eth.getBalanceAsync(address);
+  return balance.toNumber() / 1000000000000000000.0;
 }
 
 /*
@@ -190,3 +207,4 @@ function _autoLinkLibraries(compiledBytecode, existingBytecode) {
 module.exports.lookupContract = lookupContract;
 module.exports.verifySource = verifySource;
 module.exports.callConstantFunction = callConstantFunction;
+module.exports.getBalance = getBalance;

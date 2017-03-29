@@ -7,6 +7,10 @@ mongoose.Promise = require('bluebird');
 const connectWithRetry = async() => {
   try {
     await mongoose.connect(mongoUrl);
+    logger.info({
+      at: 'db#connectWithRetry',
+      message: 'Connected to mongo'
+    });
   } catch (e) {
     logger.error({
       at: 'db#connectWithRetry',
@@ -15,10 +19,6 @@ const connectWithRetry = async() => {
     });
     setTimeout(connectWithRetry, 1000);
   }
-  logger.info({
-    at: 'db#connectWithRetry',
-    message: 'Connected to mongo'
-  });
 };
 connectWithRetry();
 

@@ -18,7 +18,8 @@ class SearchResult extends React.Component {
       viewSourceOpen: false,
       callFunctionOpen: false,
       contract: this.props.contract,
-      uploadState: 'initialized'
+      uploadState: 'initialized',
+      price: null
     };
     this.copyBytecodeClicked = this.copyBytecodeClicked.bind(this);
     this.uploadSourceClicked = this.uploadSourceClicked.bind(this);
@@ -28,6 +29,9 @@ class SearchResult extends React.Component {
     this.viewSourceClosed = this.viewSourceClosed.bind(this);
     this.callFunctionClosed = this.callFunctionClosed.bind(this);
     this.uploadSource = this.uploadSource.bind(this);
+    this.getPrice = this.getPrice.bind(this);
+
+    this.getPrice();
   }
 
   copyBytecodeClicked(e) {
@@ -66,38 +70,49 @@ class SearchResult extends React.Component {
     this.setState({ contract: this.props.contract });
   }
 
-  uploadSource(code, sourceType, compilerVersion, optimized) {
-    const request = {
-      address: this.state.contract.address,
-      source: code,
-      sourceType: sourceType,
-      compilerVersion: compilerVersion,
-      optimized: optimized
-    };
-    const thisRef = this;
+  async getPrice() {
+    const requestPath = `/api/v1/data/price`;
+    const response = await fetch(requestPath);
+    if (response.status === 200) {
+      const json = await response.json();
+      this.setState({ price: json.usd });
+    } else {
+      console.error("Fetching price failed");
+    }
+  }
 
-    const requestPath = `/api/v1/contract/source`;
-    fetch(requestPath, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(request)
-    }).then(function(response) {
+  async uploadSource(code, sourceType, compilerVersion, optimized) {
+    try {
+      const request = {
+        address: this.state.contract.address,
+        source: code,
+        sourceType: sourceType,
+        compilerVersion: compilerVersion,
+        optimized: optimized
+      };
+
+      const requestPath = `/api/v1/contract/source`;
+      const response = await fetch(requestPath, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request)
+      });
+
       if (response.status !== 200) {
           throw Error("Search request to server failed");
       }
-      return response.json();
-    }).then(function(contract) {
-      thisRef.setState({
+      const json = await response.json();
+      this.setState({
         uploadState: 'completed',
-        contract: contract
+        contract: json.contract
       });
-    }).catch(function(error) {
-      thisRef.setState({ uploadState: 'error' });
+    } catch (error) {
+      this.setState({ uploadState: 'error' });
       console.error(error);
-    });
+    }
   }
 
   render() {
@@ -117,12 +132,24 @@ class SearchResult extends React.Component {
         label="View Contract Properies"
         onClick={this.callFunctionClicked}/>;
 
+    let balanceString = this.state.contract.balance + " \u039E";
+    if (this.state.price != null) {
+      const usdAmount =
+        (Math.round(this.state.contract.balance * this.state.price * 100) / 100).toFixed(2);
+      balanceString += '  ($' + usdAmount + ')';
+    }
+
     return (
       <div className="SearchResultContainer">
         <Card>
           <CardTitle
             title={this.state.contract.name || "Contract"}
-            subtitle={this.state.contract.address}
+            subtitle={<div>
+              {this.state.contract.address}
+              <div style={{ marginTop: 5 }}>
+                {balanceString}
+              </div>
+            </div>}
           />
           <CardActions>
             {uploadSourceButton}
