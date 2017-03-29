@@ -25,7 +25,11 @@ router.get('/', async(request, response) => {
       message: "Making contract request for address",
       address: address
     });
-    const contract = await contractService.lookupContract(address);
+    const lookupPromise = contractService.lookupContract(address);
+    const balancePromise = contractService.getBalance(address);
+    const [contract, balance] = await Promise.all(
+      [lookupPromise, balancePromise]
+    );
     const id = contract === null ? null : contract.id;
     logger.debug({
       at: 'contractController/',
@@ -48,7 +52,8 @@ router.get('/', async(request, response) => {
         optimized: contract.optimized,
         code: contract.code,
         abi: contract.abi,
-        sourceVersion: contract.sourceVersion
+        sourceVersion: contract.sourceVersion,
+        balance: balance
       });
     }
   } catch (e) {

@@ -13,7 +13,9 @@
     "prod_build": "cd client && npm run build && rm -rf node_modules scripts src && cd ..",
     "lint": "eslint --ext .js --ignore-path .gitignore server/**"
   },
-  "pre-commit": [ "lint" ],
+  "pre-commit": [
+    "lint"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/AntonioJuliano/weipoint.git"
@@ -30,6 +32,7 @@
   "dependencies": {
     "bluebird": "latest",
     "body-parser": "^1.15.2",
+    "coinbase": "^2.0.6",
     "dotenv": "^4.0.0",
     "express": "^4.14.0",
     "express-validator": "^3.1.2",
