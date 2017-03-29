@@ -6,6 +6,7 @@ import '../styles/Search.css';
 import SearchBar from './SearchBar';
 import SearchResult from './SearchResult';
 import PendingSearch from './PendingSearch';
+import SearchError from './SearchError';
 import { Grid, Row, Col } from 'react-flexbox-grid';
 
 class Search extends React.Component {
@@ -26,29 +27,22 @@ class Search extends React.Component {
       this.setState({ value: value });
   }
 
-  handleSearchBarClick(e) {
+  async handleSearchBarClick(e) {
       const value = this.state.value;
-
-      const thisRef = this;
 
       if (this.props.web3.isAddress(value)) {
         this.setState({ searchState: 'searching' });
 
         const requestPath = `/api/v1/contract?address=${value}`;
-        fetch(requestPath, {method: 'get'}).then(function(response) {
-                if (response.status !== 200) {
-                    throw Error("Search request to server failed");
-                }
-                return response.json();
-            }
-        ).then(function(json) {
-                thisRef.setState({
-                    contract: json,
-                    searchState: 'completed'
-                })
-            }
-        ).catch(function(error) {
-            console.error(error);
+        const response = await fetch(requestPath, {method: 'get'});
+        if (response.status !== 200) {
+            this.setState({ searchState: 'error' });
+            return;
+        }
+        const json = await response.json();
+        this.setState({
+            contract: json,
+            searchState: 'completed'
         });
       }
   }
@@ -82,6 +76,15 @@ class Search extends React.Component {
                           <SearchResult
                             contract={this.state.contract}
                             />
+                        </div>
+                      </Col>
+                    </Row>
+                  }
+                  { (this.state.searchState === 'error') &&
+                    <Row center='xs'>
+                      <Col md={8} xs={10}>
+                        <div className="SearchResults">
+                          <SearchError />
                         </div>
                       </Col>
                     </Row>

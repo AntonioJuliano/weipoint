@@ -10,24 +10,25 @@ class Editor extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      dimensions: {
-        width: this.props.maxHeight,
-        height: this.props.maxHeight
-      }
+      width: this.props.maxHeight,
+      height: this.props.maxHeight,
+      set: 0
     }
   }
   render() {
-    const width = this.state.dimensions.width;
-    const height = this.state.dimensions.height;
+    const width = this.state.width;
+    const height = this.state.height;
 
     return (
       <Measure
         onMeasure={(dimensions) => {
-          this.setState({dimensions});
+          this.setState(
+            {width: dimensions.width, height: dimensions.height, set: this.state.set + 1}
+          );
         }}
       >
         <div style={{ width:'100%', height: this.props.maxHeight, maxHeight: 'inherit' }}>
-          <AceEditor
+          {this.state.set >= 2 && <AceEditor
             width={width + 'px'}
             height={height + 'px'}
             mode="javascript"
@@ -41,7 +42,7 @@ class Editor extends React.Component {
               hScrollBarAlwaysVisible: false,
               vScrollBarAlwaysVisible: false
             }}
-          />
+          />}
         </div>
       </Measure>
     );

@@ -32,6 +32,9 @@ app.use(expressValidator({
   customValidators: {
     isAddress: function(value) {
       return web3.isAddress(value);
+    },
+    isArray: function(value) {
+      return Array.isArray(value);
     }
   }
 }));

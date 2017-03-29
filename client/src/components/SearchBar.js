@@ -9,12 +9,14 @@ import { Row, Col } from 'react-flexbox-grid';
 
 class SearchBar extends React.Component {
   render() {
+    const barSize = this.props.reduced ? 6 : 7;
+
     return (
       <div className={ this.props.reduced ? 'SearchBarContainerReduced' : 'SearchBarContainer' }>
         <div className="SearchTextField">
           <Row
             center={this.props.reduced ? null : 'xs'}>
-            <Col xs={this.props.reduced ? 6 : 7} md={this.props.reduced ? 5 : 6}>
+            <Col xs={barSize} md={barSize - 1} lg={barSize - 2}>
               <Paper zDepth={2}>
                 <TextField
                   id='searchTextField'

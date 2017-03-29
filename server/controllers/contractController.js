@@ -25,10 +25,7 @@ router.get('/', async(request, response) => {
       message: "Making contract request for address",
       address: address
     });
-    const {
-      contract,
-      blockNumber
-    } = await contractService.lookupContract(address);
+    const contract = await contractService.lookupContract(address);
     const id = contract === null ? null : contract.id;
     logger.debug({
       at: 'contractController/',
@@ -40,8 +37,7 @@ router.get('/', async(request, response) => {
     if (contract === null) {
       return response.status(400).json({
         error: 'Not Found',
-        errorCode: errors.errorCodes.notFound,
-        blockNumber: blockNumber
+        errorCode: errors.errorCodes.notFound
       })
     } else {
       return response.status(200).json({
@@ -51,8 +47,8 @@ router.get('/', async(request, response) => {
         sourceType: contract.sourceType,
         optimized: contract.optimized,
         code: contract.code,
-        sourceVersion: contract.sourceVersion,
-        blockNumber: blockNumber
+        abi: contract.abi,
+        sourceVersion: contract.sourceVersion
       });
     }
   } catch (e) {
@@ -94,10 +90,7 @@ router.post('/source', async(request, response) => {
       message: "Making contract request",
       address: request.body.address
     });
-    const {
-      contract,
-      blockNumber
-    } = await contractService.lookupContract(request.body.address);
+    const contract = await contractService.lookupContract(request.body.address);
     const id = contract === null ? null : contract.id;
     logger.debug({
       at: 'contractController#/source',
@@ -138,9 +131,74 @@ router.post('/source', async(request, response) => {
       sourceVersion: contract.sourceVersion,
       optimized: contract.optimized,
       name: contract.name,
+      abi: contract.abi,
       code: contract.code,
-      libraries: contract.libraries,
-      blockNumber: blockNumber
+      libraries: contract.libraries
+    });
+  } catch (e) {
+    errorHandler.handle(e, response);
+  }
+});
+
+router.post('/constantFunction', async (request, response) => {
+  try {
+    request.check({
+      'address': {
+        in: 'body',
+        isAddress: true,
+        errorMessage: 'Invalid Address'
+      },
+      'functionName': {
+        in: 'body',
+        notEmpty: true
+      },
+      'arguments': {
+        in: 'body',
+        isArray: true,
+        errorMessage: 'Invalid Arguments'
+      }
+    });
+    const validationResult = await request.getValidationResult();
+    if (!validationResult.isEmpty()) {
+      throw new errors.RequestError(validationResult.array());
+    }
+    logger.debug({
+      at: 'contractController#constantFunction',
+      message: "Making contract request",
+      address: request.body.address
+    });
+
+    const contract = await contractService.lookupContract(request.body.address);
+    const id = contract === null ? null : contract.id;
+    logger.debug({
+      at: 'contractController#constantFunction',
+      message: "Got contract response",
+      address: request.body.address,
+      contract_id: id
+    });
+
+    if (contract === null) {
+      throw new errors.ClientError(
+        'Contract not found at address',
+        errors.errorCodes.notFound
+      );
+    }
+    if (contract.abi === null || contract.abi === undefined) {
+      throw new errors.ClientError(
+        'Contract does not have source code',
+        errors.errorCodes.sourceNotAvailable
+      );
+    }
+
+    const callResult = await contractService.callConstantFunction(
+      contract,
+      request.body.functionName,
+      request.body.arguments
+    );
+
+    response.status(200).json({
+      address: contract.address,
+      result: callResult
     });
   } catch (e) {
     errorHandler.handle(e, response);

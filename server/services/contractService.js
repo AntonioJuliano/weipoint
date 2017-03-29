@@ -3,6 +3,7 @@ const web3 = require('../helpers/web3');
 const optimusService = require('./optimusService');
 const errors = require('../helpers/errors');
 const logger = require('../helpers/logger');
+const Promise = require('bluebird');
 
 /**
  * Lookup a contract by address on the blockchain. Will query both db
@@ -11,43 +12,41 @@ const logger = require('../helpers/logger');
  * then return
  *
  * @param  {string}     address address of contract
- * @return {Object}     Object containing contract and blockNumber
+ * @return {Contract}   the contract
  */
 async function lookupContract(address) {
-  const blockNumber = await web3.eth.getBlockNumberAsync();
-
-  const dbPromise = Contract.findOne({
+  const dbResult = await Contract.findOne({
     address: address
   }).exec();
-  const web3Promise = web3.eth.getCodeAsync(address, blockNumber);
-
-  const [dbResult, web3Result] = await Promise.all([dbPromise, web3Promise]);
-
   if (dbResult !== null) {
-    return {
-      contract: dbResult,
-      blockNumber: blockNumber
-    };
-  } else if (web3Result !== null && web3Result !== '0x') {
+    return dbResult;
+  }
+
+  const web3Result = await web3.eth.getCodeAsync(address);
+  if (web3Result !== null && web3Result !== '0x') {
     const newContract = new Contract({
       address: address,
       code: web3Result
     });
-    await newContract.save();
-    logger.info({
-      at: 'contractService#lookupContract',
-      message: 'Saved new contract to db',
-      address: address
+
+    // Don't need to wait for this to finish
+    newContract.save().then(function() {
+      logger.info({
+        at: 'contractService#lookupContract',
+        message: 'Saved new contract to db',
+        address: address
+      });
+    }).catch(function(err) {
+      logger.error({
+        at: 'contractService#lookupContract',
+        message: 'saving contract async failed',
+        error: err.toString()
+      });
     });
-    return {
-      contract: newContract,
-      blockNumber: blockNumber
-    };
+
+    return newContract;
   } else {
-    return {
-      contract: null,
-      blockNumber: blockNumber
-    };
+    return null;
   }
 }
 
@@ -103,6 +102,42 @@ async function verifySource(contract, source, sourceType, compilerVersion) {
   }
 }
 
+async function callConstantFunction(contract, functionName, args) {
+  const Contract = web3.eth.contract(contract.abi);
+  const contractInstance = Contract.at(contract.address);
+  Promise.promisifyAll(contractInstance);
+
+  logger.debug({
+    at: 'contractService#callConstantFunction',
+    message: 'calling constant contract function',
+    address: contract.address,
+    functionName: functionName,
+    args: args
+  });
+
+  const func = contractInstance[functionName + 'Async'];
+  if (typeof func === 'function') {
+    try {
+      return await func.apply(null, args);
+    } catch (e) {
+      logger.error({
+        at: 'contractService#callConstantFunction',
+        message: 'calling contract threw error',
+        err: e.toString()
+      });
+      throw new errors.ClientError(
+        e.toString(),
+        errors.errorCodes.contractFunctionThrewError
+      );
+    }
+  } else {
+    throw new errors.ClientError(
+        'Invalid function name',
+        errors.errorCodes.invalidArguments
+    );
+  }
+}
+
 /*
  * Some solidity contract bytecodes include a swarm hash at the end which seems
  * to not be deterministic. For now allow it to be ignored
@@ -154,3 +189,4 @@ function _autoLinkLibraries(compiledBytecode, existingBytecode) {
 
 module.exports.lookupContract = lookupContract;
 module.exports.verifySource = verifySource;
+module.exports.callConstantFunction = callConstantFunction;

@@ -46,20 +46,19 @@ class UploadSource extends React.Component {
         this.getStepContent = this.getStepContent.bind(this);
     }
 
-    loadCompilerVersions() {
+    async loadCompilerVersions() {
       const requestPath = '/api/v1/contract/compilerVersions';
       const thisRef = this;
-      fetch(requestPath, { method: 'get'})
-        .then(function(response) {
-          return response.json();
-        }).then(function(json) {
-          const compilerVersions = json.versions;
-          let menuItems = [];
-          for (let i = 0; i < compilerVersions.length; i++ ) {
-            menuItems.push(<MenuItem value={i} key={compilerVersions[i]} primaryText={compilerVersions[i]} />);
-          }
-          thisRef.setState({ compilerVersions: menuItems });
-        });
+      const response = await fetch(requestPath, { method: 'get'});
+      const json = await response.json();
+      const compilerVersions = json.versions;
+      let menuItems = [];
+      for (let i = 0; i < compilerVersions.length; i++ ) {
+        menuItems.push(
+          <MenuItem value={i} key={compilerVersions[i]} primaryText={compilerVersions[i]} />
+        );
+      }
+      thisRef.setState({ compilerVersions: menuItems });
     }
 
     handleChange(e) {
