@@ -1,3 +1,5 @@
+
+/*global web3:true*/
 import React, { Component } from 'react';
 import Search from './components/Search';
 import './styles/App.css';
@@ -13,16 +15,19 @@ injectTapEventPlugin();
 class App extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      web3: new Web3()
-    };
+    if (typeof web3 !== 'undefined') {
+      console.log('found');
+      web3 = new Web3(web3.currentProvider);
+    } else {
+      web3 = new Web3();
+    }
   }
 
   render() {
     return (
       <div className='App'>
         <MuiThemeProvider muiTheme={getMuiTheme(lightBaseTheme)}>
-          <Search web3={this.state.web3}/>
+          <Search web3={web3}/>
         </MuiThemeProvider>
       </div>
     );

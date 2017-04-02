@@ -1,12 +1,12 @@
 version: '3'
 services:
   parity:
-    image: "ethcore/parity:stable-release"
+    image: "ethcore/parity:v1.6.5"
     ports:
       - "8545:8545"
     volumes:
       - "~/.parity:/root/.parity"
-    entrypoint: /parity/parity --warp --jsonrpc-interface '0.0.0.0' --jsonrpc-hosts all -d /root/.parity --no-ui --no-ipc --no-dapps 
+    entrypoint: /parity/parity --warp --jsonrpc-interface '0.0.0.0' --jsonrpc-hosts all -d /root/.parity --no-ui --no-ipc --no-dapps
   mongo:
     image: "mongo:3.4.1"
     volumes:
