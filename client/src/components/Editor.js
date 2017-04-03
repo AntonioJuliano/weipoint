@@ -10,8 +10,8 @@ class Editor extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      width: this.props.maxHeight,
-      height: this.props.maxHeight,
+      width: 0,
+      height: 0,
       set: 0
     }
   }
@@ -27,8 +27,8 @@ class Editor extends React.Component {
           );
         }}
       >
-        <div style={{ width:'100%', height: this.props.maxHeight, maxHeight: 'inherit' }}>
-          {this.state.set >= 2 && <AceEditor
+        <div style={{ width:'100%', height: '100%', maxHeight: 'inherit' }}>
+          {this.state.set >= 1 && <AceEditor
             width={width + 'px'}
             height={height + 'px'}
             mode="javascript"

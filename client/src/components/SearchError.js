@@ -1,6 +1,5 @@
 import React from "react";
 import {Card} from 'material-ui/Card';
-import '../styles/SearchResult.css';
 import {Row, Col} from 'react-flexbox-grid';
 import ErrorOutlineIcon from 'react-material-icons/icons/alert/error-outline';
 import { red500 } from 'material-ui/styles/colors';
@@ -17,7 +16,7 @@ const style = {
 class SearchError extends React.Component {
   render() {
     return (
-      <div className="SearchResultContainer">
+      <div className="SearchResultContainer" style={{ marginTop: 25, textAlign: 'left' }}>
         <Card>
           <Row center='xs'>
             <Col xs={2}>

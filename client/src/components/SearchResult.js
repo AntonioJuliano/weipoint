@@ -1,13 +1,22 @@
 import React from "react";
-import {Card, CardActions, CardTitle} from 'material-ui/Card';
-import FlatButton from 'material-ui/FlatButton';
-import '../styles/SearchResult.css';
+import {Card, CardTitle} from 'material-ui/Card';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import UploadSource from './UploadSource';
 import ViewSource from './ViewSource';
 import ContractProperties from './ContractProperties';
+import {BottomNavigation, BottomNavigationItem} from 'material-ui/BottomNavigation';
+import InfoIcon from 'react-material-icons/icons/action/info';
+import BookIcon from 'react-material-icons/icons/action/book';
+import ChromeReaderModeIcon from 'react-material-icons/icons/action/chrome-reader-mode';
+import AddCircleIcon from 'react-material-icons/icons/content/add-circle';
+import FlatButton from 'material-ui/FlatButton';
 
 const initialBytecodeButtonText = "Copy Bytecode";
+
+const OVERVIEW = 'OVERVIEW';
+const VIEW_SOURCE = 'VIEW_SOURCE';
+const UPLOAD_SOURCE = 'UPLOAD_SOURCE';
+const VIEW_PROPERTIES = 'VIEW_PROPERTIES';
 
 class SearchResult extends React.Component {
   constructor(props) {
@@ -22,14 +31,12 @@ class SearchResult extends React.Component {
       price: null
     };
     this.copyBytecodeClicked = this.copyBytecodeClicked.bind(this);
-    this.uploadSourceClicked = this.uploadSourceClicked.bind(this);
-    this.viewSourceClicked = this.viewSourceClicked.bind(this);
-    this.callFunctionClicked = this.callFunctionClicked.bind(this);
-    this.uploadSourceClosed = this.uploadSourceClosed.bind(this);
-    this.viewSourceClosed = this.viewSourceClosed.bind(this);
-    this.callFunctionClosed = this.callFunctionClosed.bind(this);
     this.uploadSource = this.uploadSource.bind(this);
     this.getPrice = this.getPrice.bind(this);
+    this.changeTab = this.changeTab.bind(this);
+    this.getCurrentTab = this.getCurrentTab.bind(this);
+    this.getNavigationBar = this.getNavigationBar.bind(this);
+    this.getBalanceString = this.getBalanceString.bind(this);
 
     this.getPrice();
   }
@@ -40,30 +47,6 @@ class SearchResult extends React.Component {
     setTimeout(function() {
       thisRef.setState({ bytecodeButtonText: initialBytecodeButtonText });
     }, 1000);
-  }
-
-  uploadSourceClicked(e) {
-    this.setState({ uploadSourceOpen: true });
-  }
-
-  uploadSourceClosed(e) {
-    this.setState({ uploadSourceOpen: false });
-  }
-
-  viewSourceClicked(e) {
-    this.setState({ viewSourceOpen: true });
-  }
-
-  viewSourceClosed(e) {
-    this.setState({ viewSourceOpen: false });
-  }
-
-  callFunctionClicked(e) {
-    this.setState({ callFunctionOpen: true });
-  }
-
-  callFunctionClosed(e) {
-    this.setState({ callFunctionOpen: false });
   }
 
   componentWillReceiveProps(nextProps) {
@@ -115,69 +98,116 @@ class SearchResult extends React.Component {
     }
   }
 
-  render() {
-    const showUploadSource = this.state.contract.source === undefined;
-    const uploadSourceButton = showUploadSource ?
-      <FlatButton
-        label="Upload Source Code"
-        onClick={this.uploadSourceClicked}/> : null;
+  changeTab(name, index) {
+    this.setState({ currentTabIndex: index, currentTabName: name })
+  }
 
-    const viewSourceButton = showUploadSource ? null :
-      <FlatButton
-        label="View Source Code"
-        onClick={this.viewSourceClicked}/>;
+  getCurrentTab() {
+    const overviewTab = <div>
+        {"Overview!"}
+        <CopyToClipboard text={this.state.contract.code}>
+          <FlatButton
+            label={this.state.bytecodeButtonText}
+            onClick={this.copyBytecodeClicked}/>
+        </CopyToClipboard>
+      </div>;
+    const uploadSourceTab = <UploadSource
+        uploadSource={this.uploadSource}
+        uploadState={this.state.uploadState}
+      />;
+    const viewSourceTab = <ViewSource
+        source={this.state.contract.source}
+      />;
+    const contractPropertiesTab = <ContractProperties
+        abi={this.state.contract.abi}
+        address={this.state.contract.address}
+      />;
 
-    const readPropertiesButton = showUploadSource ? null :
-      <FlatButton
-        label="View Contract Properies"
-        onClick={this.callFunctionClicked}/>;
+    switch(this.state.currentTabName) {
+      case OVERVIEW:
+        return overviewTab;
+      case UPLOAD_SOURCE:
+        return uploadSourceTab;
+      case VIEW_SOURCE:
+        return viewSourceTab;
+      case VIEW_PROPERTIES:
+        return contractPropertiesTab;
+      default:
+        return null;
+    }
+  }
 
+  getNavigationBar() {
+    const overview = {
+      label: "Overview",
+      icon: <InfoIcon />,
+      name: OVERVIEW
+    };
+    const uploadSource = {
+      label: "Upload Source",
+      icon: <AddCircleIcon />,
+      name: UPLOAD_SOURCE
+    };
+    const viewSource = {
+      label: "Source Code",
+      icon: <BookIcon />,
+      name: VIEW_SOURCE
+    };
+    const viewProperties = {
+      label: "Read Contract",
+      icon: <ChromeReaderModeIcon />,
+      name: VIEW_PROPERTIES
+    };
+
+    let itemsToShow;
+    if (this.state.contract.source === undefined) {
+      itemsToShow = [overview, uploadSource];
+    } else {
+      itemsToShow = [overview, viewSource, viewProperties];
+    }
+
+    const thisRef = this;
+    const elementsToShow = itemsToShow.map(function(tabInfo, index) {
+      return <BottomNavigationItem
+          label={tabInfo.label}
+          icon={tabInfo.icon}
+          onTouchTap={() => thisRef.changeTab(tabInfo.name, index)}
+          key={index}
+        />;
+    });
+
+    return <BottomNavigation selectedIndex={this.state.currentTabIndex}>
+      {elementsToShow}
+    </BottomNavigation>;
+  }
+
+  getBalanceString() {
     let balanceString = this.state.contract.balance + " \u039E";
     if (this.state.price != null) {
       const usdAmount =
         (Math.round(this.state.contract.balance * this.state.price * 100) / 100).toFixed(2);
       balanceString += '  ($' + usdAmount + ')';
     }
+    return balanceString;
+  }
 
+  render() {
     return (
-      <div className="SearchResultContainer">
+      <div className="SearchResultContainer" style={{ marginTop: 25, textAlign: 'left' }}>
         <Card>
           <CardTitle
             title={this.state.contract.name || "Contract"}
             subtitle={<div>
               {this.state.contract.address}
               <div style={{ marginTop: 5 }}>
-                {balanceString}
+                {this.getBalanceString()}
               </div>
             </div>}
           />
-          <CardActions>
-            {uploadSourceButton}
-            {viewSourceButton}
-            {readPropertiesButton}
-            <CopyToClipboard text={this.state.contract.code}>
-              <FlatButton
-                label={this.state.bytecodeButtonText}
-                onClick={this.copyBytecodeClicked}/>
-            </CopyToClipboard>
-          </CardActions>
-          <UploadSource
-            open={this.state.uploadSourceOpen}
-            close={this.uploadSourceClosed}
-            uploadSource={this.uploadSource}
-            uploadState={this.state.uploadState}
-          />
-          <ViewSource
-            open={this.state.viewSourceOpen}
-            close={this.viewSourceClosed}
-            source={this.state.contract.source}
-          />
-          <ContractProperties
-            abi={this.state.contract.abi}
-            open={this.state.callFunctionOpen}
-            close={this.callFunctionClosed}
-            address={this.state.contract.address}
-          />
+        <div style={{ height: 600 }}>
+          {this.getCurrentTab()}
+        </div>
+        {this.getNavigationBar()}
         </Card>
       </div>
     );

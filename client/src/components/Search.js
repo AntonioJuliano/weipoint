@@ -2,7 +2,6 @@
  * Created by antonio on 1/2/17.
  */
 import * as React from "react";
-import '../styles/Search.css';
 import SearchBar from './SearchBar';
 import SearchResult from './SearchResult';
 import PendingSearch from './PendingSearch';
@@ -49,7 +48,7 @@ class Search extends React.Component {
 
   render() {
       return (
-          <div className="search">
+          <div className="search" style={{ minWidth: 800 }}>
               <Grid fluid={true}>
                   <Row center='xs'>
                       <Col xs={10}>

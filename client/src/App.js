@@ -2,7 +2,6 @@
 /*global web3:true*/
 import React, { Component } from 'react';
 import Search from './components/Search';
-import './styles/App.css';
 import Web3 from 'web3';
 import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
@@ -25,7 +24,19 @@ class App extends Component {
 
   render() {
     return (
-      <div className='App'>
+      <div className='App'
+        style={{
+          backgroundColor: '#efefef',
+          minHeight: '100%',
+          minWidth: '100%',
+          width: '100%',
+          height: '100%',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          zIndex: -1,
+          overflow: 'auto'
+        }}>
         <MuiThemeProvider muiTheme={getMuiTheme(lightBaseTheme)}>
           <Search web3={web3}/>
         </MuiThemeProvider>

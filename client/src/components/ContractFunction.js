@@ -27,6 +27,7 @@ class ContractFunction extends React.Component {
       args: args,
       noArgs: noArgs,
       error: null,
+      focused: false
     };
     this.getInputs = this.getInputs.bind(this);
     this.handleArgChange = this.handleArgChange.bind(this);
@@ -191,16 +192,30 @@ class ContractFunction extends React.Component {
       resultData = this.state.result;
     }
 
+    const linkable = !this.state.noArgs && !this.props.active;
+    let divStyle = {
+      fontSize: 12
+    };
+    if (linkable) {
+      divStyle.cursor = 'pointer';
+    }
+
+    const nameStyle = this.state.focused && linkable ? { color: '#1c6ced' } : {};
+
     return (
-      <div style={{ fontSize: 12 }}>
+      <div
+        style={divStyle}
+        onMouseEnter={ e => this.setState({ focused: true })}
+        onMouseLeave={ e => this.setState({ focused: false })}
+        >
         <Row style={{ marginTop: 5, marginBottom: 5 }}>
-          <Col xsOffset={1} xs={3}>
+          <Col xsOffset={1} xs={3} style={nameStyle}>
             { this.props.abi.name }
           </Col>
           <Col xs={1}>
             <ArrowForwardIcon style={{ width: 12, height: 12 }}/>
           </Col>
-          <Col xs={6}>
+          <Col xs={6} style={{ overflowWrap: 'break-word' }}>
             { resultData }
           </Col>
         </Row>

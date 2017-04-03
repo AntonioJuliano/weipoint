@@ -3,7 +3,6 @@
  */
 import React from "react";
 import FlatButton from 'material-ui/FlatButton';
-import Dialog from 'material-ui/Dialog';
 import { Grid, Row, Col } from 'react-flexbox-grid';
 import Paper from 'material-ui/Paper';
 import {
@@ -308,15 +307,9 @@ class UploadSource extends React.Component {
       }
       return (
         <div>
-          <Dialog
-            title="Upload Contract Source"
-            actions={actions}
-            modal={false}
-            open={this.props.open}
-            onRequestClose={this.props.close}
-          >
-            {current}
-          </Dialog>
+          {"Upload Contract Source"}
+          {current}
+          {actions}
         </div>
       );
     }
