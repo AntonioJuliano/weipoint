@@ -136,13 +136,12 @@ class UploadSource extends React.Component {
               <p style={{ fontSize: '75%'}}>
                 Note: currently only Solidity source code is supported
               </p>
-              <Paper zDepth={2}>
+              <Paper zDepth={2} style={{ height: 420 }}>
                 <Editor
                   readOnly={false}
-                  name='viewSource'
+                  name='uploadSource'
                   value={this.state.code}
                   onChange={this.handleCodeChanged}
-                  maxHeight={400}
                 />
               </Paper>
             </div>;
@@ -205,12 +204,14 @@ class UploadSource extends React.Component {
           disabled={backDisabled}
           onTouchTap={this.handlePrev}
           style={{ marginRight: 10 }}
+          key={0}
         />,
         <RaisedButton
           label={this.state.stepIndex === 1 ? "Submit" : "Next"}
           primary={true}
           disabled={submitDisabled}
           onTouchTap={this.state.stepIndex === 1 ? this.uploadSource : this.handleNext}
+          key={1}
         />
       ];
 
@@ -307,9 +308,12 @@ class UploadSource extends React.Component {
       }
       return (
         <div>
-          {"Upload Contract Source"}
           {current}
-          {actions}
+          <Row style={{ marginTop: 10 }} center='xs'>
+            <Col xs={4}>
+              {actions}
+            </Col>
+          </Row>
         </div>
       );
     }

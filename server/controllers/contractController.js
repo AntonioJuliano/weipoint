@@ -84,6 +84,9 @@ router.post('/source', async(request, response) => {
         matches: {
           options: 'solidity|serpent'
         }
+      },
+      'optimized': { in: 'body',
+        notEmpty: true
       }
     });
     const validationResult = await request.getValidationResult();
@@ -119,7 +122,8 @@ router.post('/source', async(request, response) => {
       contract,
       request.body.source,
       request.body.sourceType,
-      request.body.compilerVersion
+      request.body.compilerVersion,
+      request.body.optimized
     );
 
     contract.source = request.body.source;

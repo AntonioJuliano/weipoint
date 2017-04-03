@@ -58,12 +58,13 @@ async function lookupContract(address) {
  * @param  {string} sourceType      language of the source code
  * @param  {string} compilerVersion version of compiler used to compile
  *                                  source code
+ * @param  {bool} optimized         Is the source code optimized?
  * @return {Object}                 Object containing contract name,
  *                                   libraries used, and abi
  */
-async function verifySource(contract, source, sourceType, compilerVersion) {
+async function verifySource(contract, source, sourceType, compilerVersion, optimized) {
   if (sourceType === 'solidity') {
-    const contracts = await optimusService.compileSolidity(source, compilerVersion, true);
+    const contracts = await optimusService.compileSolidity(source, compilerVersion, optimized);
     for (const contractName in contracts) {
       const compiledContract = contracts[contractName];
       const compiledRuntimeBytecode = compiledContract.runtimeBytecode;

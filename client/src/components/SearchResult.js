@@ -10,6 +10,7 @@ import BookIcon from 'react-material-icons/icons/action/book';
 import ChromeReaderModeIcon from 'react-material-icons/icons/action/chrome-reader-mode';
 import AddCircleIcon from 'react-material-icons/icons/content/add-circle';
 import FlatButton from 'material-ui/FlatButton';
+import update from 'immutability-helper';
 
 const initialBytecodeButtonText = "Copy Bytecode";
 
@@ -84,13 +85,23 @@ class SearchResult extends React.Component {
         body: JSON.stringify(request)
       });
 
-      if (response.status !== 200) {
-          throw Error("Search request to server failed");
-      }
       const json = await response.json();
+      if (response.status !== 200) {
+        throw Error("Search request to server failed");
+      }
+
+      const updatedContract = update(this.state.contract, {
+        source: { $set: json.source },
+        sourceType: { $set: json.sourceType },
+        sourceVersion: { $set: json.sourceVersion },
+        optimized: { $set: json.optimized },
+        name: { $set: json.name },
+        abi: { $set: json.abi },
+        libraries: { $set: json.libraries },
+      });
       this.setState({
         uploadState: 'completed',
-        contract: json.contract
+        contract: updatedContract
       });
     } catch (error) {
       this.setState({ uploadState: 'error' });

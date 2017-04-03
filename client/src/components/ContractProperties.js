@@ -14,6 +14,7 @@ class ContractProperties extends React.Component {
   }
 
   getConstantFunctions() {
+    console.log(this.props.abi);
     const thisRef = this;
     return this.props.abi.filter(function(value) {
       return value.constant;
@@ -40,6 +41,12 @@ class ContractProperties extends React.Component {
   }
 
   render() {
+    const constantFunctions = this.getConstantFunctions();
+    const anyConstantFunctions = constantFunctions.length !== 0;
+    const noFunctionsMessage = <div
+      style={{ textAlign: 'center', marginTop: 150, fontStyle: 'italic' }}>
+      {'This contract has no properties'}
+    </div>;
     return (
       <div className='propertiesList'
         style={{ height: '100%', maxHeight: '100%', overflowY: 'auto', overflowX: 'hidden' }}>
@@ -49,7 +56,7 @@ class ContractProperties extends React.Component {
             the parameters it takes, and call it with a given set of parameters.
           </Col>
         </Row>
-        {this.getConstantFunctions()}
+        {anyConstantFunctions ? constantFunctions : noFunctionsMessage}
       </div>
     );
   }

@@ -15,7 +15,6 @@ class App extends Component {
   constructor(props) {
     super(props);
     if (typeof web3 !== 'undefined') {
-      console.log('found');
       web3 = new Web3(web3.currentProvider);
     } else {
       web3 = new Web3();
