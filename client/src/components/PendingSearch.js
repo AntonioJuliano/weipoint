@@ -1,6 +1,5 @@
 import React from "react";
 import {Card} from 'material-ui/Card';
-import '../styles/SearchResult.css';
 import RefreshIndicator from 'material-ui/RefreshIndicator';
 import {Row, Col} from 'react-flexbox-grid';
 
@@ -16,7 +15,7 @@ const style = {
 class PendingSearch extends React.Component {
   render() {
     return (
-      <div className="SearchResultContainer">
+      <div className="SearchResultContainer" style={{ marginTop: 25, textAlign: 'left' }}>
         <Card>
           <Row center='xs'>
             <Col xs={2}>

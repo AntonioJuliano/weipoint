@@ -5,7 +5,7 @@ const compileSolidityPath = '/api/v1/solidity/compile';
 const getSolidityCompilerVersionsPath = '/api/v1/solidity/versions';
 const errors = require('../helpers/errors');
 
-async function compileSolidity(source, version, optimized, libraries) {
+async function compileSolidity(source, version, optimized) {
   const response = await fetch(
     compilerServiceUrl + compileSolidityPath, {
       method: 'POST',
@@ -16,8 +16,7 @@ async function compileSolidity(source, version, optimized, libraries) {
       body: JSON.stringify({
         source: source,
         version: version,
-        optimized: optimized,
-        libraries: libraries
+        optimized: optimized
       })
     }
   );

@@ -5,41 +5,66 @@ import RaisedButton from 'material-ui/RaisedButton';
 import ArrowForwardIcon from 'react-material-icons/icons/navigation/arrow-forward';
 import ErrorOutlineIcon from 'react-material-icons/icons/alert/error-outline';
 import { red500 } from 'material-ui/styles/colors';
-import Web3 from 'web3';
+import { Promise as bluebirdPromise } from 'bluebird';
 
 class ContractFunction extends React.Component {
   constructor(props) {
     super(props);
+
+    this.state = this.setupState(this.props);
+    this.getInputs = this.getInputs.bind(this);
+    this.handleArgChange = this.handleArgChange.bind(this);
+    this.callContractFunction = this.callContractFunction.bind(this);
+    this.callConstantFunction = this.callConstantFunction.bind(this);
+    this.callNonConstantFunction = this.callNonConstantFunction.bind(this);
+    this.getArgValues = this.getArgValues.bind(this);
+  }
+
+  componentDidMount() {
+    if (this.state.noArgs && this.props.abi.constant) {
+      this.callContractFunction(false);
+    }
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.setState(this.setupState(nextProps));
+    if (this.state.noArgs && this.props.abi.constant) {
+      this.callContractFunction(false);
+    }
+  }
+
+  setupState(props) {
     let args = {};
-    for (let i = 0; i < this.props.abi.inputs.length; i++) {
+    for (let i = 0; i < props.abi.inputs.length; i++) {
       args["arg_" + i] = {
         value: "",
         valid: true,
         errorMessage: "",
-        type: this.props.abi.inputs[i].type
+        type: props.abi.inputs[i].type
       };
     }
 
-    const noArgs = this.props.abi.inputs.length === 0;
-    this.state = {
+    const noArgs = props.abi.inputs.length === 0;
+
+    return {
       result: null,
       requestState: noArgs ? 'requesting' : 'initialized',
       args: args,
       noArgs: noArgs,
       error: null,
+      focused: false
     };
-    this.getInputs = this.getInputs.bind(this);
-    this.handleArgChange = this.handleArgChange.bind(this);
-    this.callContractFunction = this.callContractFunction.bind(this);
-    this.getArgValues = this.getArgValues.bind(this);
-    this.web3 = new Web3();
-
-    if (noArgs) {
-      this.callContractFunction(false);
-    }
   }
 
   async callContractFunction(setState) {
+    if (this.props.abi.constant) {
+      return this.callConstantFunction(setState);
+    } else {
+      return this.callNonConstantFunction(setState);
+    }
+  }
+
+  async callConstantFunction(setState) {
     if (setState) {
       this.setState({ requestState: 'requesting', result: null });
     }
@@ -69,6 +94,48 @@ class ContractFunction extends React.Component {
       result = 'true';
     }
     this.setState({ requestState: 'completed', result: result });
+  }
+
+  async callNonConstantFunction(setState) {
+    if (!this.props.web3.isConnected()) {
+      this.setState({ requestState: 'error', error: 'Metamask not connected'});
+      return;
+    }
+
+    bluebirdPromise.promisifyAll(this.props.web3.version);
+    const networkVersion = await this.props.web3.version.getNetworkAsync();
+    if (networkVersion !== 1) {
+      this.setState({ requestState: 'error', error: 'Metamask not set to mainnet'});
+    }
+
+    if (setState) {
+      this.setState({ requestState: 'requesting', result: null });
+    }
+
+    let contractInstance;
+    try {
+      contractInstance = this.props.web3.eth.contract(
+        this.props.contractAbi).at(this.props.address);
+    } catch (e) {
+      console.error(e);
+    }
+
+    this.props.web3.eth.defaultAccount = this.props.web3.eth.accounts[0];
+
+    bluebirdPromise.promisifyAll(contractInstance);
+
+    try {
+      const result =
+        await contractInstance[this.props.abi.name + 'Async'](...this.getArgValues());
+      this.setState({ requestState: 'completed', result: result });
+    } catch (e) {
+      let errorString = e.toString();
+      if (e.toString().includes('User denied')) {
+        errorString = 'Metamask: User denied transaction';
+      }
+      console.error(e);
+      this.setState({ requestState: 'error', error: errorString });
+    }
   }
 
   handleArgChange(event, newValue) {
@@ -102,7 +169,7 @@ class ContractFunction extends React.Component {
     } else if (type === 'bool') {
       return value === '0' || value === '1' || value === 'true' || value === 'false';
     } else if (type === 'address') {
-      return this.web3.isAddress(value);
+      return this.props.web3.isAddress(value);
     }
 
     return true;
@@ -191,16 +258,30 @@ class ContractFunction extends React.Component {
       resultData = this.state.result;
     }
 
+    const linkable = !this.state.noArgs && !this.props.active;
+    let divStyle = {
+      fontSize: 12
+    };
+    if (linkable) {
+      divStyle.cursor = 'pointer';
+    }
+
+    const nameStyle = this.state.focused && linkable ? { color: '#1c6ced' } : {};
+
     return (
-      <div style={{ fontSize: 12 }}>
+      <div
+        style={divStyle}
+        onMouseEnter={ e => this.setState({ focused: true })}
+        onMouseLeave={ e => this.setState({ focused: false })}
+        >
         <Row style={{ marginTop: 5, marginBottom: 5 }}>
-          <Col xsOffset={1} xs={3}>
+          <Col xsOffset={1} xs={3} style={nameStyle}>
             { this.props.abi.name }
           </Col>
           <Col xs={1}>
             <ArrowForwardIcon style={{ width: 12, height: 12 }}/>
           </Col>
-          <Col xs={6}>
+          <Col xs={6} style={{ overflowWrap: 'break-word' }}>
             { resultData }
           </Col>
         </Row>
@@ -209,5 +290,13 @@ class ContractFunction extends React.Component {
     );
   }
 }
+
+ContractFunction.propTypes = {
+  address: React.PropTypes.string.isRequired,
+  abi: React.PropTypes.object.isRequired,
+  contractAbi: React.PropTypes.array.isRequired,
+  active: React.PropTypes.bool.isRequired,
+  web3: React.PropTypes.object.isRequired
+};
 
 export default ContractFunction;
