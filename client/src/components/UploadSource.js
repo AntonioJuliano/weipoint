@@ -1,6 +1,3 @@
-/**
- * Created by antonio on 1/2/17.
- */
 import React from "react";
 import FlatButton from 'material-ui/FlatButton';
 import { Grid, Row, Col } from 'react-flexbox-grid';
@@ -16,6 +13,8 @@ import MenuItem from 'material-ui/MenuItem';
 import CircularProgress from 'material-ui/CircularProgress';
 import Toggle from 'material-ui/Toggle';
 import Editor from './Editor';
+import CheckCircleIcon from 'react-material-icons/icons/action/check-circle';
+import { green500 } from 'material-ui/styles/colors';
 
 class UploadSource extends React.Component {
     constructor(props) {
@@ -296,6 +295,10 @@ class UploadSource extends React.Component {
           </div>
         </Row>;
 
+      const verifiedIcon = <div>
+        <CheckCircleIcon style={{ width: 75, height: 75 }} color={green500} />
+      </div>
+
       let current;
       if (this.state.uploadState === 'initialized') {
         current = uploadForm;
@@ -310,9 +313,8 @@ class UploadSource extends React.Component {
         <div>
           {current}
           <Row style={{ marginTop: 10 }} center='xs'>
-            <Col xs={4}>
-              {actions}
-            </Col>
+            {this.state.uploadState !== 'completed' && actions}
+            {this.state.uploadState === 'completed' && verifiedIcon}
           </Row>
         </div>
       );
