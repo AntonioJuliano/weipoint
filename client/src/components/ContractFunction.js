@@ -18,6 +18,9 @@ class ContractFunction extends React.Component {
     this.callContractFunction = this.callContractFunction.bind(this);
     this.callConstantFunction = this.callConstantFunction.bind(this);
     this.callNonConstantFunction = this.callNonConstantFunction.bind(this);
+    this.getPayableValueInWei = this.getPayableValueInWei.bind(this);
+    this.isCallable = this.isCallable.bind(this);
+    this.getName = this.getName.bind(this);
     this.getArgValues = this.getArgValues.bind(this);
   }
 
@@ -38,6 +41,9 @@ class ContractFunction extends React.Component {
 
   setupState(props) {
     let args = {};
+    if (props.abi.type === 'fallback') {
+      props.abi.inputs = [];
+    }
     for (let i = 0; i < props.abi.inputs.length; i++) {
       args["arg_" + i] = {
         value: "",
@@ -45,6 +51,14 @@ class ContractFunction extends React.Component {
         errorMessage: "",
         type: props.abi.inputs[i].type
       };
+    }
+    if (props.abi.payable) {
+      args['payable'] = {
+        value: "",
+        valid: true,
+        errorMessage: "",
+        type: 'ether'
+      }
     }
 
     const noArgs = props.abi.inputs.length === 0;
@@ -114,6 +128,25 @@ class ContractFunction extends React.Component {
     if (setState) {
       this.setState({ requestState: 'requesting', result: null });
     }
+    this.props.web3.eth.defaultAccount = this.props.web3.eth.accounts[0];
+    if (this.props.abi.type === 'fallback') {
+      bluebirdPromise.promisifyAll(this.props.web3.eth);
+      try {
+        await this.props.web3.eth.sendTransactionAsync({
+          to: this.props.address,
+          value: this.getPayableValueInWei()
+        });
+        this.setState({ requestState: 'completed', result: 'sent' });
+      } catch (e) {
+        let errorString = e.toString();
+        if (e.toString().includes('User denied')) {
+          errorString = 'Metamask: User denied transaction';
+        }
+        console.error(e);
+        this.setState({ requestState: 'error', error: errorString });
+      }
+      return;
+    }
 
     let contractInstance;
     try {
@@ -123,7 +156,6 @@ class ContractFunction extends React.Component {
       console.error(e);
     }
 
-    this.props.web3.eth.defaultAccount = this.props.web3.eth.accounts[0];
 
     bluebirdPromise.promisifyAll(contractInstance);
 
@@ -173,6 +205,8 @@ class ContractFunction extends React.Component {
       return value === '0' || value === '1' || value === 'true' || value === 'false';
     } else if (type === 'address') {
       return this.props.web3.isAddress(value);
+    } else if (type === 'ether') {
+      return value.match(/^[0-9]*\.?[0-9]*$/);
     }
 
     return true;
@@ -182,16 +216,25 @@ class ContractFunction extends React.Component {
     let values = [];
     for (const key in this.state.args) {
       if (Object.prototype.hasOwnProperty.call(this.state.args, key)) {
-        values.push(this.state.args[key].value);
+        if (key === 'payable') {
+          values.push({ value: this.getPayableValueInWei() })
+        } else {
+          values.push(this.state.args[key].value);
+        }
       }
     }
 
     return values;
   }
 
+  getPayableValueInWei() {
+    const etherValue = parseFloat(this.state.args['payable'].value);
+    return Math.floor(etherValue * 1000000000000000000);
+  }
+
   getInputs() {
     const thisRef = this;
-    return this.props.abi.inputs.map(function(value, i) {
+    let abiInputs = this.props.abi.inputs.map(function(value, i) {
       return <Row key={i}>
           <Col xsOffset={1}>
             <TextField
@@ -211,6 +254,45 @@ class ContractFunction extends React.Component {
           </Col>
         </Row>;
     });
+
+    if (!this.props.abi.payable) {
+      return abiInputs;
+    }
+
+    abiInputs.push(
+      <Row key='payable'>
+        <Col xsOffset={1}>
+          <TextField
+            floatingLabelText={'Ether value [ether]'}
+            id='payable'
+            value={thisRef.state.args['payable'].value}
+            onChange={thisRef.handleArgChange}
+            errorText={thisRef.state.args['payable'].errorMessage}
+            inputStyle={{ fontSize: 12, marginTop: 12 }}
+            floatingLabelShrinkStyle={{ fontSize: 12, marginTop: -1 }}
+            floatingLabelFocusStyle={{ fontSize: 12 }}
+            hintStyle={{ fontSize: 12 }}
+            floatingLabelStyle={{ fontSize: 12, marginTop: -7 }}
+            style={{ height: 60, marginTop: -10 }}
+            errorStyle={{ fontSize: 12 }}
+          />
+        </Col>
+      </Row>
+    );
+
+    return abiInputs;
+  }
+
+  isCallable() {
+    return !(this.state.noArgs && this.props.abi.constant);
+  }
+
+  getName() {
+    if (this.props.abi.type === 'fallback') {
+      return <div style={{ fontStyle: 'italic' }}>{'fallback'}</div>
+    } else {
+      return <div>{this.props.abi.name}</div>
+    }
   }
 
   render() {
@@ -246,11 +328,13 @@ class ContractFunction extends React.Component {
       </div>;
     } else if (Array.isArray(this.state.result)) {
       resultData = this.state.result.map(function(v, i) {
-          let identifier = thisRef.props.abi.outputs[i].name;
-          if (identifier !== null && identifier !== undefined && identifier !== '') {
-            identifier += ': ';
+          let identifier = '';
+          if (thisRef.props.abi.outputs[i]) {
+            identifier = thisRef.props.abi.outputs[i].name;
+            if (identifier !== null && identifier !== undefined && identifier !== '') {
+              identifier += ': ';
+            }
           }
-
           return <Row key={i}>
               <div>
                 {identifier + v}
@@ -261,7 +345,7 @@ class ContractFunction extends React.Component {
       resultData = this.state.result;
     }
 
-    const linkable = !this.state.noArgs && !this.props.active;
+    const linkable = this.isCallable() && !this.props.active;
     let divStyle = {
       fontSize: 12
     };
@@ -280,7 +364,7 @@ class ContractFunction extends React.Component {
         >
         <Row style={{ marginTop: 5, marginBottom: 5 }}>
           <Col xsOffset={1} xs={3} style={nameStyle}>
-            { this.props.abi.name }
+            { this.getName() }
           </Col>
           <Col xs={1}>
             <ArrowForwardIcon style={{ width: 12, height: 12 }}/>
@@ -289,7 +373,7 @@ class ContractFunction extends React.Component {
             { resultData }
           </Col>
         </Row>
-        { this.props.active && !this.state.noArgs && argumentInputs }
+        { this.props.active && this.isCallable() && argumentInputs }
       </div>
     );
   }
