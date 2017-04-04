@@ -6,6 +6,7 @@ import ArrowForwardIcon from 'react-material-icons/icons/navigation/arrow-forwar
 import ErrorOutlineIcon from 'react-material-icons/icons/alert/error-outline';
 import { red500 } from 'material-ui/styles/colors';
 import { Promise as bluebirdPromise } from 'bluebird';
+import isEqual from 'lodash.isequal';
 
 class ContractFunction extends React.Component {
   constructor(props) {
@@ -27,9 +28,11 @@ class ContractFunction extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.setState(this.setupState(nextProps));
-    if (this.state.noArgs && this.props.abi.constant) {
-      this.callContractFunction(false);
+    if (!isEqual(nextProps, this.props)) {
+      this.setState(this.setupState(nextProps));
+      if (this.state.noArgs && this.props.abi.constant) {
+        this.callContractFunction(false);
+      }
     }
   }
 
@@ -267,6 +270,7 @@ class ContractFunction extends React.Component {
     }
 
     const nameStyle = this.state.focused && linkable ? { color: '#1c6ced' } : {};
+    nameStyle.overflowX = 'auto';
 
     return (
       <div
@@ -281,7 +285,7 @@ class ContractFunction extends React.Component {
           <Col xs={1}>
             <ArrowForwardIcon style={{ width: 12, height: 12 }}/>
           </Col>
-          <Col xs={6} style={{ overflowWrap: 'break-word' }}>
+          <Col xs={7} style={{ overflowX: 'auto' }}>
             { resultData }
           </Col>
         </Row>
