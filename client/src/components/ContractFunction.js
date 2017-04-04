@@ -122,7 +122,6 @@ class ContractFunction extends React.Component {
     } catch (e) {
       console.error(e);
     }
-    console.log(contractInstance);
 
     this.props.web3.eth.defaultAccount = this.props.web3.eth.accounts[0];
 
@@ -286,7 +285,7 @@ class ContractFunction extends React.Component {
           <Col xs={1}>
             <ArrowForwardIcon style={{ width: 12, height: 12 }}/>
           </Col>
-          <Col xs={7} style={{ overflowWrap: 'break-word', overflowX: 'auto' }}>
+          <Col xs={7} style={{ overflowX: 'auto' }}>
             { resultData }
           </Col>
         </Row>
