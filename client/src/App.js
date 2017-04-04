@@ -15,9 +15,9 @@ class App extends Component {
   constructor(props) {
     super(props);
     if (typeof web3 !== 'undefined') {
-      web3 = new Web3(web3.currentProvider);
+      this.web3 = new Web3(web3.currentProvider);
     } else {
-      web3 = new Web3();
+      this.web3 = new Web3();
     }
   }
 
@@ -37,7 +37,7 @@ class App extends Component {
           overflow: 'auto'
         }}>
         <MuiThemeProvider muiTheme={getMuiTheme(lightBaseTheme)}>
-          <Search web3={web3}/>
+          <Search web3={this.web3}/>
         </MuiThemeProvider>
       </div>
     );

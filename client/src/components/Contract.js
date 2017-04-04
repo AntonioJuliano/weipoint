@@ -3,12 +3,13 @@ import {Card, CardTitle} from 'material-ui/Card';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import UploadSource from './UploadSource';
 import ViewSource from './ViewSource';
-import ContractProperties from './ContractProperties';
+import ContractFunctions from './ContractFunctions';
 import {BottomNavigation, BottomNavigationItem} from 'material-ui/BottomNavigation';
 import InfoIcon from 'react-material-icons/icons/action/info';
 import BookIcon from 'react-material-icons/icons/action/book';
 import ChromeReaderModeIcon from 'react-material-icons/icons/action/chrome-reader-mode';
 import AddCircleIcon from 'react-material-icons/icons/content/add-circle';
+import SendIcon from 'react-material-icons/icons/content/send';
 import FlatButton from 'material-ui/FlatButton';
 import update from 'immutability-helper';
 
@@ -18,8 +19,9 @@ const OVERVIEW = 'OVERVIEW';
 const VIEW_SOURCE = 'VIEW_SOURCE';
 const UPLOAD_SOURCE = 'UPLOAD_SOURCE';
 const VIEW_PROPERTIES = 'VIEW_PROPERTIES';
+const CALL_FUNCTION = 'CALL_FUNCTION';
 
-class SearchResult extends React.Component {
+class Contract extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -129,10 +131,29 @@ class SearchResult extends React.Component {
     const viewSourceTab = <ViewSource
         source={this.state.contract.source}
       />;
-    const contractPropertiesTab = <ContractProperties
-        abi={this.state.contract.abi}
+    const contractPropertiesTab = <ContractFunctions
+        functions={this.state.contract.abi.filter(function(val) {
+          return val.constant;
+        })}
         address={this.state.contract.address}
+        intro={'Here you can view properties defined by this contract. Click on a property to'
+          + ' expand the parameters it takes, and call it with a given set of parameters.'}
+        noFunctionsMessage={'This contract has no properties'}
+        contractAbi={this.state.contract.abi}
+        web3={this.props.web3}
       />;
+      const contractFunctions = <ContractFunctions
+          functions={this.state.contract.abi.filter(function(val) {
+            return !val.constant;
+          })}
+          address={this.state.contract.address}
+          intro={'Here you can send transactions to this contract on the blockchain.'
+            + ' Click on a function name to expand the parameters it takes, and call it'
+            + ' with a given set of parameters.'}
+          noFunctionsMessage={'This contract has no functions'}
+          contractAbi={this.state.contract.abi}
+          web3={this.props.web3}
+        />;
 
     switch(this.state.currentTabName) {
       case OVERVIEW:
@@ -143,6 +164,8 @@ class SearchResult extends React.Component {
         return viewSourceTab;
       case VIEW_PROPERTIES:
         return contractPropertiesTab;
+      case CALL_FUNCTION:
+        return contractFunctions;
       default:
         return null;
     }
@@ -169,12 +192,17 @@ class SearchResult extends React.Component {
       icon: <ChromeReaderModeIcon />,
       name: VIEW_PROPERTIES
     };
+    const callFunction = {
+      label: "Interact",
+      icon: <SendIcon />,
+      name: CALL_FUNCTION
+    };
 
     let itemsToShow;
     if (this.state.contract.source === undefined) {
       itemsToShow = [overview, uploadSource];
     } else {
-      itemsToShow = [overview, viewSource, viewProperties];
+      itemsToShow = [overview, viewSource, viewProperties, callFunction];
     }
 
     const thisRef = this;
@@ -204,7 +232,9 @@ class SearchResult extends React.Component {
 
   render() {
     return (
-      <div className="SearchResultContainer" style={{ marginTop: 25, textAlign: 'left' }}>
+      <div
+        className="SearchResultContainer"
+        style={{ marginTop: 25, textAlign: 'left', marginBottom: 15 }}>
         <Card>
           <CardTitle
             title={this.state.contract.name || "Contract"}
@@ -225,4 +255,9 @@ class SearchResult extends React.Component {
   }
 }
 
-export default SearchResult;
+Contract.propTypes = {
+  contract: React.PropTypes.object.isRequired,
+  web3: React.PropTypes.object.isRequired
+};
+
+export default Contract;
