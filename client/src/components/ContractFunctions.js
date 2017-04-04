@@ -10,6 +10,7 @@ class ContractFunctions extends React.Component {
       active: null
     };
     this.getFunctionElements = this.getFunctionElements.bind(this);
+    this.metamaskMissing = this.metamaskMissing.bind(this);
     this.setActive = this.setActive.bind(this);
   }
 
@@ -38,8 +39,23 @@ class ContractFunctions extends React.Component {
   }
 
   setActive(i) {
-    if (this.state.active !== i) {
+    if (this.state.active !== i
+      && (!this.props.functions[i].constant || this.props.functions[i].inputs.length !== 0)) {
       this.setState({ active: i });
+    }
+  }
+
+  metamaskMissing() {
+    if (this.props.type === 'STATE_CHANGING' && !this.props.web3.isConnected()) {
+      return <Row center='xs' style={{ marginBottom: 20, fontStyle: 'italic' }}>
+        <Col xs={8}>
+          {'An Ethereum wallet is reqired to interact with this contract.'
+            + 'We recommend Metamask, which you can download for chrome '}
+          <a href='https://metamask.io/' target='_blank'>
+            {'here'}
+          </a>
+        </Col>
+      </Row>
     }
   }
 
@@ -58,6 +74,7 @@ class ContractFunctions extends React.Component {
             {this.props.intro}
           </Col>
         </Row>
+        {this.metamaskMissing()}
         {anyFunctions ? functionElements : noFunctionsMessage}
       </div>
     );
@@ -70,7 +87,8 @@ ContractFunctions.propTypes = {
   noFunctionsMessage: React.PropTypes.string.isRequired,
   intro: React.PropTypes.string.isRequired,
   address: React.PropTypes.string.isRequired,
-  web3: React.PropTypes.object.isRequired
+  web3: React.PropTypes.object.isRequired,
+  type: React.PropTypes.string
 };
 
 export default ContractFunctions;

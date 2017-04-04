@@ -31,7 +31,8 @@ class Contract extends React.Component {
       callFunctionOpen: false,
       contract: this.props.contract,
       uploadState: 'initialized',
-      price: null
+      price: null,
+      height: 0
     };
     this.copyBytecodeClicked = this.copyBytecodeClicked.bind(this);
     this.uploadSource = this.uploadSource.bind(this);
@@ -50,6 +51,19 @@ class Contract extends React.Component {
     setTimeout(function() {
       thisRef.setState({ bytecodeButtonText: initialBytecodeButtonText });
     }, 1000);
+  }
+
+  updateDimensions() {
+    this.setState({ height: window.innerHeight - 350 });
+  }
+
+  componentDidMount() {
+    this.updateDimensions();
+    window.addEventListener("resize", this.updateDimensions.bind(this));
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.updateDimensions.bind(this));
   }
 
   componentWillReceiveProps(nextProps) {
@@ -133,7 +147,7 @@ class Contract extends React.Component {
       />;
     const contractPropertiesTab = <ContractFunctions
         functions={this.state.contract.abi.filter(function(val) {
-          return val.constant;
+          return val.constant && val.type === 'function';
         })}
         address={this.state.contract.address}
         intro={'Here you can view properties defined by this contract. Click on a property to'
@@ -144,7 +158,7 @@ class Contract extends React.Component {
       />;
       const contractFunctions = <ContractFunctions
           functions={this.state.contract.abi.filter(function(val) {
-            return !val.constant;
+            return !val.constant && (val.type === 'function' || val.type === 'fallback');
           })}
           address={this.state.contract.address}
           intro={'Here you can send transactions to this contract on the blockchain.'
@@ -153,6 +167,7 @@ class Contract extends React.Component {
           noFunctionsMessage={'This contract has no functions'}
           contractAbi={this.state.contract.abi}
           web3={this.props.web3}
+          type='STATE_CHANGING'
         />;
 
     switch(this.state.currentTabName) {
@@ -245,7 +260,7 @@ class Contract extends React.Component {
               </div>
             </div>}
           />
-        <div style={{ height: 600 }}>
+        <div style={{ height: this.state.height, minHeight: 420 }}>
           {this.getCurrentTab()}
         </div>
         {this.getNavigationBar()}
