@@ -21,14 +21,15 @@ const UPLOAD_SOURCE = 'UPLOAD_SOURCE';
 const VIEW_PROPERTIES = 'VIEW_PROPERTIES';
 const CALL_FUNCTION = 'CALL_FUNCTION';
 
+const MIN_CONTENT_HEIGHT = 420;
+
 class Contract extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      currentTabName: OVERVIEW,
+      currentTabIndex: 0,
       bytecodeButtonText: initialBytecodeButtonText,
-      uploadSourceOpen: false,
-      viewSourceOpen: false,
-      callFunctionOpen: false,
       contract: this.props.contract,
       uploadState: 'initialized',
       price: null,
@@ -54,7 +55,7 @@ class Contract extends React.Component {
   }
 
   updateDimensions() {
-    this.setState({ height: window.innerHeight - 350 });
+    this.setState({ height: window.innerHeight - 300 });
   }
 
   componentDidMount() {
@@ -141,6 +142,7 @@ class Contract extends React.Component {
     const uploadSourceTab = <UploadSource
         uploadSource={this.uploadSource}
         uploadState={this.state.uploadState}
+        height={Math.max(this.state.height, MIN_CONTENT_HEIGHT)}
       />;
     const viewSourceTab = <ViewSource
         source={this.state.contract.source}
@@ -253,14 +255,9 @@ class Contract extends React.Component {
         <Card>
           <CardTitle
             title={this.state.contract.name || "Contract"}
-            subtitle={<div>
-              {this.state.contract.address}
-              <div style={{ marginTop: 5 }}>
-                {this.getBalanceString()}
-              </div>
-            </div>}
+            subtitle={this.state.contract.address}
           />
-        <div style={{ height: this.state.height, minHeight: 420 }}>
+        <div style={{ height: this.state.height, minHeight: MIN_CONTENT_HEIGHT }}>
           {this.getCurrentTab()}
         </div>
         {this.getNavigationBar()}

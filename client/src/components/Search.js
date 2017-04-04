@@ -45,10 +45,10 @@ class Search extends React.Component {
 
   render() {
     return (
-      <div className="search" style={{ minWidth: 800 }}>
+      <div className="search" style={{ minWidth: 600 }}>
         <Grid fluid={true}>
           <Row center='xs'>
-            <Col xs={10}>
+            <Col xs={11}>
               <SearchBar
                 onChange={this.handleSearchBarChange}
                 onClick={this.handleSearchBarClick}
@@ -58,7 +58,7 @@ class Search extends React.Component {
           </Row>
           { (this.state.searchState === 'searching') &&
             <Row center='xs'>
-              <Col md={8} xs={10}>
+              <Col md={8} xs={11}>
                 <div className="SearchResults">
                   <PendingSearch />
                 </div>
@@ -67,7 +67,7 @@ class Search extends React.Component {
           }
           { (this.state.searchState === 'completed') &&
             <Row center='xs'>
-              <Col md={8} xs={10}>
+              <Col md={8} xs={11}>
                 <div className="SearchResults">
                   <Contract
                     contract={this.state.contract}
@@ -79,7 +79,7 @@ class Search extends React.Component {
           }
           { (this.state.searchState === 'error') &&
             <Row center='xs'>
-              <Col md={8} xs={10}>
+              <Col md={8} xs={11}>
                 <div className="SearchResults">
                   <SearchError />
                 </div>

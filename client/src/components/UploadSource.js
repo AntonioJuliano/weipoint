@@ -135,7 +135,7 @@ class UploadSource extends React.Component {
               <p style={{ fontSize: '75%'}}>
                 Note: currently only Solidity source code is supported
               </p>
-              <Paper zDepth={2} style={{ height: 420 }}>
+              <Paper zDepth={2} style={{ height: this.props.height - 160 }}>
                 <Editor
                   readOnly={false}
                   name='uploadSource'
@@ -217,7 +217,7 @@ class UploadSource extends React.Component {
       const uploadForm = <div>
           <Row center='xs'>
             <Col xs={8} md={6}>
-              <Stepper linear={false} activeStep={this.state.stepIndex}>
+              <Stepper linear={false} activeStep={this.state.stepIndex} style={{ height: 60 }}>
                 <Step
                   completed={this.state.visited.indexOf(0) !== -1 && this.state.stepIndex !== 0}
                   active={this.state.stepIndex === 0}
@@ -296,7 +296,7 @@ class UploadSource extends React.Component {
         </Row>;
 
       const verifiedIcon = <div>
-        <CheckCircleIcon style={{ width: 75, height: 75 }} color={green500} />
+        <CheckCircleIcon style={{ width: 60, height: 60 }} color={green500} />
       </div>
 
       let current;
