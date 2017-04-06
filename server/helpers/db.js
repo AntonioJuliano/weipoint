@@ -4,7 +4,7 @@ const logger = require('./logger');
 const mongoUrl = process.env.MONGO_URL;
 mongoose.Promise = require('bluebird');
 
-const connectWithRetry = async() => {
+const connectWithRetry = async () => {
   try {
     await mongoose.connect(mongoUrl);
     logger.info({

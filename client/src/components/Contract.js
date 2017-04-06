@@ -1,6 +1,5 @@
 import React from "react";
 import {Card, CardTitle} from 'material-ui/Card';
-import CopyToClipboard from 'react-copy-to-clipboard';
 import UploadSource from './UploadSource';
 import ViewSource from './ViewSource';
 import ContractFunctions from './ContractFunctions';
@@ -10,10 +9,9 @@ import BookIcon from 'react-material-icons/icons/action/book';
 import ChromeReaderModeIcon from 'react-material-icons/icons/action/chrome-reader-mode';
 import AddCircleIcon from 'react-material-icons/icons/content/add-circle';
 import SendIcon from 'react-material-icons/icons/content/send';
-import FlatButton from 'material-ui/FlatButton';
+import ContractOverview from './ContractOverview';
 import update from 'immutability-helper';
-
-const initialBytecodeButtonText = "Copy Bytecode";
+import clone from 'lodash.clone';
 
 const OVERVIEW = 'OVERVIEW';
 const VIEW_SOURCE = 'VIEW_SOURCE';
@@ -29,29 +27,20 @@ class Contract extends React.Component {
     this.state = {
       currentTabName: OVERVIEW,
       currentTabIndex: 0,
-      bytecodeButtonText: initialBytecodeButtonText,
       contract: this.props.contract,
       uploadState: 'initialized',
       price: null,
       height: 0
     };
-    this.copyBytecodeClicked = this.copyBytecodeClicked.bind(this);
     this.uploadSource = this.uploadSource.bind(this);
     this.getPrice = this.getPrice.bind(this);
     this.changeTab = this.changeTab.bind(this);
     this.getCurrentTab = this.getCurrentTab.bind(this);
     this.getNavigationBar = this.getNavigationBar.bind(this);
     this.getBalanceString = this.getBalanceString.bind(this);
+    this.addTag = this.addTag.bind(this);
 
     this.getPrice();
-  }
-
-  copyBytecodeClicked(e) {
-    this.setState({ bytecodeButtonText: 'Copied!' });
-    const thisRef = this;
-    setTimeout(function() {
-      thisRef.setState({ bytecodeButtonText: initialBytecodeButtonText });
-    }, 1000);
   }
 
   updateDimensions() {
@@ -69,6 +58,12 @@ class Contract extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     this.setState({ contract: this.props.contract });
+  }
+
+  async addTag(tag) {
+    let contractClone = clone(this.state.contract);
+    contractClone.tags.push({ tag: tag });
+    this.setState({ contract: contractClone });
   }
 
   async getPrice() {
@@ -131,14 +126,10 @@ class Contract extends React.Component {
   }
 
   getCurrentTab() {
-    const overviewTab = <div>
-        {"Overview!"}
-        <CopyToClipboard text={this.state.contract.code}>
-          <FlatButton
-            label={this.state.bytecodeButtonText}
-            onClick={this.copyBytecodeClicked}/>
-        </CopyToClipboard>
-      </div>;
+    const overviewTab = <ContractOverview
+      contract={this.state.contract}
+      addTag={this.addTag}
+      />;
     const uploadSourceTab = <UploadSource
         uploadSource={this.uploadSource}
         uploadState={this.state.uploadState}

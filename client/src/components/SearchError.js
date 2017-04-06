@@ -21,7 +21,7 @@ class SearchError extends React.Component {
           <Row center='xs'>
             <Col xs={2}>
               <div style={style}>
-                <ErrorOutlineIcon color={red500} />
+                <ErrorOutlineIcon color={red500} style={{ marginTop: 100, marginBottom: 100 }}/>
               </div>
             </Col>
           </Row>

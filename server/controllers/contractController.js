@@ -53,7 +53,8 @@ router.get('/', async(request, response) => {
         code: contract.code,
         abi: contract.abi,
         sourceVersion: contract.sourceVersion,
-        balance: balance
+        balance: balance,
+        tags: contract.tags
       });
     }
   } catch (e) {
@@ -142,7 +143,8 @@ router.post('/source', async(request, response) => {
       name: contract.name,
       abi: contract.abi,
       code: contract.code,
-      libraries: contract.libraries
+      libraries: contract.libraries,
+      tags: contract.tags
     });
   } catch (e) {
     errorHandler.handle(e, response);
