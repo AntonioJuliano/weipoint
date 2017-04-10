@@ -22,7 +22,7 @@ class Tags extends React.Component {
 
   getTagElements() {
     return this.props.tags.map(function(tag) {
-      return <Chip style={{ margin: 4, height: 32 }} key={tag.tag + '_'}>
+      return <Chip style={{ margin: 4, height: 32, marginTop: 10, marginBottom: -4 }} key={tag.tag + '_'}>
           {tag.tag}
         </Chip>;
     });
@@ -59,7 +59,8 @@ class Tags extends React.Component {
     if (tag.length > 30) {
       return 'Too long';
     }
-    if (this.props.tags.map(function(v) { return v.tag}).includes(tag)) {
+    if (this.props.tags.map(function(v) { return v.tag.toLowerCase(); })
+        .includes(tag.toLowerCase())) {
       return 'Duplicate tag'
     }
     if (!tag.match(/^[a-zA-Z0-9_ ]*$/)) {

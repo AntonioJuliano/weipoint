@@ -23,7 +23,7 @@ class Search extends React.Component {
     this.setState({ value: value });
   }
 
-  async handleSearchBarClick(e) {
+  async handleSearchBarClick() {
     const value = this.state.value;
 
     if (this.props.web3.isAddress(value)) {

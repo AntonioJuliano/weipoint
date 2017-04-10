@@ -12,8 +12,7 @@ class ContractOverview extends React.Component {
 
   render() {
     return (
-      <div className='functionsList'
-        style={{ height: '100%', maxHeight: '100%', overflowY: 'auto', overflowX: 'hidden' }}>
+      <div className='functionsList'>
         <Row style={{ marginTop: 10, marginBottom: 10 }} center='xs'>
           <Col xs={10}>
             {'OVERVIEW!!'}
@@ -27,21 +26,22 @@ class ContractOverview extends React.Component {
               />
           </Col>
         </Row>
-        <Row style={{ marginTop: 10, marginBottom: 10 }}>
-          <Col xs={2} xsOffset={1}>
-            {'Tags: '}
+        <div style={{ display: 'flex' }}>
+          <Col xs={1} xsOffset={1} style={{ fontSize: 16, marginTop: 15 }}>
+              {'Tags: '}
           </Col>
-          <Col xs={8}>
+          <Col xs={9}>
             <Tags tags={this.props.contract.tags} addTag={this.props.addTag}/>
           </Col>
-        </Row>
+        </div>
       </div>
     );
   }
 }
 
 ContractOverview.propTypes = {
-  contract: React.PropTypes.object.isRequired
+  contract: React.PropTypes.object.isRequired,
+  addTag: React.PropTypes.func.isRequired
 }
 
 export default ContractOverview;
