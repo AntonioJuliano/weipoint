@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 
 // IMPORTANT if you make a breaking change to the schema, increment this number
 // and synchronize the new index on console
-const esVersionNumber = 16;
+const esVersionNumber = 1;
 
 const MAX_TAGS = 30;
 

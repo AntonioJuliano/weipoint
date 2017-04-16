@@ -137,8 +137,6 @@ class Contract extends React.Component {
         throw Error("Upload source request to server failed");
       }
 
-      console.log(json);
-
       const updatedContract = update(this.state.contract, {
         source: { $set: json.contract.source },
         sourceType: { $set: json.contract.sourceType },
@@ -149,7 +147,6 @@ class Contract extends React.Component {
         libraries: { $set: json.contract.libraries },
       });
 
-      console.log(updatedContract);
       this.setState({
         uploadState: 'completed',
         contract: updatedContract
