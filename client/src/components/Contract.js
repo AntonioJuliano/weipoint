@@ -38,7 +38,7 @@ class Contract extends React.Component {
     this.getCurrentTab = this.getCurrentTab.bind(this);
     this.getNavigationBar = this.getNavigationBar.bind(this);
     this.getBalanceString = this.getBalanceString.bind(this);
-    this.addTag = this.addTag.bind(this);
+    this.addMetadata = this.addMetadata.bind(this);
 
     this.getPrice();
   }
@@ -60,10 +60,43 @@ class Contract extends React.Component {
     this.setState({ contract: this.props.contract });
   }
 
-  async addTag(tag) {
+  async addMetadata(metadata) {
+    const tags = metadata.tags;
+    const description = metadata.description;
+    let link = metadata.link;
+
+    let request = { address: this.state.contract.address };
     let contractClone = clone(this.state.contract);
-    contractClone.tags.push({ tag: tag });
+    if (tags && tags.length > 0) {
+      tags.forEach( tag => contractClone.tags.push({ tag: tag }) );
+      request.tags = tags;
+    }
+    if (description) {
+      contractClone.description = description;
+      request.description = description;
+    }
+    if (link) {
+      if (!link.match(/^http:\/\//)) {
+        link = 'http://' + link;
+      }
+      request.link = link;
+    }
     this.setState({ contract: contractClone });
+
+    const requestPath = `/api/v1/contract/metadata`;
+
+    try {
+      await fetch(requestPath, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request)
+      });
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   async getPrice() {
@@ -99,18 +132,22 @@ class Contract extends React.Component {
 
       const json = await response.json();
       if (response.status !== 200) {
-        throw Error("Search request to server failed");
+        throw Error("Upload source request to server failed");
       }
 
+      console.log(json);
+
       const updatedContract = update(this.state.contract, {
-        source: { $set: json.source },
-        sourceType: { $set: json.sourceType },
-        sourceVersion: { $set: json.sourceVersion },
-        optimized: { $set: json.optimized },
-        name: { $set: json.name },
-        abi: { $set: json.abi },
-        libraries: { $set: json.libraries },
+        source: { $set: json.contract.source },
+        sourceType: { $set: json.contract.sourceType },
+        sourceVersion: { $set: json.contract.sourceVersion },
+        optimized: { $set: json.contract.optimized },
+        name: { $set: json.contract.name },
+        abi: { $set: json.contract.abi },
+        libraries: { $set: json.contract.libraries },
       });
+
+      console.log(updatedContract);
       this.setState({
         uploadState: 'completed',
         contract: updatedContract
@@ -127,8 +164,8 @@ class Contract extends React.Component {
 
   getCurrentTab() {
     const overviewTab = <ContractOverview
-      contract={this.state.contract}
-      addTag={this.addTag}
+        contract={this.state.contract}
+        addMetadata={this.addMetadata}
       />;
     const uploadSourceTab = <UploadSource
         uploadSource={this.uploadSource}
@@ -242,16 +279,16 @@ class Contract extends React.Component {
     return (
       <div
         className="SearchResultContainer"
-        style={{ marginTop: 25, textAlign: 'left', marginBottom: 15 }}>
+        style={{ marginTop: 15, textAlign: 'left', marginBottom: 15 }}>
         <Card>
           <CardTitle
             title={this.state.contract.name || "Contract"}
             subtitle={this.state.contract.address}
           />
-        <div style={{ height: this.state.height, minHeight: MIN_CONTENT_HEIGHT }}>
-          {this.getCurrentTab()}
-        </div>
-        {this.getNavigationBar()}
+        <div style={{ height: this.state.height, minHeight: MIN_CONTENT_HEIGHT, overflowY: 'auto', overflowX: 'hidden' }}>
+            {this.getCurrentTab()}
+          </div>
+          {this.getNavigationBar()}
         </Card>
       </div>
     );

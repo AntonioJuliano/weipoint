@@ -74,9 +74,12 @@ class SearchBar extends React.Component {
                       <SearchIcon />
                   </FloatingActionButton>
                 </div>
-                <div style={{ marginLeft: 15, marginRight: 'auto' }}>
+                <div style={{ marginLeft: 15, marginRight: 'auto' }}
+                  className='hint--bottom-right hint--rounded'
+                  aria-label='Browse Most Popular'>
                   <FloatingActionButton
-                    onClick={this.props.onClick}>
+                    onClick={this.props.onClick}
+                    >
                       <WhatshotIcon />
                   </FloatingActionButton>
                 </div>

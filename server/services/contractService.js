@@ -51,7 +51,8 @@ async function lookupContract(address) {
 }
 
 /**
- * Attempts to verify the source code of a contract
+ * Attempts to verify the source code of a contract. Saves the updated contract if
+ * verification successful
  *
  * @param  {Contract} contract      contract to verify source for
  * @param  {string} source          provided source code
@@ -59,8 +60,7 @@ async function lookupContract(address) {
  * @param  {string} compilerVersion version of compiler used to compile
  *                                  source code
  * @param  {bool} optimized         Is the source code optimized?
- * @return {Object}                 Object containing contract name,
- *                                   libraries used, and abi
+ * @return {Contract}               The contract updated with source info
  */
 async function verifySource(contract, source, sourceType, compilerVersion, optimized) {
   if (sourceType === 'solidity') {
@@ -83,11 +83,16 @@ async function verifySource(contract, source, sourceType, compilerVersion, optim
             message: 'Found matching source code for contract',
             address: contract.address
           });
-          return {
-            contractName: contractName,
-            libraries: linkResult.libraries,
-            abi: JSON.parse(contracts[contractName].interface)
-          };
+
+          contract.source = source;
+          contract.sourceType = sourceType;
+          contract.sourceVersion = compilerVersion;
+          contract.name = contractName;
+          contract.abi = JSON.parse(contracts[contractName].interface);
+          contract.libraries = linkResult.libraries;
+          await contract.save();
+
+          return contract;
         }
       }
     }
@@ -156,6 +161,94 @@ async function getBalance(address) {
   return balance.toNumber() / 1000000000000000000.0;
 }
 
+async function addMetadata(contract, metadata) {
+  if (metadata.tags) {
+    _addTags(contract, metadata.tags);
+  }
+  if (metadata.description) {
+    const descriptionPending = !!contract.description;
+    _addDescription(contract, metadata.description, descriptionPending);
+  }
+  if (metadata.link) {
+    _addLink(contract, metadata.link, true);
+  }
+
+  await contract.save();
+  return contract;
+}
+
+function _addTags(contract, tags) {
+  tags.forEach(tag => {
+    if (!contract.tags.map( t => t.tag ).includes(tag)) {
+      contract.tags.push({
+        tag: tag,
+        approved: false
+      });
+    }
+  });
+  if (contract.tags.length > Contract.MAX_TAGS) {
+    throw new errors.ClientError(
+        'Too many tags',
+        errors.errorCodes.tooManyTags
+    );
+  }
+  return contract;
+}
+
+function _addDescription(contract, description, pending) {
+  if (pending &&
+      !contract.pendingDescriptions.includes(description)
+      && contract.description !== description) {
+    contract.pendingDescriptions.push(description);
+  } else if (!pending) {
+    contract.description = description;
+  }
+  return contract;
+}
+
+async function _addLink(contract, link, pending) {
+  if (pending &&
+      !contract.pendingLinks.includes(link)
+      && contract.link !== link) {
+    contract.pendingLinks.push(link);
+    await contract.save();
+  }
+  if (!pending) {
+    contract.link = link;
+    await contract.save();
+  }
+  return contract;
+}
+
+function toJson(contract) {
+  let json = {
+    name: contract.name,
+    address: contract.address,
+    code: contract.code,
+    source: contract.source,
+    sourceType: contract.sourceType,
+    sourceVersion: contract.sourceVersion,
+    optimized: contract.optimized,
+    abi: contract.abi,
+    tags: contract.tags.map(_tagToJson),
+    libraries: contract.libraries,
+    description: contract.description
+  };
+
+  if (contract.type) {
+    json.type = contract.type;
+  }
+
+  return json;
+}
+
+function _tagToJson(tag) {
+  return {
+    tag: tag.tag,
+    approved: tag.approved
+  };
+}
+
 /*
  * Some solidity contract bytecodes include a swarm hash at the end which seems
  * to not be deterministic. For now allow it to be ignored
@@ -209,3 +302,5 @@ module.exports.lookupContract = lookupContract;
 module.exports.verifySource = verifySource;
 module.exports.callConstantFunction = callConstantFunction;
 module.exports.getBalance = getBalance;
+module.exports.toJson = toJson;
+module.exports.addMetadata = addMetadata;

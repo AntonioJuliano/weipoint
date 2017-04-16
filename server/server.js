@@ -21,6 +21,16 @@ process.on('unhandledRejection', (reason, p) => {
   });
 });
 
+app.use(function(req, res, next) {
+  if(process.env.NODE_ENV === 'production'
+    && !req.secure
+    && req.get('X-Forwarded-Proto') !== 'https') {
+    res.redirect('https://' + req.get('Host') + req.url);
+  } else {
+    return next();
+  }
+});
+
 app.use(bodyParser.json());
 app.use(function(error, request, response, _next) {
   response.status(400).json({
@@ -30,12 +40,15 @@ app.use(function(error, request, response, _next) {
 })
 app.use(expressValidator({
   customValidators: {
-    isAddress: function(value) {
-      return web3.isAddress(value);
+    isAddress: value =>  web3.isAddress(value),
+    isArray: value => Array.isArray(value),
+    isArrayOfStrings: value => {
+      return Array.isArray(value)
+        && value.every(v => typeof v === 'string');
     },
-    isArray: function(value) {
-      return Array.isArray(value);
-    }
+    isString: value => typeof value === 'string',
+    isBoolean: value => typeof value === 'boolean',
+    optionalPositiveInteger: v => !v || (Number.isInteger(v) && v >= 0)
   }
 }));
 app.use(require('./middlewares/requestLogger'));

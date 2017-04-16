@@ -2,6 +2,8 @@ import React from "react";
 import Chip from 'material-ui/Chip';
 import TextField from 'material-ui/TextField';
 
+const MAX_TAGS = 30;
+
 class Tags extends React.Component {
   constructor(props) {
     super(props);
@@ -22,9 +24,14 @@ class Tags extends React.Component {
 
   getTagElements() {
     return this.props.tags.map(function(tag) {
-      return <Chip style={{ margin: 4, height: 32, marginTop: 10, marginBottom: -4 }} key={tag.tag + '_'}>
+      return (
+        <Chip
+          style={{ margin: 4, height: 32, marginTop: 10, marginBottom: -4 }}
+          key={tag.tag + '_'}
+        >
           {tag.tag}
-        </Chip>;
+        </Chip>
+      );
     });
   }
 
@@ -71,7 +78,9 @@ class Tags extends React.Component {
 
   render() {
     const tagElements = this.getTagElements();
-    tagElements.push(this.getAddTagElement());
+    if (this.props.showAddTag && this.props.tags.length < MAX_TAGS) {
+      tagElements.push(this.getAddTagElement());
+    }
     return (
       <div style={{
           display: 'flex',
@@ -85,7 +94,8 @@ class Tags extends React.Component {
 
 Tags.propTypes = {
   tags: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
-  addTag: React.PropTypes.func.isRequired
+  addTag: React.PropTypes.func,
+  showAddTag: React.PropTypes.bool.isRequired
 };
 
 export default Tags;
