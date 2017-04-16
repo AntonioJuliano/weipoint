@@ -31,7 +31,14 @@ router.get('/', async(request, response) => {
       throw new errors.RequestError(validationResult.array());
     }
 
-    const searchResults = await searchService.search(request.query.query, true);
+    let searchResults;
+    const index = request.query.index ? parseInt(request.query.index) : 0;
+    const size = request.query.size ? parseInt(request.query.size) : 10;
+    if (request.query.query !== '') {
+      searchResults = await searchService.search(request.query.query, true, index, size);
+    } else {
+      searchResults = await searchService.searchAll(true, index, size);
+    }
 
     logger.info({
       at: 'searchController/',

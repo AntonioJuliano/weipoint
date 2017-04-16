@@ -7,15 +7,22 @@ import NotFound from './NotFound';
 import SearchResults from './SearchResults';
 import { Grid, Row, Col } from 'react-flexbox-grid';
 
+// The maximum number of results to be fetched from server
+const PAGE_SIZE = 10;
+
 class Search extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-        value: '',
-        error: null,
-        contract: null,
-        searchState: 'initialized',
-        searchResults: null
+      searchedValue: '',
+      value: '',
+      error: null,
+      contract: null,
+      searchState: 'initialized',
+      searchResults: null,
+      searchIndex: 0,
+      totalResults: 0,
+      showBack: false
     };
     this.handleSearchBarChange = this.handleSearchBarChange.bind(this);
     this.handleSearchBarClick = this.handleSearchBarClick.bind(this);
@@ -23,6 +30,9 @@ class Search extends React.Component {
     this.searchByAddress = this.searchByAddress.bind(this);
     this.searchResultClicked = this.searchResultClicked.bind(this);
     this.getBodyElement = this.getBodyElement.bind(this);
+    this.getNextPage = this.getNextPage.bind(this);
+    this.getPreviousPage = this.getPreviousPage.bind(this);
+    this.backToResults = this.backToResults.bind(this);
   }
 
   handleSearchBarChange(e) {
@@ -44,10 +54,17 @@ class Search extends React.Component {
     }
   }
 
-  async searchByTags(query) {
-    this.setState({ searchState: 'searching' });
+  async searchByTags(query, index) {
+    if (!index) {
+      index = 0;
+    }
+    this.setState({
+      searchState: 'searching',
+      searchedValue: query,
+      searchIndex: index
+    });
 
-    const requestPath = `/api/v1/search?query=${query}`;
+    const requestPath = `/api/v1/search?query=${query}&index=${index}&size=${PAGE_SIZE}`;
 
     try {
       const response = await fetch(requestPath, { method: 'get' });
@@ -60,6 +77,7 @@ class Search extends React.Component {
       if (json.results.length > 0) {
         this.setState({
           searchResults: json.results,
+          totalResults: json.total,
           searchState: 'completed'
         });
       } else {
@@ -74,7 +92,7 @@ class Search extends React.Component {
   }
 
   async searchByAddress(address) {
-    this.setState({ searchState: 'searching' });
+    this.setState({ searchState: 'searching', searchedValue: address });
 
     const requestPath = `/api/v1/contract?address=${address}`;
 
@@ -87,7 +105,8 @@ class Search extends React.Component {
       const json = await response.json();
       this.setState({
         contract: json.contract,
-        searchState: 'contract'
+        searchState: 'contract',
+        showBack: false
       });
     } catch (e) {
       console.error(e);
@@ -95,11 +114,24 @@ class Search extends React.Component {
     }
   }
 
+  getNextPage() {
+    return this.searchByTags(this.state.searchedValue, this.state.searchIndex + PAGE_SIZE);
+  }
+
+  getPreviousPage() {
+    return this.searchByTags(this.state.searchedValue, this.state.searchIndex - PAGE_SIZE);
+  }
+
+  backToResults() {
+    this.setState({ searchState: 'completed' });
+  }
+
   searchResultClicked(address) {
     const contract = this.state.searchResults.find( e => e.address === address );
     this.setState({
       searchState: 'contract',
-      contract: contract
+      contract: contract,
+      showBack: true
     });
   }
 
@@ -119,6 +151,10 @@ class Search extends React.Component {
           <SearchResults
             results={this.state.searchResults}
             onResultClicked={this.searchResultClicked}
+            onNextPage={this.getNextPage}
+            onPreviousPage={this.getPreviousPage}
+            total={this.state.totalResults}
+            index={this.state.searchIndex}
           />
         );
         break;
@@ -127,11 +163,12 @@ class Search extends React.Component {
           <Contract
             contract={this.state.contract}
             web3={this.props.web3}
+            back={this.state.showBack ? this.backToResults : null}
           />
         );
         break;
       case 'notFound':
-        content = <NotFound query={this.state.value}/>;
+        content = <NotFound query={this.state.searchedValue}/>;
         break;
       default:
         // Shouldn't get here
@@ -156,7 +193,8 @@ class Search extends React.Component {
             <Col xs={11}>
               <SearchBar
                 onChange={this.handleSearchBarChange}
-                onClick={this.handleSearchBarClick}
+                onSearchClicked={this.handleSearchBarClick}
+                onBrowseClicked={ () => this.searchByTags('') }
                 reduced={this.state.searchState !== 'initialized'}
                 />
             </Col>

@@ -6,12 +6,14 @@ import ContractFunctions from './ContractFunctions';
 import {BottomNavigation, BottomNavigationItem} from 'material-ui/BottomNavigation';
 import InfoIcon from 'react-material-icons/icons/action/info';
 import BookIcon from 'react-material-icons/icons/action/book';
+import KeyboardArrowLeftIcon from 'react-material-icons/icons/hardware/keyboard-arrow-left';
 import ChromeReaderModeIcon from 'react-material-icons/icons/action/chrome-reader-mode';
 import AddCircleIcon from 'react-material-icons/icons/content/add-circle';
 import SendIcon from 'react-material-icons/icons/content/send';
 import ContractOverview from './ContractOverview';
 import update from 'immutability-helper';
 import clone from 'lodash.clone';
+import FlatButton from 'material-ui/FlatButton';
 
 const OVERVIEW = 'OVERVIEW';
 const VIEW_SOURCE = 'VIEW_SOURCE';
@@ -281,11 +283,26 @@ class Contract extends React.Component {
         className="SearchResultContainer"
         style={{ marginTop: 15, textAlign: 'left', marginBottom: 15 }}>
         <Card>
-          <CardTitle
-            title={this.state.contract.name || "Contract"}
-            subtitle={this.state.contract.address}
-          />
-        <div style={{ height: this.state.height, minHeight: MIN_CONTENT_HEIGHT, overflowY: 'auto', overflowX: 'hidden' }}>
+          <div style={{ display: 'flex' }} >
+            {
+              this.props.back &&
+              <FlatButton
+                style={{ height: 84, width: 50, maxWidth: 50, minWidth: 50 }}
+                icon={<KeyboardArrowLeftIcon style={{ width: 32, height: 32 }} />}
+                onTouchTap={this.props.back}
+              />
+            }
+            <CardTitle
+              title={this.state.contract.name || "Contract"}
+              subtitle={this.state.contract.address}
+            />
+          </div>
+          <div style={{
+            height: this.state.height,
+            minHeight: MIN_CONTENT_HEIGHT,
+            overflowY: 'auto',
+            overflowX: 'hidden'
+          }}>
             {this.getCurrentTab()}
           </div>
           {this.getNavigationBar()}
@@ -297,7 +314,8 @@ class Contract extends React.Component {
 
 Contract.propTypes = {
   contract: React.PropTypes.object.isRequired,
-  web3: React.PropTypes.object.isRequired
+  web3: React.PropTypes.object.isRequired,
+  back: React.PropTypes.func
 };
 
 export default Contract;

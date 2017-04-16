@@ -3,27 +3,28 @@ const Contract = require('../models/contract');
 const MAX_RETRIES = 2;
 const RETRY_DELAY = 500;
 
-async function search(query, hydrate, index, size, numRetries) {
-  if (!numRetries) {
-    numRetries = 0;
-  }
-
+function search(query, hydrate, index, size) {
   const es_query = {
-    nested: {
-      path: 'tags',
-      score_mode: 'max',
-      query: {
-        match: {
-          'tags.tag': {
-            query: query,
-            fuzziness: 'AUTO',
-            prefix_length: 1
-          }
-        }
-      }
+    multi_match: {
+      query: query,
+      fields: ['tags.tag', 'description', 'link', 'name'],
+      fuzziness: 'AUTO',
+      prefix_length: 1
     }
   };
 
+  return _search(es_query, hydrate, index, size, 0);
+}
+
+function searchAll(hydrate, index, size) {
+  const es_query = {
+    match_all: {}
+  };
+
+  return _search(es_query, hydrate, index, size, 0);
+}
+
+async function _search(es_query, hydrate, index, size, numRetries) {
   let result;
   try {
     result = await Contract.esSearchAsync(
@@ -39,7 +40,7 @@ async function search(query, hydrate, index, size, numRetries) {
       throw err;
     }
     const delay = ms => new Promise(r => setTimeout(r, ms));
-    return delay(RETRY_DELAY).then( () => search(query, hydrate, index, size, numRetries + 1));
+    return delay(RETRY_DELAY).then( () => _search(es_query, hydrate, index, size, numRetries + 1));
   }
 
   let results;
@@ -60,3 +61,4 @@ async function search(query, hydrate, index, size, numRetries) {
 }
 
 module.exports.search = search;
+module.exports.searchAll = searchAll;

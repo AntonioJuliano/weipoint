@@ -41,7 +41,7 @@ class SearchBar extends React.Component {
                     onChange={this.props.onChange}
                     onKeyPress={ (e) => { if (e.charCode === 13) {
                       e.preventDefault();
-                      this.props.onClick();
+                      this.props.onSearchClicked();
                     }}}
                     underlineShow={false}
                     fullWidth={true}
@@ -55,7 +55,7 @@ class SearchBar extends React.Component {
               <div style={{ marginTop: 4, marginBottom: 4, marginLeft: 8 }}>
                 <FloatingActionButton
                   mini={true}
-                  onClick={this.props.onClick}
+                  onClick={this.props.onSearchClicked}
                   >
                   <SearchIcon />
                 </FloatingActionButton>
@@ -70,7 +70,7 @@ class SearchBar extends React.Component {
               <div style={{ display: 'flex' }} className='button_container_2'>
                 <div  style={{ marginLeft: 'auto', marginRight: 15 }}>
                   <FloatingActionButton
-                    onClick={this.props.onClick}>
+                    onClick={this.props.onSearchClicked}>
                       <SearchIcon />
                   </FloatingActionButton>
                 </div>
@@ -78,7 +78,7 @@ class SearchBar extends React.Component {
                   className='hint--bottom-right hint--rounded'
                   aria-label='Browse Most Popular'>
                   <FloatingActionButton
-                    onClick={this.props.onClick}
+                    onClick={this.props.onBrowseClicked}
                     >
                       <WhatshotIcon />
                   </FloatingActionButton>
@@ -91,5 +91,11 @@ class SearchBar extends React.Component {
     );
   }
 }
+
+SearchBar.propType = {
+  onChange: React.PropTypes.func.isRequired,
+  onSearchClicked: React.PropTypes.func.isRequired,
+  onBrowseClicked: React.PropTypes.func.isRequired
+};
 
 export default SearchBar;
