@@ -1,8 +1,6 @@
 import React from "react";
-import {Card} from 'material-ui/Card';
 import RefreshIndicator from 'material-ui/RefreshIndicator';
-import {Row, Col} from 'react-flexbox-grid';
-
+import SearchStatus from './SearchStatus';
 const style = {
   refresh: {
     display: 'inline-block',
@@ -15,21 +13,17 @@ const style = {
 class PendingSearch extends React.Component {
   render() {
     return (
-      <div className="SearchResultContainer" style={{ marginTop: 25, textAlign: 'left' }}>
-        <Card>
-          <Row center='xs'>
-            <Col xs={2}>
-              <RefreshIndicator
-                size={50}
-                left={0}
-                top={0}
-                loadingColor="#FF9800"
-                status="loading"
-                style={style.refresh}/>
-            </Col>
-          </Row>
-        </Card>
-      </div>
+      <SearchStatus
+        icon={
+          <RefreshIndicator
+            size={50}
+            left={0}
+            top={0}
+            loadingColor="#FF9800"
+            status="loading"
+            style={style.refresh}
+          />}
+      />
     );
   }
 }

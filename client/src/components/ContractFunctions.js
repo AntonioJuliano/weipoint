@@ -68,7 +68,7 @@ class ContractFunctions extends React.Component {
     </div>;
     return (
       <div className='functionsList'
-        style={{ height: '100%', maxHeight: '100%', overflowY: 'auto', overflowX: 'hidden' }}>
+        style={{ height: '100%', maxHeight: '100%' }}>
         <Row style={{ marginTop: 10, marginBottom: 25 }} center='xs'>
           <Col xs={10}>
             {this.props.intro}

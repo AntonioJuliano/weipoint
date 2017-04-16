@@ -135,7 +135,7 @@ class UploadSource extends React.Component {
               <p style={{ fontSize: '75%'}}>
                 Note: currently only Solidity source code is supported
               </p>
-              <Paper zDepth={2} style={{ height: this.props.height - 160 }}>
+              <Paper zDepth={2} style={{ height: this.props.height - 170 }}>
                 <Editor
                   readOnly={false}
                   name='uploadSource'
@@ -250,7 +250,7 @@ class UploadSource extends React.Component {
       const spinner = <div>
         <Row center={'xs'} style={{marginTop: 15}}>
           <p>
-            Verifying source code matches contract on blockchain...
+            Verifying source code matches contract on blockchain. This may take a minute...
           </p>
         </Row>
         <Row center={'xs'}>
@@ -291,7 +291,8 @@ class UploadSource extends React.Component {
             marginRight: 'auto'
           }}
         >
-            {'Error verifying contract source code. Please check your input and try again'}
+            {'Error verifying contract source code. Please check your inputs are correct '
+              + '(including Solidity version and optimized) and try again'}
           </div>
         </Row>;
 

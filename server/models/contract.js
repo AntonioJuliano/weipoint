@@ -1,25 +1,70 @@
 const mongoose = require('../helpers/db');
+const elasticsearch = require('../helpers/elasticsearch');
+const bluebird = require('bluebird');
 const Schema = mongoose.Schema;
 
+// IMPORTANT if you make a breaking change to the schema, increment this number
+// and synchronize the new index on console
+const esVersionNumber = 1;
+
+const MAX_TAGS = 30;
+
+// TODO validate no duplicate tags
+const tagSchema = new Schema({
+  tag: { type: String, es_indexed: 'true', es_type: 'text' },
+  approved: { type: Boolean, es_index: 'true', es_type: 'boolean' }
+});
+
 const contractSchema = new Schema({
-  name: 'string',
+  name: { type: String, es_indexed: true, es_type: 'text' },
   address: {
-    type: 'string',
+    type: String,
+    es_indexed: true,
+    es_type: 'keyword',
     required: true,
     unique: true
   },
   code: {
-    type: 'string',
+    type: String,
     required: true
   },
-  source: 'string',
-  sourceType: 'string',
-  sourceVersion: 'string',
-  optimized: 'boolean',
-  abi: 'array',
-  libraries: 'mixed'
+  source: String,
+  sourceType: String,
+  sourceVersion: String,
+  optimized: Boolean,
+  abi: [Schema.Types.Mixed],
+  tags: {
+    type: [tagSchema],
+    es_indexed: true,
+    es_type: 'nested',
+    es_include_in_parent: true
+  },
+  libraries: Schema.Types.Mixed,
+  description: {
+    type: String,
+    es_indexed: true,
+    es_type: 'text'
+  },
+  pendingDescriptions: {
+    type: [String]
+  },
+  link: {
+    type: String,
+    es_indexed: true,
+    es_type: 'text'
+  },
+  pendingLinks: {
+    type: [String]
+  }
 });
 
+elasticsearch.plugin(contractSchema, esVersionNumber, 'contract');
+
 const Contract = mongoose.model('Contract', contractSchema);
+bluebird.promisifyAll(Contract);
+
+elasticsearch.connect(Contract, esVersionNumber, 'contract');
+
+Contract.MAX_TAGS = MAX_TAGS;
 
 module.exports = Contract;

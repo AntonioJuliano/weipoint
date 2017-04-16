@@ -1,62 +1,89 @@
 import React from "react";
 import TextField from 'material-ui/TextField';
-import '../styles/SearchBar.css';
 import SearchIcon from 'react-material-icons/icons/action/search';
-import FaceIcon from 'react-material-icons/icons/action/face';
+import WhatshotIcon from 'react-material-icons/icons/social/whatshot';
 import Paper from 'material-ui/Paper';
 import FloatingActionButton from 'material-ui/FloatingActionButton';
 import { Row, Col } from 'react-flexbox-grid';
 
 class SearchBar extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      focused: false
+    };
+  }
+
   render() {
     const barSize = this.props.reduced ? 6 : 7;
 
+    const barStyle = this.props.reduced ? { marginTop: 40 } : { marginTop: 250 };
+    const colStyle = this.props.reduced ? {} : { maxWidth: 550, margin: 'auto' };
+
     return (
-      <div className={ this.props.reduced ? 'SearchBarContainerReduced' : 'SearchBarContainer' }>
-        <div className="SearchTextField">
+      <div className='SearchBarContainer' style={barStyle}>
+        <div className="SearchTextField" style={{ marginBottom: 20 }}>
           <Row
             center={this.props.reduced ? null : 'xs'}>
-            <Col xs={barSize} md={barSize - 1} lg={barSize - 2}>
-              <Paper zDepth={2}>
-                <TextField
-                  id='searchTextField'
-                  onChange={this.props.onChange}
-                  underlineShow={false}
-                  style={{marginLeft: "10px", marginRight: "0px", width: "95%"}}
-                  />
+            <Col
+              xs={barSize}
+              md={barSize - 1}
+              lg={barSize - 2}
+              style={colStyle}
+              xsOffset={this.props.reduced ? 1 : 0}>
+              <Paper zDepth={this.state.focused ? 2 : 1}
+                onMouseEnter={ e => this.setState({ focused: true })}
+                onMouseLeave={ e => this.setState({ focused: false })}>
+                <div style={{ marginRight: 10, marginLeft: 10, width: "auto" }}>
+                  <TextField
+                    id='searchTextField'
+                    onChange={this.props.onChange}
+                    onKeyPress={ (e) => { if (e.charCode === 13) {
+                      e.preventDefault();
+                      this.props.onSearchClicked();
+                    }}}
+                    underlineShow={false}
+                    fullWidth={true}
+                    spellCheck={false}
+                    />
+                </div>
               </Paper>
             </Col>
             {
               this.props.reduced &&
-              <Col xs={1}>
-                <div style={{marginTop: "4px", marginBottom: "4px"}}>
-                  <FloatingActionButton
-                    mini={true}
-                    onClick={this.props.onClick}
-                    keyboardFocused={true}
-                    >
-                    <SearchIcon />
-                  </FloatingActionButton>
-                </div>
-              </Col>
+              <div style={{ marginTop: 4, marginBottom: 4, marginLeft: 8 }}>
+                <FloatingActionButton
+                  mini={true}
+                  onClick={this.props.onSearchClicked}
+                  >
+                  <SearchIcon />
+                </FloatingActionButton>
+              </div>
             }
           </Row>
         </div>
         {
           !this.props.reduced &&
           <Row center={'xs'}>
-            <Col xs={1} style={{marginRight: "8px"}}>
-              <FloatingActionButton
-                onClick={this.props.onClick}
-                keyboardFocused={true}
-                >
-                <SearchIcon />
-              </FloatingActionButton>
-            </Col>
-            <Col xs={1} style={{marginLeft: "8px"}}>
-              <FloatingActionButton>
-                <FaceIcon />
-              </FloatingActionButton>
+            <Col xs={5}>
+              <div style={{ display: 'flex' }} className='button_container_2'>
+                <div  style={{ marginLeft: 'auto', marginRight: 15 }}>
+                  <FloatingActionButton
+                    onClick={this.props.onSearchClicked}>
+                      <SearchIcon />
+                  </FloatingActionButton>
+                </div>
+                <div style={{ marginLeft: 15, marginRight: 'auto' }}
+                  className='hint--bottom-right hint--rounded'
+                  aria-label='Browse Most Popular'>
+                  <FloatingActionButton
+                    onClick={this.props.onBrowseClicked}
+                    >
+                      <WhatshotIcon />
+                  </FloatingActionButton>
+                </div>
+              </div>
             </Col>
           </Row>
         }
@@ -64,5 +91,11 @@ class SearchBar extends React.Component {
     );
   }
 }
+
+SearchBar.propType = {
+  onChange: React.PropTypes.func.isRequired,
+  onSearchClicked: React.PropTypes.func.isRequired,
+  onBrowseClicked: React.PropTypes.func.isRequired
+};
 
 export default SearchBar;

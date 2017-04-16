@@ -38,22 +38,16 @@ router.get('/', async(request, response) => {
       contract_id: id
     });
 
+    let contractJson = contractService.toJson(contract);
+    contractJson.balance = balance;
     if (contract === null) {
       return response.status(400).json({
         error: 'Not Found',
         errorCode: errors.errorCodes.notFound
-      })
+      });
     } else {
       return response.status(200).json({
-        address: contract.address,
-        name: contract.name,
-        source: contract.source,
-        sourceType: contract.sourceType,
-        optimized: contract.optimized,
-        code: contract.code,
-        abi: contract.abi,
-        sourceVersion: contract.sourceVersion,
-        balance: balance
+        contract: contractJson
       });
     }
   } catch (e) {
@@ -78,15 +72,20 @@ router.post('/source', async(request, response) => {
         errorMessage: 'Invalid Address'
       },
       'source': { in: 'body',
-        notEmpty: true
+        notEmpty: true,
+        isString: true,
+        errorMessage: 'Invalid Source'
       },
       'sourceType': { in: 'body',
         matches: {
           options: 'solidity|serpent'
-        }
+        },
+        errorMessage: 'Invalid Source Type'
       },
       'optimized': { in: 'body',
-        notEmpty: true
+        notEmpty: true,
+        isBoolean: true,
+        errorMessage: 'Invalid Optimized'
       }
     });
     const validationResult = await request.getValidationResult();
@@ -118,7 +117,7 @@ router.post('/source', async(request, response) => {
         errors.errorCodes.sourceAlreadyExists
       );
     }
-    const compileResult = await contractService.verifySource(
+    const updatedContract = await contractService.verifySource(
       contract,
       request.body.source,
       request.body.sourceType,
@@ -126,23 +125,8 @@ router.post('/source', async(request, response) => {
       request.body.optimized
     );
 
-    contract.source = request.body.source;
-    contract.sourceType = request.body.sourceType;
-    contract.sourceVersion = request.body.compilerVersion;
-    contract.name = compileResult.contractName;
-    contract.abi = compileResult.abi;
-    contract.libraries = compileResult.libraries;
-    await contract.save();
     return response.status(200).json({
-      address: contract.address,
-      source: contract.source,
-      sourceType: contract.sourceType,
-      sourceVersion: contract.sourceVersion,
-      optimized: contract.optimized,
-      name: contract.name,
-      abi: contract.abi,
-      code: contract.code,
-      libraries: contract.libraries
+      contract: contractService.toJson(updatedContract)
     });
   } catch (e) {
     errorHandler.handle(e, response);
@@ -208,6 +192,77 @@ router.post('/constantFunction', async (request, response) => {
     response.status(200).json({
       address: contract.address,
       result: callResult
+    });
+  } catch (e) {
+    errorHandler.handle(e, response);
+  }
+});
+
+router.post('/metadata', async (request, response) => {
+  try {
+    request.check({
+      'address': {
+        in: 'body',
+        isAddress: true,
+        errorMessage: 'Invalid Address'
+      },
+      'tags': {
+        in: 'body',
+        optional: true,
+        isArrayOfStrings: true,
+        errorMessage: 'Invalid Tags'
+      },
+      'description': {
+        in: 'body',
+        optional: true,
+        isString: true,
+        errorMessage: 'Invalid Description'
+      },
+      'link': {
+        in: 'body',
+        optional: true,
+        isString: true,
+        errorMessage: 'Invalid Link'
+      }
+    });
+    const validationResult = await request.getValidationResult();
+    if (!validationResult.isEmpty()) {
+      throw new errors.RequestError(validationResult.array());
+    }
+    logger.debug({
+      at: 'contractController#metadata',
+      message: "Making contract request",
+      address: request.body.address
+    });
+
+    const contract = await contractService.lookupContract(request.body.address);
+    const id = contract === null ? null : contract.id;
+    logger.debug({
+      at: 'contractController#metadata',
+      message: "Got contract response",
+      address: request.body.address,
+      contract_id: id
+    });
+
+    if (contract === null) {
+      throw new errors.ClientError(
+        'Contract not found at address',
+        errors.errorCodes.notFound
+      );
+    }
+
+    const updatedContract = await contractService.addMetadata(
+      contract,
+      {
+        tags: request.body.tags,
+        description: request.body.description,
+        link: request.body.link
+      }
+    );
+
+    response.status(200).json({
+      address: contract.address,
+      contract: contractService.toJson(updatedContract)
     });
   } catch (e) {
     errorHandler.handle(e, response);

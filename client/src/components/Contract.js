@@ -1,19 +1,19 @@
 import React from "react";
 import {Card, CardTitle} from 'material-ui/Card';
-import CopyToClipboard from 'react-copy-to-clipboard';
 import UploadSource from './UploadSource';
 import ViewSource from './ViewSource';
 import ContractFunctions from './ContractFunctions';
 import {BottomNavigation, BottomNavigationItem} from 'material-ui/BottomNavigation';
 import InfoIcon from 'react-material-icons/icons/action/info';
 import BookIcon from 'react-material-icons/icons/action/book';
+import KeyboardArrowLeftIcon from 'react-material-icons/icons/hardware/keyboard-arrow-left';
 import ChromeReaderModeIcon from 'react-material-icons/icons/action/chrome-reader-mode';
 import AddCircleIcon from 'react-material-icons/icons/content/add-circle';
 import SendIcon from 'react-material-icons/icons/content/send';
-import FlatButton from 'material-ui/FlatButton';
+import ContractOverview from './ContractOverview';
 import update from 'immutability-helper';
-
-const initialBytecodeButtonText = "Copy Bytecode";
+import clone from 'lodash.clone';
+import FlatButton from 'material-ui/FlatButton';
 
 const OVERVIEW = 'OVERVIEW';
 const VIEW_SOURCE = 'VIEW_SOURCE';
@@ -29,29 +29,20 @@ class Contract extends React.Component {
     this.state = {
       currentTabName: OVERVIEW,
       currentTabIndex: 0,
-      bytecodeButtonText: initialBytecodeButtonText,
       contract: this.props.contract,
       uploadState: 'initialized',
       price: null,
       height: 0
     };
-    this.copyBytecodeClicked = this.copyBytecodeClicked.bind(this);
     this.uploadSource = this.uploadSource.bind(this);
     this.getPrice = this.getPrice.bind(this);
     this.changeTab = this.changeTab.bind(this);
     this.getCurrentTab = this.getCurrentTab.bind(this);
     this.getNavigationBar = this.getNavigationBar.bind(this);
     this.getBalanceString = this.getBalanceString.bind(this);
+    this.addMetadata = this.addMetadata.bind(this);
 
     this.getPrice();
-  }
-
-  copyBytecodeClicked(e) {
-    this.setState({ bytecodeButtonText: 'Copied!' });
-    const thisRef = this;
-    setTimeout(function() {
-      thisRef.setState({ bytecodeButtonText: initialBytecodeButtonText });
-    }, 1000);
   }
 
   updateDimensions() {
@@ -69,6 +60,45 @@ class Contract extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     this.setState({ contract: this.props.contract });
+  }
+
+  async addMetadata(metadata) {
+    const tags = metadata.tags;
+    const description = metadata.description;
+    let link = metadata.link;
+
+    let request = { address: this.state.contract.address };
+    let contractClone = clone(this.state.contract);
+    if (tags && tags.length > 0) {
+      tags.forEach( tag => contractClone.tags.push({ tag: tag }) );
+      request.tags = tags;
+    }
+    if (description) {
+      contractClone.description = description;
+      request.description = description;
+    }
+    if (link) {
+      if (!link.match(/^http:\/\//)) {
+        link = 'http://' + link;
+      }
+      request.link = link;
+    }
+    this.setState({ contract: contractClone });
+
+    const requestPath = `/api/v1/contract/metadata`;
+
+    try {
+      await fetch(requestPath, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request)
+      });
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   async getPrice() {
@@ -104,18 +134,19 @@ class Contract extends React.Component {
 
       const json = await response.json();
       if (response.status !== 200) {
-        throw Error("Search request to server failed");
+        throw Error("Upload source request to server failed");
       }
 
       const updatedContract = update(this.state.contract, {
-        source: { $set: json.source },
-        sourceType: { $set: json.sourceType },
-        sourceVersion: { $set: json.sourceVersion },
-        optimized: { $set: json.optimized },
-        name: { $set: json.name },
-        abi: { $set: json.abi },
-        libraries: { $set: json.libraries },
+        source: { $set: json.contract.source },
+        sourceType: { $set: json.contract.sourceType },
+        sourceVersion: { $set: json.contract.sourceVersion },
+        optimized: { $set: json.contract.optimized },
+        name: { $set: json.contract.name },
+        abi: { $set: json.contract.abi },
+        libraries: { $set: json.contract.libraries },
       });
+
       this.setState({
         uploadState: 'completed',
         contract: updatedContract
@@ -131,14 +162,10 @@ class Contract extends React.Component {
   }
 
   getCurrentTab() {
-    const overviewTab = <div>
-        {"Overview!"}
-        <CopyToClipboard text={this.state.contract.code}>
-          <FlatButton
-            label={this.state.bytecodeButtonText}
-            onClick={this.copyBytecodeClicked}/>
-        </CopyToClipboard>
-      </div>;
+    const overviewTab = <ContractOverview
+        contract={this.state.contract}
+        addMetadata={this.addMetadata}
+      />;
     const uploadSourceTab = <UploadSource
         uploadSource={this.uploadSource}
         uploadState={this.state.uploadState}
@@ -251,16 +278,31 @@ class Contract extends React.Component {
     return (
       <div
         className="SearchResultContainer"
-        style={{ marginTop: 25, textAlign: 'left', marginBottom: 15 }}>
+        style={{ marginTop: 15, textAlign: 'left', marginBottom: 15 }}>
         <Card>
-          <CardTitle
-            title={this.state.contract.name || "Contract"}
-            subtitle={this.state.contract.address}
-          />
-        <div style={{ height: this.state.height, minHeight: MIN_CONTENT_HEIGHT }}>
-          {this.getCurrentTab()}
-        </div>
-        {this.getNavigationBar()}
+          <div style={{ display: 'flex' }} >
+            {
+              this.props.back &&
+              <FlatButton
+                style={{ height: 84, width: 50, maxWidth: 50, minWidth: 50 }}
+                icon={<KeyboardArrowLeftIcon style={{ width: 32, height: 32 }} />}
+                onTouchTap={this.props.back}
+              />
+            }
+            <CardTitle
+              title={this.state.contract.name || "Contract"}
+              subtitle={this.state.contract.address}
+            />
+          </div>
+          <div style={{
+            height: this.state.height,
+            minHeight: MIN_CONTENT_HEIGHT,
+            overflowY: 'auto',
+            overflowX: 'hidden'
+          }}>
+            {this.getCurrentTab()}
+          </div>
+          {this.getNavigationBar()}
         </Card>
       </div>
     );
@@ -269,7 +311,8 @@ class Contract extends React.Component {
 
 Contract.propTypes = {
   contract: React.PropTypes.object.isRequired,
-  web3: React.PropTypes.object.isRequired
+  web3: React.PropTypes.object.isRequired,
+  back: React.PropTypes.func
 };
 
 export default Contract;
