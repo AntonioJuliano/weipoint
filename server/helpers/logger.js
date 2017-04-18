@@ -7,7 +7,7 @@ const logger = new winston.Logger({
     new winston.transports.Console({
       level: 'debug',
       handleExceptions: true,
-      json: false,
+      json: process.env.NODE_ENV === 'production' ? true : false,
       colorize: true
     })
   ],

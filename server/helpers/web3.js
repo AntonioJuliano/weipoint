@@ -12,4 +12,17 @@ web3.setProvider(new web3.providers.HttpProvider(providerPath));
 Promise.promisifyAll(web3.eth);
 Promise.promisifyAll(web3.eth.compile);
 
+function healthCheck() {
+  if(!web3.isConnected()) {
+    logger.error({
+      at: 'web3#healthCheck',
+      message: 'not connected to web3 provider'
+    });
+  }
+
+  setTimeout(healthCheck, 10000);
+}
+
+healthCheck();
+
 module.exports = web3;

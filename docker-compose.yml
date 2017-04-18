@@ -28,6 +28,7 @@ services:
     environment:
       - http.host=0.0.0.0
       - transport.host=127.0.0.1
+      - xpack.security.enabled=false
     volumes:
       - esdata1:/usr/share/elasticsearch/data
   redis:
