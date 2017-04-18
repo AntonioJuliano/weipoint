@@ -21,15 +21,15 @@ process.on('unhandledRejection', (reason, p) => {
   });
 });
 
-app.use(function(req, res, next) {
-  if(process.env.NODE_ENV === 'production'
-    && !req.secure
-    && req.get('X-Forwarded-Proto') !== 'https') {
-    res.redirect('https://' + req.get('Host') + req.url);
-  } else {
-    return next();
-  }
-});
+// app.use(function(req, res, next) {
+//   if(process.env.NODE_ENV === 'production'
+//     && !req.secure
+//     && req.get('X-Forwarded-Proto') !== 'https') {
+//     res.redirect('https://' + req.get('Host') + req.url);
+//   } else {
+//     return next();
+//   }
+// });
 
 app.use(bodyParser.json());
 app.use(function(error, request, response, _next) {
@@ -56,6 +56,10 @@ app.use(require('./middlewares/requestLogger'));
 app.use(express.static(path.join(__dirname, '../client/build')));
 
 app.get('/', function(req, res) {
+  res.status(200);
+});
+
+app.get('/health', function(req, res) {
   res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
 });
 
