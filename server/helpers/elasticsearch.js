@@ -14,7 +14,7 @@ let config = {
   host: process.env.ELASTICSEARCH_URL,
   port: process.env.ELASTICSEARCH_PORT,
   auth: process.env.ELASTICSEARCH_LOGIN,
-  protocol: "http"
+  protocol: "https"
 };
 
 function plugin(schema, versionNumber, schemaName) {
@@ -37,11 +37,8 @@ async function connect(model, versionNumber, schemaName) {
     delay: 1000
   });
 
-  bluebird.promisifyAll(version_lock);
-  bluebird.promisifyAll(synchronized_lock);
-
   try {
-    await version_lock.acquireAsync(ES_REDIS_VERSION_PREFIX + '_lock_' + schemaName);
+    await version_lock.acquire(ES_REDIS_VERSION_PREFIX + '_lock_' + schemaName);
     const schemaVersion = await redis.getAsync(ES_REDIS_VERSION_PREFIX + schemaName);
     if (parseInt(schemaVersion) !== versionNumber) {
       await model.createMappingAsync();
@@ -66,7 +63,7 @@ async function connect(model, versionNumber, schemaName) {
       multi.set(ES_REDIS_SYNCHRONIZED_PREFIX + schemaName, SYNCHRONIZING)
       await multi.execAsync();
     } else {
-      version_lock.releaseAsync(ES_REDIS_VERSION_PREFIX + '_lock_' + schemaName)
+      version_lock.release(ES_REDIS_VERSION_PREFIX + '_lock_' + schemaName)
         .catch(function(_err){});
     }
   } catch (err) {
@@ -80,13 +77,13 @@ async function connect(model, versionNumber, schemaName) {
     setTimeout(() => {
       connect( model, versionNumber, schemaName)
     }, 1000);
-    version_lock.releaseAsync(ES_REDIS_VERSION_PREFIX + '_lock_' + schemaName)
+    version_lock.release(ES_REDIS_VERSION_PREFIX + '_lock_' + schemaName)
       .catch(function(_err){});
     return;
   }
 
   try {
-    await synchronized_lock.acquireAsync(ES_REDIS_SYNCHRONIZED_PREFIX + '_lock_' + schemaName);
+    await synchronized_lock.acquire(ES_REDIS_SYNCHRONIZED_PREFIX + '_lock_' + schemaName);
     const synchronized = await redis.getAsync(ES_REDIS_SYNCHRONIZED_PREFIX + schemaName);
     if (synchronized !== SYNCHRONIZED) {
       const stream = model.synchronize();
@@ -103,7 +100,7 @@ async function connect(model, versionNumber, schemaName) {
             count: count
           });
           try {
-            await synchronized_lock.extendAsync(
+            await synchronized_lock.extend(
               ES_REDIS_SYNCHRONIZED_PREFIX + '_lock_' + schemaName
             );
           } catch (err) {
@@ -126,7 +123,7 @@ async function connect(model, versionNumber, schemaName) {
           version: versionNumber,
           count: count
         });
-        synchronized_lock.releaseAsync(ES_REDIS_SYNCHRONIZED_PREFIX + '_lock_' + schemaName);
+        synchronized_lock.release(ES_REDIS_SYNCHRONIZED_PREFIX + '_lock_' + schemaName);
         redis.setAsync(ES_REDIS_SYNCHRONIZED_PREFIX + schemaName, SYNCHRONIZED);
         // TODO remove the old index
       });
@@ -140,13 +137,13 @@ async function connect(model, versionNumber, schemaName) {
           count: count,
           error: err.toString()
         });
-        synchronized_lock.releaseAsync(ES_REDIS_SYNCHRONIZED_PREFIX + '_lock_' + schemaName);
+        synchronized_lock.release(ES_REDIS_SYNCHRONIZED_PREFIX + '_lock_' + schemaName);
         setTimeout(() => {
           connect( model, versionNumber, schemaName)
         }, 1000);
       });
     } else {
-      synchronized_lock.releaseAsync(ES_REDIS_SYNCHRONIZED_PREFIX + '_lock_' + schemaName);
+      synchronized_lock.release(ES_REDIS_SYNCHRONIZED_PREFIX + '_lock_' + schemaName);
     }
   } catch (err) {
     logger.error({
@@ -156,7 +153,7 @@ async function connect(model, versionNumber, schemaName) {
       version: versionNumber,
       error: err.toString()
     });
-    synchronized_lock.releaseAsync(ES_REDIS_SYNCHRONIZED_PREFIX + '_lock_' + schemaName)
+    synchronized_lock.release(ES_REDIS_SYNCHRONIZED_PREFIX + '_lock_' + schemaName)
       .catch(function(_err){});
     setTimeout(() => {
       connect( model, versionNumber, schemaName)
