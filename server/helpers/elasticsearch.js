@@ -15,7 +15,7 @@ const esClient = new elasticsearch.Client({
   host: [
     {
       host: process.env.ELASTICSEARCH_URL,
-      protocol: 'https',
+      protocol: 'http',
       port: process.env.ELASTICSEARCH_PORT
     }
   ]
