@@ -3,6 +3,7 @@ const redis = require('../helpers/redis');
 const logger = require('./logger');
 const bluebird = require('bluebird');
 const redislock = require('redislock');
+const elasticsearch = require('elasticsearch');
 
 const ES_REDIS_VERSION_PREFIX = 'es_version_';
 const ES_REDIS_SYNCHRONIZED_PREFIX = 'es_synchronized_';
@@ -10,11 +11,18 @@ const ES_REDIS_SYNCHRONIZED_PREFIX = 'es_synchronized_';
 const SYNCHRONIZED = 'SYNCHRONIZED';
 const SYNCHRONIZING = 'SYNCHRONIZING';
 
+const esClient = new elasticsearch.Client({
+  host: [
+    {
+      host: process.env.ELASTICSEARCH_URL,
+      protocol: 'https',
+      port: process.env.ELASTICSEARCH_PORT
+    }
+  ]
+});
+
 let config = {
-  host: process.env.ELASTICSEARCH_URL,
-  port: process.env.ELASTICSEARCH_PORT,
-  auth: process.env.ELASTICSEARCH_LOGIN,
-  protocol: "https"
+  esClient: esClient
 };
 
 function plugin(schema, versionNumber, schemaName) {
@@ -38,6 +46,9 @@ async function connect(model, versionNumber, schemaName) {
   });
 
   try {
+    // Make sure elasticsearch is up
+    await esClient.ping();
+
     await version_lock.acquire(ES_REDIS_VERSION_PREFIX + '_lock_' + schemaName);
     const schemaVersion = await redis.getAsync(ES_REDIS_VERSION_PREFIX + schemaName);
     if (parseInt(schemaVersion) !== versionNumber) {
