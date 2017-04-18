@@ -63,7 +63,7 @@ elasticsearch.plugin(contractSchema, esVersionNumber, 'contract');
 const Contract = mongoose.model('Contract', contractSchema);
 bluebird.promisifyAll(Contract);
 
-elasticsearch.connect(Contract, esVersionNumber, 'contract');
+// elasticsearch.connect(Contract, esVersionNumber, 'contract');
 
 Contract.MAX_TAGS = MAX_TAGS;
 
