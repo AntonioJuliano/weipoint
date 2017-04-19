@@ -16,20 +16,44 @@ class SearchBar extends React.Component {
   }
 
   render() {
-    const barSize = this.props.reduced ? 6 : 7;
+    const barSize = this.props.reduced ? 7 : 8;
 
-    const barStyle = this.props.reduced ? { marginTop: 40 } : { marginTop: 250 };
+    const barStyle = this.props.reduced ? { marginTop: 40 } : { marginTop: 190 };
     const colStyle = this.props.reduced ? {} : { maxWidth: 550, margin: 'auto' };
+    const hintText = this.props.reduced ? null : 'Search by address or term, e.g. "token"'
 
     return (
       <div className='SearchBarContainer' style={barStyle}>
+        {
+          !this.props.reduced &&
+          <div>
+            <div style={{
+              marginLeft: 'auto',
+              marginRight: 'auto',
+              fontSize: 52,
+              fontFamily: "Bitter, serif",
+              marginBottom: 12
+            }}>
+              {'Weipoint'}
+            </div>
+            <div style={{
+              marginLeft: 'auto',
+              marginRight: 'auto',
+              fontSize: 18,
+              fontFamily: "Bitter, serif",
+              marginBottom: 18
+            }}>
+              {'Search the decentralized web'}
+            </div>
+          </div>
+        }
         <div className="SearchTextField" style={{ marginBottom: 20 }}>
           <Row
             center={this.props.reduced ? null : 'xs'}>
             <Col
               xs={barSize}
-              md={barSize - 1}
-              lg={barSize - 2}
+              md={barSize - 2}
+              lg={barSize - 3}
               style={colStyle}
               xsOffset={this.props.reduced ? 1 : 0}>
               <Paper zDepth={this.state.focused ? 2 : 1}
@@ -46,7 +70,8 @@ class SearchBar extends React.Component {
                     underlineShow={false}
                     fullWidth={true}
                     spellCheck={false}
-                    />
+                    hintText={hintText}
+                  />
                 </div>
               </Paper>
             </Col>
@@ -70,17 +95,18 @@ class SearchBar extends React.Component {
               <div style={{ display: 'flex' }} className='button_container_2'>
                 <div  style={{ marginLeft: 'auto', marginRight: 15 }}>
                   <FloatingActionButton
-                    onClick={this.props.onSearchClicked}>
-                      <SearchIcon />
+                    onClick={this.props.onSearchClicked}
+                  >
+                    <SearchIcon />
                   </FloatingActionButton>
                 </div>
                 <div style={{ marginLeft: 15, marginRight: 'auto' }}
                   className='hint--bottom-right hint--rounded'
-                  aria-label='Browse Most Popular'>
+                  aria-label='Browse All'>
                   <FloatingActionButton
                     onClick={this.props.onBrowseClicked}
-                    >
-                      <WhatshotIcon />
+                  >
+                    <WhatshotIcon />
                   </FloatingActionButton>
                 </div>
               </div>

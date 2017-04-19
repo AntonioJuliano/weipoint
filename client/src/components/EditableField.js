@@ -35,7 +35,7 @@ class EditableField extends React.Component {
       if (this.state.value.trim() === '') {
         return;
       }
-      if (this.props.validate(this.state.value) === '') {
+      if (this.props.validate(this.state.value.trim()) === '') {
         const showMessage = !(this.props.autoAcceptFirst && this.props.value);
         this.setState({ value: '', showAddField: false, showReviewingMessage: showMessage });
         this.props.add(this.state.value.trim());
