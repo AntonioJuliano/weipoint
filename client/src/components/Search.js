@@ -86,7 +86,6 @@ class Search extends React.Component {
         });
       }
     } catch (e) {
-      console.error(e);
       this.setState({ searchState: 'error' });
     }
   }
@@ -109,7 +108,6 @@ class Search extends React.Component {
         showBack: false
       });
     } catch (e) {
-      console.error(e);
       this.setState({ searchState: 'error' });
     }
   }
@@ -196,7 +194,7 @@ class Search extends React.Component {
                 onSearchClicked={this.handleSearchBarClick}
                 onBrowseClicked={ () => this.searchByTags('') }
                 reduced={this.state.searchState !== 'initialized'}
-                />
+              />
             </Col>
           </Row>
           {this.getBodyElement()}

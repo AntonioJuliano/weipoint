@@ -1,11 +1,13 @@
 import {
-  cyan500,
+  cyan500, cyan700,
   pinkA200,
-  grey100, grey300, grey500,
-  white, darkBlack, fullBlack
+  grey100, grey300, grey400, grey500,
+  white, darkBlack, fullBlack,
 } from 'material-ui/styles/colors';
 import {fade} from 'material-ui/utils/colorManipulator';
 import spacing from 'material-ui/styles/spacing';
+
+const purple_1 = '#9b59b6';
 
 /**
  *  Light Theme is the default theme used in material-ui. It is guaranteed to
@@ -17,9 +19,9 @@ export default {
   fontFamily: 'Roboto, sans-serif',
   borderRadius: 2,
   palette: {
-    primary1Color: '#8e44ad',
-    primary2Color: '#34495e',
-    primary3Color: '#7f8c8d',
+    primary1Color: purple_1,
+    primary2Color: cyan700,
+    primary3Color: grey400,
     accent1Color: pinkA200,
     accent2Color: grey100,
     accent3Color: grey500,

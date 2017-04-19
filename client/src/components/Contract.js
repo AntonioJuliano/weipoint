@@ -97,7 +97,7 @@ class Contract extends React.Component {
         body: JSON.stringify(request)
       });
     } catch (error) {
-      console.error(error);
+      console.error('Metadata add failed');
     }
   }
 
@@ -153,7 +153,7 @@ class Contract extends React.Component {
       });
     } catch (error) {
       this.setState({ uploadState: 'error' });
-      console.error(error);
+      console.error('Upload Source failed');
     }
   }
 

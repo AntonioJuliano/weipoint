@@ -142,7 +142,6 @@ class ContractFunction extends React.Component {
         if (e.toString().includes('User denied')) {
           errorString = 'Metamask: User denied transaction';
         }
-        console.error(e);
         this.setState({ requestState: 'error', error: errorString });
       }
       return;
@@ -153,7 +152,6 @@ class ContractFunction extends React.Component {
       contractInstance = this.props.web3.eth.contract(
         this.props.contractAbi).at(this.props.address);
     } catch (e) {
-      console.error(e);
     }
 
 
@@ -168,7 +166,6 @@ class ContractFunction extends React.Component {
       if (e.toString().includes('User denied')) {
         errorString = 'Metamask: User denied transaction';
       }
-      console.error(e);
       this.setState({ requestState: 'error', error: errorString });
     }
   }
