@@ -77,7 +77,7 @@ class SearchResult extends React.Component {
   }
 
   render() {
-    const titleStyle = this.state.focused ? { color: '#1c6ced' } : {};
+    const titleStyle = this.state.focused ? { color: '#0060fc' } : {};
 
     return (
       <div

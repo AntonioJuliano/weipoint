@@ -288,7 +288,8 @@ class UploadSource extends React.Component {
             marginTop: 50,
             marginBottom: 50,
             marginLeft: 'auto',
-            marginRight: 'auto'
+            marginRight: 'auto',
+            width: '80%'
           }}
         >
             {'Error verifying contract source code. Please check your inputs are correct '

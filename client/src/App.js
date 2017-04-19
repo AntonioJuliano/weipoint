@@ -3,7 +3,7 @@
 import React, { Component } from 'react';
 import Search from './components/Search';
 import Web3 from 'web3';
-import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
+import theme from './lib/theme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 
@@ -36,7 +36,7 @@ class App extends Component {
           zIndex: -1,
           overflow: 'auto'
         }}>
-        <MuiThemeProvider muiTheme={getMuiTheme(lightBaseTheme)}>
+        <MuiThemeProvider muiTheme={getMuiTheme(theme)}>
           <Search web3={this.web3}/>
         </MuiThemeProvider>
       </div>

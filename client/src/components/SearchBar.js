@@ -18,11 +18,34 @@ class SearchBar extends React.Component {
   render() {
     const barSize = this.props.reduced ? 6 : 7;
 
-    const barStyle = this.props.reduced ? { marginTop: 40 } : { marginTop: 250 };
+    const barStyle = this.props.reduced ? { marginTop: 40 } : { marginTop: 180 };
     const colStyle = this.props.reduced ? {} : { maxWidth: 550, margin: 'auto' };
 
     return (
       <div className='SearchBarContainer' style={barStyle}>
+        {
+          !this.props.reduced &&
+          <div>
+            <div style={{
+              marginLeft: 'auto',
+              marginRight: 'auto',
+              fontSize: 52,
+              fontFamily: "Bitter, serif",
+              marginBottom: 12
+            }}>
+              {'Weipoint'}
+            </div>
+            <div style={{
+              marginLeft: 'auto',
+              marginRight: 'auto',
+              fontSize: 18,
+              fontFamily: "Bitter, serif",
+              marginBottom: 28
+            }}>
+              {'Search the decentralized web'}
+            </div>
+          </div>
+        }
         <div className="SearchTextField" style={{ marginBottom: 20 }}>
           <Row
             center={this.props.reduced ? null : 'xs'}>
