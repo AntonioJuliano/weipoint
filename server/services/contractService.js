@@ -46,7 +46,10 @@ async function lookupContract(address) {
 
     return newContract;
   } else {
-    return null;
+    throw new errors.ClientError(
+      "Contract not found",
+      errors.errorCodes.notFound
+    );
   }
 }
 
@@ -206,16 +209,14 @@ function _addDescription(contract, description, pending) {
   return contract;
 }
 
-async function _addLink(contract, link, pending) {
+function _addLink(contract, link, pending) {
   if (pending &&
       !contract.pendingLinks.includes(link)
       && contract.link !== link) {
     contract.pendingLinks.push(link);
-    await contract.save();
   }
   if (!pending) {
     contract.link = link;
-    await contract.save();
   }
   return contract;
 }
@@ -232,7 +233,8 @@ function toJson(contract) {
     abi: contract.abi,
     tags: contract.tags.map(_tagToJson),
     libraries: contract.libraries,
-    description: contract.description
+    description: contract.description,
+    link: contract.link
   };
 
   if (contract.type) {

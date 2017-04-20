@@ -4,7 +4,7 @@ import AssignmentIcon from 'react-material-icons/icons/action/assignment';
 import VerifiedUserIcon from 'react-material-icons/icons/action/verified-user';
 import LanguageIcon from 'react-material-icons/icons/action/language';
 import Tags from './Tags';
-import { green600 } from 'material-ui/styles/colors';
+import { green600, blue700 } from 'material-ui/styles/colors';
 
 class SearchResult extends React.Component {
   constructor(props) {
@@ -45,7 +45,7 @@ class SearchResult extends React.Component {
         );
       }
 
-      if (this.props.contract.link) {
+      if (this.props.link) {
         badges.push(
           <span
             className="hint--bottom-right hint--rounded"
@@ -53,7 +53,7 @@ class SearchResult extends React.Component {
             style={{ width: 24, height: 24, marginLeft: 10}}
             key='hasWebsite'
             >
-            <LanguageIcon color={green600}/>
+            <LanguageIcon color={blue700}/>
           </span>
         );
       }

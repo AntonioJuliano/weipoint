@@ -97,6 +97,10 @@ class Search extends React.Component {
 
     try {
       const response = await fetch(requestPath, { method: 'get' });
+      if (response.status === 400) {
+        this.setState({ searchState: 'notFound' });
+        return;
+      }
       if (response.status !== 200) {
         this.setState({ searchState: 'error' });
         return;
