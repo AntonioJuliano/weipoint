@@ -14,6 +14,7 @@ import ContractOverview from './ContractOverview';
 import update from 'immutability-helper';
 import clone from 'lodash.clone';
 import FlatButton from 'material-ui/FlatButton';
+import { withRouter } from 'react-router-dom';
 
 const OVERVIEW = 'OVERVIEW';
 const VIEW_SOURCE = 'VIEW_SOURCE';
@@ -41,6 +42,7 @@ class Contract extends React.Component {
     this.getNavigationBar = this.getNavigationBar.bind(this);
     this.getBalanceString = this.getBalanceString.bind(this);
     this.addMetadata = this.addMetadata.bind(this);
+    this.updateContract = this.updateContract.bind(this);
 
     this.getPrice();
   }
@@ -60,6 +62,12 @@ class Contract extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     this.setState({ contract: this.props.contract });
+  }
+
+  // We store the updated contract in state, and also update it in the contract cache
+  updateContract(updatedContract) {
+    this.setState({ contract: updatedContract });
+    this.props.contractStore[this.props.contract.address] = updatedContract;
   }
 
   async addMetadata(metadata) {
@@ -83,7 +91,7 @@ class Contract extends React.Component {
       }
       request.link = link;
     }
-    this.setState({ contract: contractClone });
+    this.updateContract(contractClone);
 
     const requestPath = `/api/v1/contract/metadata`;
 
@@ -146,6 +154,7 @@ class Contract extends React.Component {
         abi: { $set: json.contract.abi },
         libraries: { $set: json.contract.libraries },
       });
+      this.props.contractStore[this.props.contract.address] = updatedContract;
 
       this.setState({
         uploadState: 'completed',
@@ -175,29 +184,33 @@ class Contract extends React.Component {
         source={this.state.contract.source}
       />;
     const contractPropertiesTab = <ContractFunctions
-        functions={this.state.contract.abi.filter(function(val) {
+        functions={this.state.contract.abi.filter(val => {
           return val.constant && val.type === 'function';
-        })}
+
+        // Sort so no arg functions show up after functions that take args
+        }).sort( (a, b) => b.inputs.length - a.inputs.length)}
         address={this.state.contract.address}
         intro={'Here you can view properties defined by this contract. Click on a property to'
           + ' expand the parameters it takes, and call it with a given set of parameters.'}
         noFunctionsMessage={'This contract has no properties'}
         contractAbi={this.state.contract.abi}
         web3={this.props.web3}
+        type='CONSTANT'
+        storedContract={this.props.contractStore[this.state.contract.address]}
       />;
-      const contractFunctions = <ContractFunctions
-          functions={this.state.contract.abi.filter(function(val) {
-            return !val.constant && (val.type === 'function' || val.type === 'fallback');
-          })}
-          address={this.state.contract.address}
-          intro={'Here you can send transactions to this contract on the blockchain.'
-            + ' Click on a function name to expand the parameters it takes, and call it'
-            + ' with a given set of parameters.'}
-          noFunctionsMessage={'This contract has no functions'}
-          contractAbi={this.state.contract.abi}
-          web3={this.props.web3}
-          type='STATE_CHANGING'
-        />;
+    const contractFunctions = <ContractFunctions
+        functions={this.state.contract.abi.filter(val => {
+          return !val.constant && (val.type === 'function' || val.type === 'fallback');
+        })}
+        address={this.state.contract.address}
+        intro={'Here you can send transactions to this contract on the blockchain.'
+          + ' Click on a function name to expand the parameters it takes, and call it'
+          + ' with a given set of parameters.'}
+        noFunctionsMessage={'This contract has no functions'}
+        contractAbi={this.state.contract.abi}
+        web3={this.props.web3}
+        type='STATE_CHANGING'
+      />;
 
     switch(this.state.currentTabName) {
       case OVERVIEW:
@@ -312,7 +325,8 @@ class Contract extends React.Component {
 Contract.propTypes = {
   contract: React.PropTypes.object.isRequired,
   web3: React.PropTypes.object.isRequired,
-  back: React.PropTypes.func
+  back: React.PropTypes.func,
+  contractStore: React.PropTypes.object.isRequired
 };
 
-export default Contract;
+export default withRouter(Contract);

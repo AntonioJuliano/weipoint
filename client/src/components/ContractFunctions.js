@@ -12,30 +12,33 @@ class ContractFunctions extends React.Component {
     this.getFunctionElements = this.getFunctionElements.bind(this);
     this.metamaskMissing = this.metamaskMissing.bind(this);
     this.setActive = this.setActive.bind(this);
+    this.mapFunctionToElement = this.mapFunctionToElement.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
     this.setState({ active: null });
   }
 
+  mapFunctionToElement(value, i) {
+    return <div
+      key={value.name + i}
+      style={{ width: '90%', margin: 'auto' }}
+      onClick={ e => this.setActive(i) }
+      >
+      <Divider />
+      <ContractFunction
+        contractAbi={this.props.contractAbi}
+        abi={value}
+        address={this.props.address}
+        active={i === this.state.active}
+        web3={this.props.web3}
+        storedContract={this.props.storedContract}
+        />
+    </div>;
+  }
+
   getFunctionElements() {
-    const thisRef = this;
-    return this.props.functions.map(function(value, i) {
-      return <div
-        key={value.name + i}
-        style={{ width: '90%', margin: 'auto' }}
-        onClick={ e => thisRef.setActive(i) }
-        >
-        <Divider />
-        <ContractFunction
-          contractAbi={thisRef.props.contractAbi}
-          abi={value}
-          address={thisRef.props.address}
-          active={i === thisRef.state.active}
-          web3={thisRef.props.web3}
-          />
-      </div>;
-    });
+    return this.props.functions.map( (v, i) => this.mapFunctionToElement(v, i));
   }
 
   setActive(i) {
@@ -67,8 +70,7 @@ class ContractFunctions extends React.Component {
       {this.props.noFunctionsMessage}
     </div>;
     return (
-      <div className='functionsList'
-        style={{ height: '100%', maxHeight: '100%' }}>
+      <div className='functionsList'>
         <Row style={{ marginTop: 10, marginBottom: 25 }} center='xs'>
           <Col xs={10}>
             {this.props.intro}
@@ -88,7 +90,8 @@ ContractFunctions.propTypes = {
   intro: React.PropTypes.string.isRequired,
   address: React.PropTypes.string.isRequired,
   web3: React.PropTypes.object.isRequired,
-  type: React.PropTypes.string
+  type: React.PropTypes.string,
+  storedContract: React.PropTypes.object
 };
 
 export default ContractFunctions;

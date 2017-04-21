@@ -57,13 +57,13 @@ app.use(expressValidator({
 }));
 app.use(require('./middlewares/requestLogger'));
 
+app.use('/api/v1', require('./controllers/index'));
+
 app.use(express.static(path.join(__dirname, '../client/build')));
 
-app.get('/', function(req, res) {
-  res.status(200);
+app.get('/*', function (req, res) {
+  res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
 });
-
-app.use('/', require('./controllers/index'));
 
 // Error handler
 app.use((error, request, response, _next) => {

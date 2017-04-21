@@ -13,7 +13,7 @@ class SearchError extends React.Component {
             height: 48
           }}/>
         }
-        message={'No results found matching "' + this.props.query + '"'}
+        message={'No results found matching: "' + this.props.query + '"'}
       />
     );
   }
