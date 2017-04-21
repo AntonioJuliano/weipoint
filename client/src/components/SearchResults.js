@@ -108,7 +108,6 @@ class SearchResults extends React.Component {
 
 SearchResults.propTypes = {
   results: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
-  onResultClicked: React.PropTypes.func.isRequired,
   onNextPage: React.PropTypes.func.isRequired,
   onPreviousPage: React.PropTypes.func.isRequired,
   total: React.PropTypes.number,

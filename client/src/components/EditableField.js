@@ -25,7 +25,7 @@ class EditableField extends React.Component {
   onChange(event, newValue) {
     this.setState({
       value: newValue,
-      error: this.props.validate(newValue)
+      error: this.props.validate(newValue.trim())
     });
   }
 
