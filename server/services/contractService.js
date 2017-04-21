@@ -15,6 +15,7 @@ const Promise = require('bluebird');
  * @return {Contract}   the contract
  */
 async function lookupContract(address) {
+  address = address.toLowerCase();
   const dbResult = await Contract.findOne({
     address: address
   }).exec();
