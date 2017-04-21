@@ -5,6 +5,7 @@ import VerifiedUserIcon from 'react-material-icons/icons/action/verified-user';
 import LanguageIcon from 'react-material-icons/icons/action/language';
 import Tags from './Tags';
 import { green600, blue700 } from 'material-ui/styles/colors';
+import { withRouter } from 'react-router-dom';
 
 class SearchResult extends React.Component {
   constructor(props) {
@@ -84,7 +85,7 @@ class SearchResult extends React.Component {
         style={{ marginTop: 10, textAlign: 'left', marginBottom: 10, cursor: 'pointer' }}
         onMouseEnter={ e => this.setState({ focused: true })}
         onMouseLeave={ e => this.setState({ focused: false })}
-        onClick={ e => this.props.onClick(this.props.address)}
+        onClick={ e => this.props.history.push('/contract/' + this.props.address) }
       >
         <Card>
           <CardTitle
@@ -138,8 +139,7 @@ SearchResult.propTypes = {
   tags: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
   description: React.PropTypes.node,
   link: React.PropTypes.node,
-  onClick: React.PropTypes.func.isRequired,
   contract: React.PropTypes.object
 };
 
-export default SearchResult;
+export default withRouter(SearchResult);

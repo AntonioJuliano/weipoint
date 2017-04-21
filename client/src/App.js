@@ -6,6 +6,10 @@ import Web3 from 'web3';
 import theme from './lib/theme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
+import {
+  BrowserRouter as Router,
+  Route
+} from 'react-router-dom'
 
 import injectTapEventPlugin from 'react-tap-event-plugin';
 
@@ -23,23 +27,25 @@ class App extends Component {
 
   render() {
     return (
-      <div className='App'
-        style={{
-          backgroundColor: '#efefef',
-          minHeight: '100%',
-          minWidth: '100%',
-          width: '100%',
-          height: '100%',
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          zIndex: -1,
-          overflow: 'auto'
-        }}>
-        <MuiThemeProvider muiTheme={getMuiTheme(theme)}>
-          <Search web3={this.web3}/>
-        </MuiThemeProvider>
-      </div>
+      <Router>
+        <div className='App'
+          style={{
+            backgroundColor: '#efefef',
+            minHeight: '100%',
+            minWidth: '100%',
+            width: '100%',
+            height: '100%',
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            zIndex: -1,
+            overflow: 'auto'
+          }}>
+          <MuiThemeProvider muiTheme={getMuiTheme(theme)}>
+            <Route path="/" render={() => <Search web3={this.web3}/>}/>
+          </MuiThemeProvider>
+        </div>
+      </Router>
     );
   }
 }

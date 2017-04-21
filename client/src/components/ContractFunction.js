@@ -22,21 +22,40 @@ class ContractFunction extends React.Component {
     this.isCallable = this.isCallable.bind(this);
     this.getName = this.getName.bind(this);
     this.getArgValues = this.getArgValues.bind(this);
-  }
+    this.getCachedValue = this.getCachedValue.bind(this);
 
-  componentDidMount() {
-    if (this.state.noArgs && this.props.abi.constant) {
+    if (this.state.noArgs
+        && this.props.abi.constant
+        && !this.getCachedValue(this.state.noArgs, props)) {
       this.callContractFunction(false);
+    }
+
+    if (props.abi.name === 'playerGetPendingTxByAddress') {
+      console.log(props)
     }
   }
 
   componentWillReceiveProps(nextProps) {
     if (!isEqual(nextProps, this.props)) {
       this.setState(this.setupState(nextProps));
-      if (this.state.noArgs && this.props.abi.constant) {
+      if (this.state.noArgs
+          && this.props.abi.constant
+          && !this.getCachedValue(this.state.noArgs, nextProps)) {
         this.callContractFunction(false);
       }
     }
+  }
+
+  getCachedValue(noArgs, props) {
+    if (noArgs && this.props.abi.constant) {
+      if (props.storedContract
+          && props.storedContract.functionResults
+          && props.storedContract.functionResults[props.abi.name]) {
+        return this.props.storedContract.functionResults[this.props.abi.name];
+      }
+    }
+
+    return null;
   }
 
   setupState(props) {
@@ -63,9 +82,18 @@ class ContractFunction extends React.Component {
 
     const noArgs = props.abi.inputs.length === 0;
 
+    let result = null;
+    let requestState = noArgs ? 'requesting' : 'initialized';
+
+    // If this is a constant function that has no args use the cached value if available
+    const cachedValue = this.getCachedValue(noArgs, props);
+    if (cachedValue) {
+      result = cachedValue;
+    }
+
     return {
-      result: null,
-      requestState: noArgs ? 'requesting' : 'initialized',
+      result: result,
+      requestState: requestState,
       args: args,
       noArgs: noArgs,
       error: null,
@@ -109,6 +137,13 @@ class ContractFunction extends React.Component {
       result = 'false';
     } else if (json.result === true) {
       result = 'true';
+    }
+
+    if (this.state.noArgs && this.props.abi.constant) {
+      if (!this.props.storedContract.functionResults) {
+        this.props.storedContract.functionResults = {};
+      }
+      this.props.storedContract.functionResults[this.props.abi.name] = result;
     }
     this.setState({ requestState: 'completed', result: result });
   }
@@ -381,6 +416,7 @@ ContractFunction.propTypes = {
   abi: React.PropTypes.object.isRequired,
   contractAbi: React.PropTypes.array.isRequired,
   active: React.PropTypes.bool.isRequired,
+  storedResults: React.PropTypes.func,
   web3: React.PropTypes.object.isRequired
 };
 
