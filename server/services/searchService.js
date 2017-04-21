@@ -45,12 +45,12 @@ async function _search(es_query, hydrate, index, size, numRetries) {
 
   let results;
   if (hydrate) {
-    results = result.hits.hits.map( r => {
+    results = result.hits.hits.filter(r => r).map( r => {
       r.type = 'contract';
       return r;
     });
   } else {
-    results = result.hits.hits.map( r => r._source );
+    results = result.hits.hits.filter(r => r).map( r => r._source );
   }
 
   return {

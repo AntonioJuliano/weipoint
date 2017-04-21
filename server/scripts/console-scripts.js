@@ -23,3 +23,21 @@ r.forEach( c => {
     c.save()
   }
 })
+
+let es_query = {
+  multi_match: {
+    query: query,
+    fields: ['tags.tag', 'description', 'link', 'name'],
+    fuzziness: 'AUTO',
+    prefix_length: 1
+  }
+};
+
+Contract.esSearchAsync(
+  {
+    from: 0,
+    size: 10,
+    query: es_query
+  },
+  { hydrate: true }
+).then(r => res = r );
