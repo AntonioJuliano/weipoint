@@ -1,4 +1,3 @@
-
 import React from "react";
 import {Card, CardTitle} from 'material-ui/Card';
 import UploadSource from './UploadSource';

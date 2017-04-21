@@ -29,10 +29,6 @@ class ContractFunction extends React.Component {
         && !this.getCachedValue(this.state.noArgs, props)) {
       this.callContractFunction(false);
     }
-
-    if (props.abi.name === 'playerGetPendingTxByAddress') {
-      console.log(props)
-    }
   }
 
   componentWillReceiveProps(nextProps) {
