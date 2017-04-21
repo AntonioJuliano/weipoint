@@ -7,6 +7,7 @@
     "start": "concurrently \"npm run server\" \"npm run client\"",
     "server": "nodemon server/server.js --ignore client/",
     "prod": "NODE_ENV=production node server/server.js",
+    "staging": "NODE_ENV=staging node server/server.js",
     "client": "node start-client.js",
     "test": "mocha test",
     "prod_install": "npm install --production && cd client && npm install && cd ..",
