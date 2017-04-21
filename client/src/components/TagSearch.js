@@ -66,7 +66,7 @@ class TagSearch extends React.Component {
 
   gotoNextPage() {
     const query = this.props.match.params.query;
-    const index = this.props.match.params.page || 0;
+    const index = this.props.match.params.page ? parseInt(this.props.match.params.page, 10) : 0;
     if (this.props.all) {
       this.props.history.push('/all/' + (index + 1));
     } else {
@@ -76,7 +76,7 @@ class TagSearch extends React.Component {
 
   gotoPreviousPage() {
     const query = this.props.match.params.query;
-    const index = this.props.match.params.page || 0;
+    const index = this.props.match.params.page ? parseInt(this.props.match.params.page, 10) : 0;
     if (this.props.all) {
       this.props.history.push('/all/' + (index - 1));
     } else {

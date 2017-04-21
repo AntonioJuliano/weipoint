@@ -39,11 +39,12 @@ class Search extends React.Component {
   }
 
   getBodyElement() {
+    console.log(this.props.location.pathname)
     const content = (
       <div>
         <Switch>
           <Route
-            path='/all(/:page)'
+            path='/all/:page?'
             render={() => <TagSearch
               all={true}
               searchStore={this.state.searchStore}
@@ -81,6 +82,8 @@ class Search extends React.Component {
   }
 
   render() {
+    console.log(this.props.location.pathname)
+
     return (
       <div className="search" style={{ minWidth: 600 }}>
         <Grid fluid={true}>

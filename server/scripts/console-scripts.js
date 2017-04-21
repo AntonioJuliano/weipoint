@@ -2,10 +2,10 @@
 
 // Get all contracts
 let r
-Contract.find({}).exec.then( res => r = res );
+Contract.find({}).exec().then( res => r = res );
 
 // Show pending Links
-r.forEach( c => c.pendingLinks)
+r.map( c => c.pendingLinks)
 
 // Accept all of the first link
 r.forEach( c => {
@@ -15,3 +15,11 @@ r.forEach( c => {
     c.save();
   }
 });
+
+r.forEach( c => {
+  if (c.link && c.link.match(/^http:\/\/https/)) {
+    let str = c.link.replace(/^http:\/\//, '')
+    c.link = str
+    c.save()
+  }
+})
