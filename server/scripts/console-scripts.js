@@ -2,10 +2,10 @@
 
 // Get all contracts
 let r
-Contract.find({}).exec.then( res => r = res );
+Contract.find({}).exec().then( res => r = res );
 
 // Show pending Links
-r.forEach( c => c.pendingLinks)
+r.map( c => c.pendingLinks)
 
 // Accept all of the first link
 r.forEach( c => {
@@ -15,3 +15,29 @@ r.forEach( c => {
     c.save();
   }
 });
+
+r.forEach( c => {
+  if (c.link && c.link.match(/^http:\/\/https/)) {
+    let str = c.link.replace(/^http:\/\//, '')
+    c.link = str
+    c.save()
+  }
+})
+
+let es_query = {
+  multi_match: {
+    query: query,
+    fields: ['tags.tag', 'description', 'link', 'name'],
+    fuzziness: 'AUTO',
+    prefix_length: 1
+  }
+};
+
+Contract.esSearchAsync(
+  {
+    from: 0,
+    size: 10,
+    query: es_query
+  },
+  { hydrate: true }
+).then(r => res = r );

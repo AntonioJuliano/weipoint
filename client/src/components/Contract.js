@@ -86,7 +86,7 @@ class Contract extends React.Component {
       request.description = description;
     }
     if (link) {
-      if (!link.match(/^http:\/\//)) {
+      if (!link.match(/^https?:\/\//)) {
         link = 'http://' + link;
       }
       request.link = link;

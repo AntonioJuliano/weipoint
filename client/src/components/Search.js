@@ -43,7 +43,7 @@ class Search extends React.Component {
       <div>
         <Switch>
           <Route
-            path='/all(/:page)'
+            path='/all/:page?'
             render={() => <TagSearch
               all={true}
               searchStore={this.state.searchStore}

@@ -52,7 +52,7 @@ class FetchContract extends React.Component {
   }
 
   async search(props) {
-    const address = props.match.params.address;
+    const address = props.match.params.address.toLowerCase();
     const requestPath = `/api/v1/contract?address=${address}`;
 
     try {
