@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
-router.use('/api/v1/contract', require('./contractController'));
-router.use('/api/v1/data', require('./dataController'));
-router.use('/api/v1/search', require('./searchController'));
+router.use('/contract', require('./contractController'));
+router.use('/data', require('./dataController'));
+router.use('/search', require('./searchController'));
 
 module.exports = router;
