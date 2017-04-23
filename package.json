@@ -34,6 +34,7 @@
     "@risingstack/trace": "^3.6.2",
     "bluebird": "latest",
     "body-parser": "^1.15.2",
+    "bugsnag": "^1.10.0",
     "coinbase": "^2.0.6",
     "dotenv": "^4.0.0",
     "elasticsearch": "^13.0.0-rc2",
