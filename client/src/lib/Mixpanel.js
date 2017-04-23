@@ -1,4 +1,4 @@
-/* eslint-disable */
+/*global mixpanel:true*/
 let toExport;
 if (process.env.NODE_ENV === 'production') {
   toExport = mixpanel;

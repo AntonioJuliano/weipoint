@@ -4,6 +4,7 @@ const optimusService = require('./optimusService');
 const errors = require('../helpers/errors');
 const logger = require('../helpers/logger');
 const Promise = require('bluebird');
+const bugsnag = require('../helpers/bugsnag');
 
 /**
  * Lookup a contract by address on the blockchain. Will query both db
@@ -38,6 +39,7 @@ async function lookupContract(address) {
         address: address
       });
     }).catch(function(err) {
+      bugsnag.notify(err);
       logger.error({
         at: 'contractService#lookupContract',
         message: 'saving contract async failed',
@@ -137,7 +139,7 @@ async function callConstantFunction(contract, functionName, args) {
     try {
       return await func.apply(null, args);
     } catch (e) {
-      logger.error({
+      logger.info({
         at: 'contractService#callConstantFunction',
         message: 'calling contract threw error',
         err: e.toString()

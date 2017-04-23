@@ -1,5 +1,5 @@
-
 /*global web3:true*/
+require('./lib/Bugsnag');
 import React, { Component } from 'react';
 import Search from './components/Search';
 import Web3 from 'web3';

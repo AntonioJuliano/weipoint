@@ -2,6 +2,7 @@
 
 const errors = require('./errors');
 const logger = require('./logger');
+const bugsnag = require('./bugsnag');
 
 function handle(error, response) {
   if (error instanceof errors.ClientError) {
@@ -26,12 +27,15 @@ function handle(error, response) {
       code: errors.errorCodes.invalidArguments
     });
   } else {
-    console.log(error)
+    if (process.env.NODE_ENV === 'development') {
+      console.log(error);
+    }
     logger.error({
       at: 'errorHandler#handle',
       message: 'unhandled Error thrown',
       error: error
     });
+    bugsnag.notify(error);
     response.status(500).json({
       error: 'Server Error'
     });

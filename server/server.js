@@ -1,3 +1,4 @@
+// This needs to be first
 require('@risingstack/trace');
 
 const dotenv = require('dotenv');
@@ -13,6 +14,7 @@ const errors = require('./helpers/errors');
 const logger = require('./helpers/logger');
 const path = require('path');
 const errorHandler = require('./helpers/errorHandler');
+const bugsnag = require('./helpers/bugsnag');
 
 process.on('unhandledRejection', (reason, p) => {
   logger.error({
@@ -21,7 +23,11 @@ process.on('unhandledRejection', (reason, p) => {
     promise: p,
     error: reason
   });
+  bugsnag.notify(reason);
 });
+
+// This needs to be the first middleware
+app.use(bugsnag.requestHandler);
 
 app.get('/health', function(req, res) {
   res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
@@ -67,6 +73,9 @@ app.get('/*', function (req, res) {
   res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
 });
 
+// This needs to be the last non-error middleware
+app.use(bugsnag.errorHandler);
+
 // Error handler
 app.use((error, request, response, _next) => {
   errorHandler.handle(error, response);
@@ -86,10 +95,11 @@ app.listen(port, (error) => {
       message: 'Server failed to start',
       error: error
     });
+    bugsnag.notify(error);
+  } else {
+    logger.info({
+      at: 'server#start',
+      message: `server is listening on ${port}`
+    });
   }
-
-  logger.info({
-    at: 'server#start',
-    message: `server is listening on ${port}`
-  });
 });
