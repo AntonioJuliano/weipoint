@@ -31,6 +31,7 @@
   },
   "homepage": "https://github.com/AntonioJuliano/weipoint#readme",
   "dependencies": {
+    "@risingstack/trace": "^3.6.2",
     "bluebird": "latest",
     "body-parser": "^1.15.2",
     "coinbase": "^2.0.6",
