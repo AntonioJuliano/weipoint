@@ -31,7 +31,7 @@ class SearchBar extends React.Component {
               marginLeft: 'auto',
               marginRight: 'auto',
               fontSize: 52,
-              fontFamily: "Bitter, serif",
+              fontFamily: "Raleway, sans-serif",
               marginBottom: 12
             }}>
               {'Weipoint'}
@@ -40,7 +40,7 @@ class SearchBar extends React.Component {
               marginLeft: 'auto',
               marginRight: 'auto',
               fontSize: 18,
-              fontFamily: "Bitter, serif",
+              fontFamily: "Raleway, sans-serif",
               marginBottom: 18
             }}>
               {'Search the decentralized web'}
