@@ -5,6 +5,10 @@ import { Grid, Row, Col } from 'react-flexbox-grid';
 import { Route, withRouter, Switch } from 'react-router-dom';
 import TagSearch from './TagSearch';
 import PageNotFound from './PageNotFound';
+import MarkdownRenderer from './MarkdownRenderer';
+import terms from '../assets/docs/terms';
+import privacy from '../assets/docs/privacy';
+import About from './About';
 
 class Search extends React.Component {
   constructor(props) {
@@ -64,6 +68,24 @@ class Search extends React.Component {
               contractStore={this.state.contractStore}
             />}
           />
+          <Route
+            path="/terms"
+            render={() => <MarkdownRenderer
+              content={terms}
+              title='Terms of Service'
+            />}
+          />
+          <Route
+            path="/privacy"
+            render={() => <MarkdownRenderer
+              content={privacy}
+              title='Privacy Policy'
+            />}
+          />
+          <Route
+            path="/about"
+            render={() => <About />}
+          />
           <Route path="/:path" render={() => <PageNotFound />}/>
         </Switch>
       </div>
@@ -71,7 +93,7 @@ class Search extends React.Component {
 
     return (
       <Row center='xs'>
-        <Col md={8} xs={11}>
+        <Col md={8} sm={9} xs={11}>
           <div className="content">
             {content}
           </div>
@@ -85,14 +107,14 @@ class Search extends React.Component {
       <div className="search" style={{ minWidth: 600 }}>
         <Grid fluid={true}>
           <Row center='xs'>
-            <Col xs={11}>
+            <div style={{ width: '100%'}}>
               <SearchBar
                 onChange={this.handleSearchBarChange}
                 onSearchClicked={this.handleSearchBarClick}
                 onBrowseClicked={ () => this.props.history.push('/all') }
                 reduced={this.props.location.pathname !== '/'}
               />
-            </Col>
+            </div>
           </Row>
           {this.getBodyElement()}
         </Grid>

@@ -16,10 +16,10 @@ class SearchBar extends React.Component {
   }
 
   render() {
-    const barSize = this.props.reduced ? 7 : 8;
+    const barSize = this.props.reduced ? 5 : 8;
 
-    const barStyle = this.props.reduced ? { marginTop: 40 } : { marginTop: 190 };
-    const colStyle = this.props.reduced ? {} : { maxWidth: 550, margin: 'auto' };
+    const barStyle = this.props.reduced ? { marginTop: 20 } : { marginTop: 190 };
+    const colStyle = this.props.reduced ? { minWidth: 300, maxWidth: 550} : { maxWidth: 550, margin: 'auto', minWidth: 300 };
     const hintText = this.props.reduced ? null : 'Search by address or term, e.g. "token"'
 
     return (
@@ -41,7 +41,7 @@ class SearchBar extends React.Component {
               marginRight: 'auto',
               fontSize: 18,
               fontFamily: "Raleway, sans-serif",
-              marginBottom: 18
+              marginBottom: 22
             }}>
               {'Search the decentralized web'}
             </div>
@@ -49,13 +49,28 @@ class SearchBar extends React.Component {
         }
         <div className="SearchTextField" style={{ marginBottom: 20 }}>
           <Row
-            center={this.props.reduced ? null : 'xs'}>
+            center={this.props.reduced ? null : 'xs'}
+            style={{ display: 'flex' }}
+          >
+            {
+              this.props.reduced &&
+              <Col smOffset={1} style={{
+                fontSize: 22,
+                fontFamily: "Raleway, sans-serif",
+                marginTop: 'auto',
+                marginBottom: 'auto',
+                marginRight: 12
+              }}>
+                {'Weipoint'}
+              </Col>
+            }
             <Col
               xs={barSize}
-              md={barSize - 2}
-              lg={barSize - 3}
+              sm={barSize - 1}
+              md={barSize - 1}
+              lg={barSize - 1}
               style={colStyle}
-              xsOffset={this.props.reduced ? 1 : 0}>
+            >
               <Paper zDepth={this.state.focused ? 2 : 1}
                 onMouseEnter={ e => this.setState({ focused: true })}
                 onMouseLeave={ e => this.setState({ focused: false })}>
