@@ -48,7 +48,7 @@ class Contract extends React.Component {
   }
 
   updateDimensions() {
-    this.setState({ height: window.innerHeight - 300 });
+    this.setState({ height: window.innerHeight - 321 });
   }
 
   componentDidMount() {
@@ -291,7 +291,7 @@ class Contract extends React.Component {
     return (
       <div
         className="SearchResultContainer"
-        style={{ marginTop: 15, textAlign: 'left', marginBottom: 15 }}>
+        style={{ marginTop: 15, textAlign: 'left', marginBottom: 10 }}>
         <Card>
           <div style={{ display: 'flex' }} >
             {

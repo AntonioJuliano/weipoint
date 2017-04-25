@@ -9,7 +9,8 @@ import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import {
   BrowserRouter as Router,
   Route
-} from 'react-router-dom'
+} from 'react-router-dom';
+import Footer from './components/Footer';
 
 import injectTapEventPlugin from 'react-tap-event-plugin';
 
@@ -31,18 +32,23 @@ class App extends Component {
         <div className='App'
           style={{
             backgroundColor: '#efefef',
-            minHeight: '100%',
             minWidth: '100%',
             width: '100%',
+            minHeight: '100vh',
             height: '100%',
             position: 'fixed',
             top: 0,
             left: 0,
             zIndex: -1,
-            overflow: 'auto'
+            overflow: 'auto',
+            display: 'flex',
+            flexDirection: 'column'
           }}>
           <MuiThemeProvider muiTheme={getMuiTheme(theme)}>
-            <Route path="/" render={() => <Search web3={this.web3}/>}/>
+            <div style={{ minHeight: '100vh', flexDirection: 'column', display: 'flex' }}>
+              <Route path="/" render={() => <main style={{ flex: '1 1 auto' }}><Search web3={this.web3} /></main>}/>
+              <Footer />
+            </div>
           </MuiThemeProvider>
         </div>
       </Router>

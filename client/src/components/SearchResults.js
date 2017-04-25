@@ -97,7 +97,7 @@ class SearchResults extends React.Component {
 
   render() {
     return (
-      <div>
+      <div className='searchResults'>
         {this.getTotalResultsElement()}
         {this.getResultElements()}
         {this.getPagingElement()}
