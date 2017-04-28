@@ -16,12 +16,9 @@ r.forEach( c => {
   }
 });
 
-r.forEach( c => {
-  if (c.link && c.link.match(/^http:\/\/https/)) {
-    let str = c.link.replace(/^http:\/\//, '')
-    c.link = str
-    c.save()
-  }
+r.forEach( con => {
+  con.pendingMetadata = con.address.toLowerCase();
+  con.save()
 })
 
 let es_query = {
@@ -39,5 +36,5 @@ Contract.esSearchAsync(
     size: 10,
     query: es_query
   },
-  { hydrate: true }
+  { hydrate: false }
 ).then(r => res = r );

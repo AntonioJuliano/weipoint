@@ -23,11 +23,13 @@ async function _fetchPrice() {
     const response = await client.getSpotPriceAsync({'currencyPair': 'ETH-USD'});
     price = parseFloat(response.data.amount);
   } catch (e) {
-    logger.error({
-      at: 'coinbase#_fetchPrice',
-      message: 'Fetching price threw error',
-      error: e.toString()
-    });
+    if (process.env.NODE_ENV === 'production') {
+      logger.error({
+        at: 'coinbase#_fetchPrice',
+        message: 'Fetching price threw error',
+        error: e.toString()
+      });
+    }
   }
   // logger.info({
   //   at: 'coinbase#_fetchPrice',

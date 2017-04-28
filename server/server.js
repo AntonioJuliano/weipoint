@@ -60,7 +60,7 @@ app.use(expressValidator({
     },
     isString: value => typeof value === 'string',
     isBoolean: value => typeof value === 'boolean',
-    optionalPositiveInteger: v => !v || (Number.isInteger(parseInt(v)) && v >= 0)
+    optionalPositiveInteger: v => v === undefined || (Number.isInteger(parseInt(v)) && v >= 0)
   }
 }));
 app.use(require('./middlewares/requestLogger'));

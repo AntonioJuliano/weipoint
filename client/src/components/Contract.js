@@ -82,7 +82,9 @@ class Contract extends React.Component {
       request.tags = tags;
     }
     if (description) {
-      contractClone.description = description;
+      if (!contractClone.description) {
+        contractClone.description = description;
+      }
       request.description = description;
     }
     if (link) {
