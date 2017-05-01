@@ -4,7 +4,7 @@ const bluebird = require('bluebird');
 const Schema = mongoose.Schema;
 
 // IMPORTANT if you make a breaking change to the elasticsearch schema, increment this number
-const esVersionNumber = 2;
+const esVersionNumber = 1;
 
 const querySchema = new Schema(
   {

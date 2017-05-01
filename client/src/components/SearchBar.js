@@ -56,104 +56,13 @@ class SearchBar extends React.Component {
     }
   }
 
-  getInputElement() {
-    const hintText = this.props.reduced ? null : 'Search by address or term, e.g. "token"';
-    const inputProps = {
-      placeholder: hintText,
-      value: this.state.value,
-      onChange: this.onChange
-    };
 
-    const style = {
-      input: {
-        height: 42,
-        width: 'calc(100% - 20px)',
-        fontFamily: 'Roboto',
-        fontSize: 16,
-        borderStyle: 'none',
-        outline: 'none',
-        paddingLeft: 10,
-        paddingRight: 10,
-        marginTop: 'auto',
-        marginBottom: 'auto'
-      },
-      suggestionsList: {
-        margin: 0,
-        padding: 0,
-        listStyleType: 'none'
-      },
-      suggestionsContainer: {
-        display: 'none'
-      },
-      suggestionsContainerOpen: {
-        display: 'block',
-        position: 'absolute',
-        zIndex: 2,
-        backgroundColor: '#fff',
-        marginTop: 1,
-        width: 500
-      },
-      suggestion: {
-        cursor: 'pointer'
-      },
-      suggestionHighlighted: {
-        backgroundColor: '#ddd'
-      }
-    }
-
-    return (
-      <div
-        onKeyPress={ (e) => { if (e.charCode === 13) {
-          e.preventDefault();
-          this.search();
-        }}}
-      >
-        <Autosuggest
-          suggestions={this.state.autocompleteSuggestions}
-          onSuggestionsFetchRequested={this.getAutocompleteSuggestions}
-          onSuggestionsClearRequested={
-            () => this.setState({autocompleteSuggestions: []})
-          }
-          getSuggestionValue={ v => v }
-          renderSuggestion={ (suggestion, { query }) => {
-            return (
-              <div
-                style={{
-                  width: 'calc(100% - 10px)',
-                  paddingLeft: 10,
-                  paddingTop: 5,
-                  paddingBottom: 5
-                }}
-              >
-                {suggestion}
-              </div>
-            );
-          }}
-          inputProps={inputProps}
-          renderSuggestionsContainer={ ({ containerProps , children, query }) => {
-            return (
-              <div {... containerProps}>
-                <Paper zDepth={1} style={{ textAlign: 'left' }}>
-                    {children}
-                </Paper>
-              </div>
-            );
-          }}
-          theme={style}
-          onSuggestionSelected={ event => {
-            event.preventDefault();
-            this.search();
-          }}
-        />
-      </div>
-    );
-  }
 
   render() {
     const barSize = this.props.reduced ? 5 : 8;
 
     const barStyle = this.props.reduced ? { marginTop: 20 } : { marginTop: 190 };
-    let colStyle = { minWidth: 300, maxWidth: 550, height: 42 }
+    let colStyle = { minWidth: 300, maxWidth: 550, height: 48 }
 
     if (!this.props.reduced) {
       colStyle.margin = 'auto';
@@ -255,6 +164,136 @@ class SearchBar extends React.Component {
             </Col>
           </Row>
         }
+      </div>
+    );
+  }
+
+  getInputElement() {
+    const hintText = this.props.reduced ? null : 'Search by address or term, e.g. "token"';
+    const inputProps = {
+      value: this.state.value,
+      onChange: this.onChange
+    };
+
+    const style = {
+      container: {
+        position: 'relative'
+      },
+      input: {
+        height: 48,
+        width: 'calc(100% - 20px)',
+        fontFamily: 'Roboto',
+        fontSize: 16,
+        borderStyle: 'none',
+        outline: 'none',
+        paddingLeft: 10,
+        paddingRight: 10,
+        paddingTop: 0,
+        paddingBottom: 0,
+        marginTop: 'auto',
+        marginBottom: 'auto',
+        transition: 'all 450ms',
+        color: 'rgba(0, 0, 0, 0.870588)',
+        position: 'relative',
+        backgroundColor: 'rgba(0, 0, 0, 0)',
+      },
+      suggestionsList: {
+        margin: 0,
+        padding: 0,
+        listStyleType: 'none'
+      },
+      suggestionsContainer: {
+        display: 'none'
+      },
+      suggestionsContainerOpen: {
+        display: 'block',
+        position: 'absolute',
+        zIndex: 2,
+        backgroundColor: '#fff',
+        marginTop: 1,
+        left: 0,
+        right: 0
+      },
+      suggestion: {
+        cursor: 'pointer'
+      },
+      suggestionHighlighted: {
+        backgroundColor: '#ddd'
+      }
+    }
+
+    return (
+      <div
+        onKeyPress={ (e) => { if (e.charCode === 13) {
+          e.preventDefault();
+          this.search();
+        }}}
+      >
+        <Autosuggest
+          suggestions={this.state.autocompleteSuggestions}
+          onSuggestionsFetchRequested={this.getAutocompleteSuggestions}
+          onSuggestionsClearRequested={
+            () => this.setState({autocompleteSuggestions: []})
+          }
+          getSuggestionValue={ v => v }
+          renderSuggestion={ (suggestion, { query }) => {
+            return (
+              <div
+                style={{
+                  width: 'calc(100% - 10px)',
+                  paddingLeft: 10,
+                  paddingTop: 5,
+                  paddingBottom: 5
+                }}
+              >
+                {suggestion}
+              </div>
+            );
+          }}
+          inputProps={inputProps}
+          renderSuggestionsContainer={ ({ containerProps , children, query }) => {
+            return (
+              <div {... containerProps}>
+                <Paper zDepth={1} style={{ textAlign: 'left' }}>
+                    {children}
+                </Paper>
+              </div>
+            );
+          }}
+          theme={style}
+          onSuggestionSelected={ event => {
+            event.preventDefault();
+            this.search();
+          }}
+          renderInputComponent={ props => {
+            return (
+              <div
+                style={{
+                  fontSize: 16,
+                  height: 48,
+                  display: 'inline-block',
+                  fontFamily: 'Roboto, sans-serif',
+                  width: '100%',
+                  position: 'relative'
+                }}
+              >
+                <div
+                  style={{
+                    position: 'absolute',
+                    opacity: this.state.value === '' ? 1 : 0,
+                    color: 'rgba(0, 0, 0, 0.298039)',
+                    transition: 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms',
+                    bottom: 12,
+                    paddingLeft: 10
+                  }}
+                >
+                  {hintText}
+                </div>
+                <input {...props} spellcheck="false" autocorrect="off" autocapitalize="off" />
+              </div>
+            );
+          }}
+        />
       </div>
     );
   }
