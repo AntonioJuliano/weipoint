@@ -1,26 +1,166 @@
 import React from "react";
-import TextField from 'material-ui/TextField';
 import SearchIcon from 'react-material-icons/icons/action/search';
 import WhatshotIcon from 'react-material-icons/icons/social/whatshot';
 import Paper from 'material-ui/Paper';
 import FloatingActionButton from 'material-ui/FloatingActionButton';
 import { Row, Col } from 'react-flexbox-grid';
+import Autosuggest from 'react-autosuggest';
 
 class SearchBar extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      focused: false
+      focused: false,
+      value: '',
+      autocompleteSuggestions: []
     };
+
+    this.onChange = this.onChange.bind(this);
+    this.getAutocompleteSuggestions = this.getAutocompleteSuggestions.bind(this);
+    this.getInputElement = this.getInputElement.bind(this);
+    this.search = this.search.bind(this);
+  }
+
+  search() {
+    this.props.onSearchClicked(this.state.value.trim().toLowerCase());
+  }
+
+  onChange(event, { newValue, method }) {
+    this.setState({ value: newValue });
+  }
+
+  async getAutocompleteSuggestions(v) {
+    const value = v.value.trim().toLowerCase();
+
+    // Use the cached value if available
+    if (this.props.autocompleteStore[value]) {
+      this.setState({ autocompleteSuggestions: this.props.autocompleteStore[value] });
+      return;
+    }
+
+    const requestPath = `/api/v1/search/autocomplete?query=${value}`;
+
+    try {
+      const response = await fetch(requestPath);
+      if (response.status !== 200) {
+        throw new Error('Autocomplete fetch failed');
+      }
+      const json = await response.json();
+      this.props.autocompleteStore[value] = json.results.map( r => r.value );
+      if (this.state.value.trim().toLowerCase() === value) {
+        this.setState({ autocompleteSuggestions: json.results.map( r => r.value )});
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  getInputElement() {
+    const hintText = this.props.reduced ? null : 'Search by address or term, e.g. "token"';
+    const inputProps = {
+      placeholder: hintText,
+      value: this.state.value,
+      onChange: this.onChange
+    };
+
+    const style = {
+      input: {
+        height: 42,
+        width: 'calc(100% - 20px)',
+        fontFamily: 'Roboto',
+        fontSize: 16,
+        borderStyle: 'none',
+        outline: 'none',
+        paddingLeft: 10,
+        paddingRight: 10,
+        marginTop: 'auto',
+        marginBottom: 'auto'
+      },
+      suggestionsList: {
+        margin: 0,
+        padding: 0,
+        listStyleType: 'none'
+      },
+      suggestionsContainer: {
+        display: 'none'
+      },
+      suggestionsContainerOpen: {
+        display: 'block',
+        position: 'absolute',
+        zIndex: 2,
+        backgroundColor: '#fff',
+        marginTop: 1,
+        width: 500
+      },
+      suggestion: {
+        cursor: 'pointer'
+      },
+      suggestionHighlighted: {
+        backgroundColor: '#ddd'
+      }
+    }
+
+    return (
+      <div
+        onKeyPress={ (e) => { if (e.charCode === 13) {
+          e.preventDefault();
+          this.search();
+        }}}
+      >
+        <Autosuggest
+          suggestions={this.state.autocompleteSuggestions}
+          onSuggestionsFetchRequested={this.getAutocompleteSuggestions}
+          onSuggestionsClearRequested={
+            () => this.setState({autocompleteSuggestions: []})
+          }
+          getSuggestionValue={ v => v }
+          renderSuggestion={ (suggestion, { query }) => {
+            return (
+              <div
+                style={{
+                  width: 'calc(100% - 10px)',
+                  paddingLeft: 10,
+                  paddingTop: 5,
+                  paddingBottom: 5
+                }}
+              >
+                {suggestion}
+              </div>
+            );
+          }}
+          inputProps={inputProps}
+          renderSuggestionsContainer={ ({ containerProps , children, query }) => {
+            return (
+              <div {... containerProps}>
+                <Paper zDepth={1} style={{ textAlign: 'left' }}>
+                    {children}
+                </Paper>
+              </div>
+            );
+          }}
+          theme={style}
+          onSuggestionSelected={ event => {
+            event.preventDefault();
+            this.search();
+          }}
+        />
+      </div>
+    );
   }
 
   render() {
     const barSize = this.props.reduced ? 5 : 8;
 
     const barStyle = this.props.reduced ? { marginTop: 20 } : { marginTop: 190 };
-    const colStyle = this.props.reduced ? { minWidth: 300, maxWidth: 550} : { maxWidth: 550, margin: 'auto', minWidth: 300 };
-    const hintText = this.props.reduced ? null : 'Search by address or term, e.g. "token"'
+    let colStyle = { minWidth: 300, maxWidth: 550, height: 42 }
+
+    if (!this.props.reduced) {
+      colStyle.margin = 'auto';
+    } else {
+      colStyle.marginTop = 'auto';
+      colStyle.marginBottom = 'auto';
+    }
 
     return (
       <div className='SearchBarContainer' style={barStyle}>
@@ -74,20 +214,7 @@ class SearchBar extends React.Component {
               <Paper zDepth={this.state.focused ? 2 : 1}
                 onMouseEnter={ e => this.setState({ focused: true })}
                 onMouseLeave={ e => this.setState({ focused: false })}>
-                <div style={{ marginRight: 10, marginLeft: 10, width: "auto" }}>
-                  <TextField
-                    id='searchTextField'
-                    onChange={this.props.onChange}
-                    onKeyPress={ (e) => { if (e.charCode === 13) {
-                      e.preventDefault();
-                      this.props.onSearchClicked();
-                    }}}
-                    underlineShow={false}
-                    fullWidth={true}
-                    spellCheck={false}
-                    hintText={hintText}
-                  />
-                </div>
+                {this.getInputElement()}
               </Paper>
             </Col>
             {
@@ -95,7 +222,7 @@ class SearchBar extends React.Component {
               <div style={{ marginTop: 4, marginBottom: 4, marginLeft: 8 }}>
                 <FloatingActionButton
                   mini={true}
-                  onClick={this.props.onSearchClicked}
+                  onClick={this.search}
                   >
                   <SearchIcon />
                 </FloatingActionButton>
@@ -110,7 +237,7 @@ class SearchBar extends React.Component {
               <div style={{ display: 'flex' }} className='button_container_2'>
                 <div  style={{ marginLeft: 'auto', marginRight: 15 }}>
                   <FloatingActionButton
-                    onClick={this.props.onSearchClicked}
+                    onClick={this.search}
                   >
                     <SearchIcon />
                   </FloatingActionButton>
@@ -119,7 +246,7 @@ class SearchBar extends React.Component {
                   className='hint--bottom-right hint--rounded'
                   aria-label='Browse All'>
                   <FloatingActionButton
-                    onClick={this.props.onBrowseClicked}
+                    onClick={ this.props.onBrowseClicked }
                   >
                     <WhatshotIcon />
                   </FloatingActionButton>
@@ -134,9 +261,10 @@ class SearchBar extends React.Component {
 }
 
 SearchBar.propType = {
-  onChange: React.PropTypes.func.isRequired,
   onSearchClicked: React.PropTypes.func.isRequired,
-  onBrowseClicked: React.PropTypes.func.isRequired
+  onBrowseClicked: React.PropTypes.func.isRequired,
+  autocompleteStore: React.PropTypes.object.isRequired,
+  reduced: React.PropTypes.bool.isRequired
 };
 
 export default SearchBar;

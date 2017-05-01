@@ -1,5 +1,5 @@
 {
-  "name": "ethnexus-web",
+  "name": "weipoint-web",
   "version": "0.1.0",
   "private": true,
   "devDependencies": {
@@ -59,6 +59,7 @@
     "material-ui": "^0.16.7",
     "react": "^15.4.1",
     "react-ace": "^4.1.6",
+    "react-autosuggest": "^9.0.1",
     "react-bootstrap": "^0.30.7",
     "react-copy-to-clipboard": "^4.2.3",
     "react-dom": "^15.4.1",

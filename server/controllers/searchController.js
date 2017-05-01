@@ -58,4 +58,36 @@ router.get('/', async(request, response) => {
   }
 });
 
+router.get('/autocomplete', async(request, response) => {
+  try {
+    request.check({
+      'query': {
+        in: 'query',
+        isString: true,
+        errorMessage: 'Invalid Query'
+      }
+    });
+
+    const validationResult = await request.getValidationResult();
+    if (!validationResult.isEmpty()) {
+      throw new errors.RequestError(validationResult.array());
+    }
+
+    const suggestResults = await searchService.suggestAutocomplete(request.query.query);
+
+    logger.info({
+      at: 'searchController/autocomplete',
+      message: 'Received suggest results for search query',
+      query: request.query.query,
+      results: suggestResults
+    });
+
+    return response.status(200).json({
+      results: suggestResults
+    });
+  } catch (e) {
+    errorHandler.handle(e, response);
+  }
+});
+
 module.exports = router;
