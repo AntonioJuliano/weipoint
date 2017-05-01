@@ -10,6 +10,8 @@ const optimusService = require('../services/optimusService');
 const db = require('../helpers/db');
 const elasticsearch = require('../helpers/elasticsearch');
 const Contract = require('../models/contract');
+const Query = require('../models/query');
+const Search = require('../models/search');
 
 const envName = process.env.NODE_ENV || "dev";
 const replServer = repl.start({
@@ -23,3 +25,5 @@ replServer.context.db = db;
 replServer.context.elasticsearch = elasticsearch;
 replServer.context.Contract = Contract;
 replServer.context.searchService = searchService;
+replServer.context.Query = Query;
+replServer.context.Search = Search;

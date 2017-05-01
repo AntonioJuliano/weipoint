@@ -14,31 +14,23 @@ class Search extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      value: '',
       searchStore: {},
-      contractStore: {}
+      contractStore: {},
+      autocompleteStore: {}
     };
-    this.handleSearchBarChange = this.handleSearchBarChange.bind(this);
     this.handleSearchBarClick = this.handleSearchBarClick.bind(this);
     this.getBodyElement = this.getBodyElement.bind(this);
   }
 
-  handleSearchBarChange(e) {
-    const value = e.target.value.trim();
-    this.setState({ value: value });
-  }
-
-  handleSearchBarClick() {
-    const value = this.state.value;
-
-    if (value === '') {
+  handleSearchBarClick(query) {
+    if (query === '') {
       return;
     }
 
-    if (this.props.web3.isAddress(value)) {
-      this.props.history.push('/contract/' + value);
+    if (this.props.web3.isAddress(query)) {
+      this.props.history.push('/contract/' + query);
     } else {
-      this.props.history.push('/search/' + value);
+      this.props.history.push('/search/' + query);
     }
   }
 
@@ -109,10 +101,10 @@ class Search extends React.Component {
           <Row center='xs'>
             <div style={{ width: '100%'}}>
               <SearchBar
-                onChange={this.handleSearchBarChange}
                 onSearchClicked={this.handleSearchBarClick}
                 onBrowseClicked={ () => this.props.history.push('/all') }
                 reduced={this.props.location.pathname !== '/'}
+                autocompleteStore={this.state.autocompleteStore}
               />
             </div>
           </Row>

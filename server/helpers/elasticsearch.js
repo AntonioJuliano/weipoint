@@ -18,15 +18,19 @@ const esClient = new elasticsearch.Client({
       protocol: 'http',
       port: process.env.ELASTICSEARCH_PORT
     }
-  ]
+  ],
+  apiVersion: '5.1'
 });
 
 let config = {
   esClient: esClient
 };
 
-function plugin(schema, versionNumber, schemaName) {
+function plugin(schema, versionNumber, schemaName, transform) {
   config.index = schemaName + '_' + versionNumber;
+  if (transform) {
+    config.transform = transform;
+  }
   schema.plugin(
     mongoosastic,
     config
