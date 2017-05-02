@@ -22,8 +22,14 @@ class SearchBar extends React.Component {
     this.search = this.search.bind(this);
   }
 
-  search() {
-    this.props.onSearchClicked(this.state.value.trim().toLowerCase());
+  search(value) {
+    let query;
+    if (value !== undefined) {
+      query = value
+    } else {
+      query = this.state.value.trim().toLowerCase();
+    }
+    this.props.onSearchClicked(query);
   }
 
   onChange(event, { newValue, method }) {
@@ -261,9 +267,9 @@ class SearchBar extends React.Component {
             );
           }}
           theme={style}
-          onSuggestionSelected={ event => {
+          onSuggestionSelected={ (event, {suggestion}) => {
             event.preventDefault();
-            this.search();
+            this.search(suggestion);
           }}
           renderInputComponent={ props => {
             return (
