@@ -85,7 +85,7 @@ class Search extends React.Component {
 
     return (
       <Row center='xs'>
-        <Col md={8} sm={9} xs={11}>
+        <Col md={8} sm={9} xs={12}>
           <div className="content">
             {content}
           </div>
@@ -96,7 +96,7 @@ class Search extends React.Component {
 
   render() {
     return (
-      <div className="search" style={{ minWidth: 600 }}>
+      <div className="search" style={{ minWidth: 320 }}>
         <Grid fluid={true}>
           <Row center='xs'>
             <div style={{ width: '100%'}}>
