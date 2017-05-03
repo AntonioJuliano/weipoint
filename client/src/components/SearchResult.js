@@ -79,6 +79,7 @@ class SearchResult extends React.Component {
 
   render() {
     const titleStyle = this.state.focused ? { color: '#0060fc' } : {};
+    titleStyle.wordWrap = 'break-word';
 
     return (
       <div
@@ -92,7 +93,8 @@ class SearchResult extends React.Component {
             title={this.props.name || 'Contract'}
             subtitle={this.props.address}
             titleStyle={titleStyle}
-         />
+            subtitleStyle={{ wordWrap: 'break-word' }}
+          />
           <CardText style={{paddingTop: 0}}>
             {
               this.props.description &&
@@ -122,9 +124,12 @@ class SearchResult extends React.Component {
                 </a>
               </div>
             }
-            <Tags
-              tags={this.props.tags}
-              showAddTag={false}/>
+            <div style={{ maxHeight: 115, height: 'auto', overflowY: 'auto', paddingBottom: 5 }}>
+              <Tags
+                tags={this.props.tags}
+                showAddTag={false}
+              />
+            </div>
             {this.getBadges()}
           </CardText>
         </Card>
