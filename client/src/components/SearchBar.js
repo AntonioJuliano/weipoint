@@ -5,6 +5,7 @@ import Paper from 'material-ui/Paper';
 import FloatingActionButton from 'material-ui/FloatingActionButton';
 import { Row, Col } from 'react-flexbox-grid';
 import Autosuggest from 'react-autosuggest';
+import { withRouter } from 'react-router-dom';
 
 const SMALL_SCREEN_WIDTH = 500;
 
@@ -131,8 +132,10 @@ class SearchBar extends React.Component {
               fontFamily: "Raleway, sans-serif",
               marginLeft: 'auto',
               marginRight: 'auto',
+              cursor: 'pointer',
               marginBottom: 10
             }}
+            onClick={ () => this.props.history.push('/') }
           >
             {'Weipoint'}
           </div>
@@ -145,13 +148,18 @@ class SearchBar extends React.Component {
             {
               this.props.reduced &&
               !this.state.smallScreen &&
-              <Col smOffset={1} style={{
-                fontSize: 22,
-                fontFamily: "Raleway, sans-serif",
-                marginTop: 'auto',
-                marginBottom: 'auto',
-                marginRight: 12
-              }}>
+              <Col
+                smOffset={1}
+                style={{
+                  fontSize: 22,
+                  fontFamily: "Raleway, sans-serif",
+                  marginTop: 'auto',
+                  marginBottom: 'auto',
+                  marginRight: 12,
+                  cursor: 'pointer'
+                }}
+                onClick={ () => this.props.history.push('/') }
+              >
                 {'Weipoint'}
               </Col>
             }
@@ -207,7 +215,10 @@ class SearchBar extends React.Component {
   }
 
   getInputElement() {
-    const hintText = this.props.reduced ? null : 'Search by address or term, e.g. "token"';
+    let hintText = this.props.reduced ? null : 'Search by address or term';
+    if (!this.state.smallScreen && !this.props.reduced) {
+      hintText += ', e.g. "token"';
+    }
     const inputProps = {
       value: this.state.value,
       onChange: this.onChange
@@ -344,4 +355,4 @@ SearchBar.propType = {
   reduced: React.PropTypes.bool.isRequired
 };
 
-export default SearchBar;
+export default withRouter(SearchBar);

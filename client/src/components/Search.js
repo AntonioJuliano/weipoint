@@ -85,7 +85,7 @@ class Search extends React.Component {
 
     return (
       <Row center='xs'>
-        <Col md={8} sm={9} xs={12}>
+        <Col lg={8} md={9} sm={10} xs={12}>
           <div className="content">
             {content}
           </div>
