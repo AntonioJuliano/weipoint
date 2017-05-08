@@ -14,8 +14,6 @@ COPY ./client /home/weipoint/app/client
 RUN npm run prod_build
 COPY ./server /home/weipoint/app/server
 
-EXPOSE 3001
-
 RUN adduser -S weipoint
 USER weipoint
 
