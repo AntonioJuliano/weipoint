@@ -135,7 +135,7 @@ class UploadSource extends React.Component {
               <p style={{ fontSize: '75%'}}>
                 Note: currently only Solidity source code is supported
               </p>
-              <Paper zDepth={2} style={{ height: this.props.height - 170 }}>
+              <Paper zDepth={2} style={{ height: this.props.height - 180 }}>
                 <Editor
                   readOnly={false}
                   name='uploadSource'

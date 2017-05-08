@@ -266,15 +266,20 @@ class Contract extends React.Component {
 
     const thisRef = this;
     const elementsToShow = itemsToShow.map(function(tabInfo, index) {
+      const style = index === 0 ? { left: 0 } : {};
       return <BottomNavigationItem
           label={tabInfo.label}
           icon={tabInfo.icon}
           onTouchTap={() => thisRef.changeTab(tabInfo.name, index)}
           key={index}
+          style={style}
         />;
     });
 
-    return <BottomNavigation selectedIndex={this.state.currentTabIndex}>
+    return <BottomNavigation
+      selectedIndex={this.state.currentTabIndex}
+      style={{ width: 'auto', height: 'auto', minWidth: 75 * elementsToShow.length }}
+    >
       {elementsToShow}
     </BottomNavigation>;
   }
@@ -295,7 +300,7 @@ class Contract extends React.Component {
         className="SearchResultContainer"
         style={{ marginTop: 15, textAlign: 'left', marginBottom: 10 }}>
         <Card>
-          <div style={{ display: 'flex' }} >
+          <div style={{ display: 'flex', maxWidth: 'inherit', width: 'inherit' }} >
             {
               this.props.back &&
               <FlatButton
@@ -307,6 +312,9 @@ class Contract extends React.Component {
             <CardTitle
               title={this.state.contract.name || "Contract"}
               subtitle={this.state.contract.address}
+              titleStyle={{ wordWrap: 'break-word' }}
+              subtitleStyle={{ wordWrap: 'break-word' }}
+              style={{ maxWidth: '90%' }}
             />
           </div>
           <div style={{
@@ -317,7 +325,9 @@ class Contract extends React.Component {
           }}>
             {this.getCurrentTab()}
           </div>
-          {this.getNavigationBar()}
+          <div style={{ overflowX: 'auto', overflowY: 'hidden'}}>
+            {this.getNavigationBar()}
+          </div>
         </Card>
       </div>
     );

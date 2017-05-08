@@ -35,7 +35,7 @@ class Footer extends React.Component {
           fontSize: 14,
           paddingTop: 16,
         }}>
-        <Col xs={10} style={{ marginLeft: 'auto', marginRight: 'auto', minWidth: 360 }}>
+        <Col xs={10} style={{ marginLeft: 'auto', marginRight: 'auto', minWidth: 320 }}>
           <Divider style={{ margin: 'auto', width: '100%' }} />
           <div style={{ width: '100%', display: 'flex', marginTop: 16, marginRight: 0, justifyContent: 'flex-end' }}>
             <div style={{ width: 'auto', margin: 'auto', marginRight: 0, marginLeft: 'auto' }}>

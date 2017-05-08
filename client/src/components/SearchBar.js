@@ -5,6 +5,9 @@ import Paper from 'material-ui/Paper';
 import FloatingActionButton from 'material-ui/FloatingActionButton';
 import { Row, Col } from 'react-flexbox-grid';
 import Autosuggest from 'react-autosuggest';
+import { withRouter } from 'react-router-dom';
+
+const SMALL_SCREEN_WIDTH = 500;
 
 class SearchBar extends React.Component {
   constructor(props) {
@@ -13,13 +16,31 @@ class SearchBar extends React.Component {
     this.state = {
       focused: false,
       value: '',
-      autocompleteSuggestions: []
+      autocompleteSuggestions: [],
+      smallScreen: window.innerWidth < SMALL_SCREEN_WIDTH
     };
 
     this.onChange = this.onChange.bind(this);
     this.getAutocompleteSuggestions = this.getAutocompleteSuggestions.bind(this);
     this.getInputElement = this.getInputElement.bind(this);
     this.search = this.search.bind(this);
+  }
+
+  updateDimensions() {
+    if (!this.state.smallScreen && window.innerWidth < SMALL_SCREEN_WIDTH) {
+      this.setState({ smallScreen: true });
+    } else if (this.state.smallScreen && window.innerWidth >= SMALL_SCREEN_WIDTH) {
+      this.setState({ smallScreen: false });
+    }
+  }
+
+  componentDidMount() {
+    this.updateDimensions();
+    window.addEventListener("resize", this.updateDimensions.bind(this));
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.updateDimensions.bind(this));
   }
 
   search(value) {
@@ -62,17 +83,17 @@ class SearchBar extends React.Component {
     }
   }
 
-
-
   render() {
-    const barSize = this.props.reduced ? 5 : 8;
+    let barSize = this.props.reduced ? (this.state.smallScreen ? 9 : 7) : 8;
 
     const barStyle = this.props.reduced ? { marginTop: 20 } : { marginTop: 190 };
-    let colStyle = { minWidth: 300, maxWidth: 550, height: 48 }
+    let colStyle = { height: 48 }
 
     if (!this.props.reduced) {
+      colStyle.maxWidth = 550;
       colStyle.margin = 'auto';
     } else {
+      colStyle.maxWidth = 450;
       colStyle.marginTop = 'auto';
       colStyle.marginBottom = 'auto';
     }
@@ -102,20 +123,43 @@ class SearchBar extends React.Component {
             </div>
           </div>
         }
+        {
+          this.props.reduced &&
+          this.state.smallScreen &&
+          <div
+            style={{
+              fontSize: 22,
+              fontFamily: "Raleway, sans-serif",
+              marginLeft: 'auto',
+              marginRight: 'auto',
+              cursor: 'pointer',
+              marginBottom: 10
+            }}
+            onClick={ () => this.props.history.push('/') }
+          >
+            {'Weipoint'}
+          </div>
+        }
         <div className="SearchTextField" style={{ marginBottom: 20 }}>
           <Row
-            center={this.props.reduced ? null : 'xs'}
+            center={(this.props.reduced && !this.state.smallScreen) ? null : 'xs'}
             style={{ display: 'flex' }}
           >
             {
               this.props.reduced &&
-              <Col smOffset={1} style={{
-                fontSize: 22,
-                fontFamily: "Raleway, sans-serif",
-                marginTop: 'auto',
-                marginBottom: 'auto',
-                marginRight: 12
-              }}>
+              !this.state.smallScreen &&
+              <Col
+                smOffset={1}
+                style={{
+                  fontSize: 22,
+                  fontFamily: "Raleway, sans-serif",
+                  marginTop: 'auto',
+                  marginBottom: 'auto',
+                  marginRight: 12,
+                  cursor: 'pointer'
+                }}
+                onClick={ () => this.props.history.push('/') }
+              >
                 {'Weipoint'}
               </Col>
             }
@@ -147,35 +191,34 @@ class SearchBar extends React.Component {
         </div>
         {
           !this.props.reduced &&
-          <Row center={'xs'}>
-            <Col xs={5}>
-              <div style={{ display: 'flex' }} className='button_container_2'>
-                <div  style={{ marginLeft: 'auto', marginRight: 15 }}>
-                  <FloatingActionButton
-                    onClick={this.search}
-                  >
-                    <SearchIcon />
-                  </FloatingActionButton>
-                </div>
-                <div style={{ marginLeft: 15, marginRight: 'auto' }}
-                  className='hint--bottom-right hint--rounded'
-                  aria-label='Browse All'>
-                  <FloatingActionButton
-                    onClick={ this.props.onBrowseClicked }
-                  >
-                    <WhatshotIcon />
-                  </FloatingActionButton>
-                </div>
-              </div>
-            </Col>
-          </Row>
+          <div style={{ display: 'flex', marginLeft: 'auto', marginRight: 'auto' }} className='button_container_2'>
+            <div  style={{ marginLeft: 'auto', marginRight: 15 }}>
+              <FloatingActionButton
+                onClick={this.search}
+              >
+                <SearchIcon />
+              </FloatingActionButton>
+            </div>
+            <div style={{ marginLeft: 15, marginRight: 'auto' }}
+              className='hint--bottom-right hint--rounded'
+              aria-label='Browse All'>
+              <FloatingActionButton
+                onClick={ this.props.onBrowseClicked }
+              >
+                <WhatshotIcon />
+              </FloatingActionButton>
+            </div>
+          </div>
         }
       </div>
     );
   }
 
   getInputElement() {
-    const hintText = this.props.reduced ? null : 'Search by address or term, e.g. "token"';
+    let hintText = this.props.reduced ? null : 'Search by address or term';
+    if (!this.state.smallScreen && !this.props.reduced) {
+      hintText += ', e.g. "token"';
+    }
     const inputProps = {
       value: this.state.value,
       onChange: this.onChange
@@ -295,7 +338,7 @@ class SearchBar extends React.Component {
                 >
                   {hintText}
                 </div>
-                <input {...props} spellcheck="false" autocorrect="off" autocapitalize="off" />
+                <input {...props} spellCheck="false" autoCorrect="off" autoCapitalize="off" />
               </div>
             );
           }}
@@ -312,4 +355,4 @@ SearchBar.propType = {
   reduced: React.PropTypes.bool.isRequired
 };
 
-export default SearchBar;
+export default withRouter(SearchBar);

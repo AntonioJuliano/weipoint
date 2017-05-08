@@ -115,9 +115,7 @@ async function connect(model, versionNumber, schemaName) {
             count: count
           });
           try {
-            await synchronized_lock.extend(
-              ES_REDIS_SYNCHRONIZED_PREFIX + '_lock_' + schemaName
-            );
+            await synchronized_lock.extend(1000);
           } catch (err) {
             logger.error({
               at: 'Elasticsearch#connect',
