@@ -6,7 +6,7 @@ dotenv.load();
 
 const express = require('express');
 const app = express();
-const port = 3001;
+const port = process.env.PORT;
 const expressValidator = require('express-validator');
 const bodyParser = require('body-parser');
 const web3 = require('./helpers/web3');
