@@ -38,3 +38,7 @@ Contract.esSearchAsync(
   },
   { hydrate: false }
 ).then(r => res = r );
+
+
+
+r.forEach( c => {if (c.score) {console.log(c.address + ': ' + c.score.value)}})
