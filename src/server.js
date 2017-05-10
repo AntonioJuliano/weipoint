@@ -75,12 +75,6 @@ app.use(require('./middlewares/requestLogger'));
 
 app.use('/api/v1', require('./controllers/index'));
 
-app.use(express.static(path.join(__dirname, '../client/build')));
-
-app.get('/*', function (req, res) {
-  res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
-});
-
 // This needs to be the last non-error middleware
 app.use(bugsnag.errorHandler);
 
