@@ -12,7 +12,6 @@ const bodyParser = require('body-parser');
 const web3 = require('./helpers/web3');
 const errors = require('./helpers/errors');
 const logger = require('./helpers/logger');
-const path = require('path');
 const errorHandler = require('./helpers/errorHandler');
 const bugsnag = require('./helpers/bugsnag');
 const cors = require('cors');
@@ -36,7 +35,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.get('/health', function(req, res) {
-  res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
+  res.status(200).json({ ok: true });
 });
 
 app.use(function(req, res, next) {
