@@ -30,9 +30,7 @@ process.on('unhandledRejection', (reason, p) => {
 // This needs to be the first middleware
 app.use(bugsnag.requestHandler);
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'development' ?
-    'http://localhost:3000' :
-    'https://www.weipoint.com',
+  origin: process.env.CORS_ORIGIN,
   optionsSuccessStatus: 200
 }
 app.use(cors(corsOptions));
