@@ -9,11 +9,21 @@ const RETRY_DELAY = 500;
 
 async function search(query, hydrate, index, size) {
   const es_query = {
-    multi_match: {
-      query: query,
-      fields: ['tags.tag', 'description', 'link', 'name'],
-      fuzziness: 'AUTO',
-      prefix_length: 1
+    function_score: {
+      query: {
+        multi_match: {
+          query: query,
+          fields: ['tags.tag', 'description', 'link', 'name'],
+          fuzziness: 'AUTO',
+          prefix_length: 1
+        }
+      },
+      field_value_factor: {
+        field: 'score.value',
+        modifier: 'ln1p',
+        factor: 1,
+        missing: 0
+      }
     }
   };
 
