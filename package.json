@@ -9,7 +9,9 @@
     "staging": "NODE_ENV=staging node src/server.js",
     "test": "mocha test",
     "prod_install": "npm install --loglevel warn --production",
-    "lint": "eslint --ext .js --ignore-path .gitignore src/**"
+    "lint": "eslint --ext .js --ignore-path .gitignore src/**",
+    "prod_console": "NODE_ENV=production node src/scripts/console.js",
+    "console": "NODE_ENV=development node src/scripts/console.js"
   },
   "pre-commit": [
     "lint"
