@@ -4,15 +4,12 @@
   "description": "server for weipoint app",
   "main": "server.js",
   "scripts": {
-    "start": "concurrently \"npm run server\" \"npm run client\"",
-    "server": "nodemon server/server.js --ignore client/",
-    "prod": "NODE_ENV=production node server/server.js",
-    "staging": "NODE_ENV=staging node server/server.js",
-    "client": "node start-client.js",
+    "start": "nodemon src/server.js/",
+    "prod": "NODE_ENV=production node src/server.js",
+    "staging": "NODE_ENV=staging node src/server.js",
     "test": "mocha test",
-    "prod_install": "npm install --loglevel warn --production && cd client && npm install --loglevel warn && cd ..",
-    "prod_build": "cd client && npm run build && rm -rf node_modules scripts src && cd ..",
-    "lint": "eslint --ext .js --ignore-path .gitignore server/**"
+    "prod_install": "npm install --loglevel warn --production",
+    "lint": "eslint --ext .js --ignore-path .gitignore src/**"
   },
   "pre-commit": [
     "lint"
@@ -36,6 +33,7 @@
     "body-parser": "^1.15.2",
     "bugsnag": "^1.10.0",
     "coinbase": "^2.0.6",
+    "cors": "^2.8.3",
     "dotenv": "^4.0.0",
     "elasticsearch": "^13.0.0-rc2",
     "express": "^4.14.0",
