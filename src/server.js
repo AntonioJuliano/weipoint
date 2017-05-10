@@ -15,6 +15,7 @@ const logger = require('./helpers/logger');
 const path = require('path');
 const errorHandler = require('./helpers/errorHandler');
 const bugsnag = require('./helpers/bugsnag');
+const cors = require('cors');
 
 process.on('unhandledRejection', (reason, p) => {
   logger.error({
@@ -28,6 +29,13 @@ process.on('unhandledRejection', (reason, p) => {
 
 // This needs to be the first middleware
 app.use(bugsnag.requestHandler);
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'development' ?
+    'http://localhost:3000' :
+    'https://www.weipoint.com',
+  optionsSuccessStatus: 200
+}
+app.use(cors(corsOptions));
 
 app.get('/health', function(req, res) {
   res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
