@@ -21,7 +21,7 @@ async function search(query, hydrate, index, size) {
       field_value_factor: {
         field: 'score.value',
         modifier: 'ln1p',
-        factor: 1,
+        factor: 2,
         missing: 0
       }
     }
@@ -37,7 +37,17 @@ async function search(query, hydrate, index, size) {
 
 function searchAll(hydrate, index, size) {
   const es_query = {
-    match_all: {}
+    function_score: {
+      query: {
+        match_all: {}
+      },
+      field_value_factor: {
+        field: 'score.value',
+        modifier: 'ln1p',
+        factor: 1,
+        missing: 0
+      }
+    }
   };
 
   return _search(es_query, hydrate, index, size, 0);

@@ -237,7 +237,8 @@ function toJson(contract) {
     tags: contract.tags.map(_tagToJson),
     libraries: contract.libraries,
     description: contract.description,
-    link: contract.link
+    link: contract.link,
+    score: contract.score.value
   };
 
   if (contract.type) {
