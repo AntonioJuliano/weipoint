@@ -71,17 +71,18 @@ async function lookupContract(address) {
 async function verifySource(contract, source, sourceType, compilerVersion, optimized) {
   if (sourceType === 'solidity') {
     const contracts = await optimusService.compileSolidity(source, compilerVersion, optimized);
+    const existingRuntimeCode = contract.code.replace('0x', '');
+    const strippedExisting = _removeMetadata(existingRuntimeCode);
     for (const contractName in contracts) {
       const compiledContract = contracts[contractName];
       const compiledRuntimeBytecode = compiledContract.runtimeBytecode;
-      const existingRuntimeCode = contract.code.replace('0x', '');
 
       const strippedCompiled = _removeMetadata(compiledRuntimeBytecode);
-      const strippedExisting = _removeMetadata(existingRuntimeCode);
 
       if (strippedCompiled.length === strippedExisting.length) {
         const linkResult = _autoLinkLibraries(strippedCompiled, strippedExisting);
         const linkedCompiled = linkResult.linked;
+
         if (compiledRuntimeBytecode === existingRuntimeCode ||
           linkedCompiled === strippedExisting) {
           logger.info({
@@ -256,11 +257,11 @@ function _tagToJson(tag) {
 }
 
 /*
- * Some solidity contract bytecodes include a swarm hash at the end which seems
+ * Some solidity contract bytecodes include a swarm hash (sometimes more than one) which seems
  * to not be deterministic. For now allow it to be ignored
  */
 function _removeMetadata(bytecode) {
-  return bytecode.replace(/a165627a7a72305820([0-9a-f]{64})0029$/, '');
+  return bytecode.replace(/a165627a7a72305820([0-9a-f]{64})0029/g, '');
 }
 
 /*
