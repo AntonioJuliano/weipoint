@@ -9,7 +9,8 @@ const logger = new winston.Logger({
       handleExceptions: true,
       json: process.env.NODE_ENV === 'production'
             || process.env.NODE_ENV === 'staging' ? true : false,
-      colorize: true
+      colorize: true,
+      humanReadableUnhandledException: true
     })
   ],
   exitOnError: false
