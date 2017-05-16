@@ -38,6 +38,8 @@
     "cors": "^2.8.3",
     "dotenv": "^4.0.0",
     "elasticsearch": "^13.0.0-rc2",
+    "eth-registrar-ens": "0.8.1",
+    "ethereum-ens": "0.7.1",
     "express": "^4.14.0",
     "express-validator": "^3.1.2",
     "mongoosastic": "^4.3.0",
