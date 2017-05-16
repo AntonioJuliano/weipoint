@@ -41,7 +41,7 @@ router.get('/', async(request, response) => {
     if (resolvedAddress) {
       const balance = await contractService.getBalance(resolvedAddress);
       try {
-        contract = contractService.lookupContract(resolvedAddress);
+        contract = await contractService.lookupContract(resolvedAddress);
       } catch (e) {
         // Ignore not found
       }
