@@ -97,6 +97,7 @@ async function verifySource(contract, source, sourceType, compilerVersion, optim
           contract.name = contractName;
           contract.abi = JSON.parse(contracts[contractName].interface);
           contract.libraries = linkResult.libraries;
+          contract.isToken = _isToken(contract);
           await contract.save();
 
           return contract;
@@ -304,6 +305,36 @@ function _autoLinkLibraries(compiledBytecode, existingBytecode) {
     linked: result + compiledCurrent,
     libraries: libraries
   };
+}
+
+function _isToken(contract) {
+  if (contract.abi) {
+    const balanceOf = contract.abi.filter( f => f.name === 'balanceOf' )[0];
+    const decimals = contract.abi.filter( f => f.name === 'decimals' )[0];
+    const symbol = contract.abi.filter( f => f.name === 'symbol' )[0];
+
+    if (balanceOf
+        && decimals
+        && symbol
+        && symbol.inputs.length === 0
+        && symbol.constant
+        && symbol.outputs.length === 1
+        && symbol.outputs[0].type === 'string'
+        && decimals.constant
+        && decimals.inputs.length === 0
+        && decimals.outputs.length === 1
+        && decimals.outputs[0].type === 'uint8'
+        && balanceOf.constant
+        && balanceOf.inputs.length === 1
+        && balanceOf.inputs[0].type === 'address'
+        && balanceOf.outputs.length === 1
+        && balanceOf.outputs[0].type === 'uint256') {
+
+      return true;
+    }
+  }
+
+  return false;
 }
 
 module.exports.lookupContract = lookupContract;
