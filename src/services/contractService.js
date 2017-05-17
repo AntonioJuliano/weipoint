@@ -97,7 +97,7 @@ async function verifySource(contract, source, sourceType, compilerVersion, optim
           contract.name = contractName;
           contract.abi = JSON.parse(contracts[contractName].interface);
           contract.libraries = linkResult.libraries;
-          contract.isToken = _isToken(contract);
+          contract.isToken = isToken(contract);
           await contract.save();
 
           return contract;
@@ -307,7 +307,7 @@ function _autoLinkLibraries(compiledBytecode, existingBytecode) {
   };
 }
 
-function _isToken(contract) {
+function isToken(contract) {
   if (contract.abi) {
     const balanceOf = contract.abi.filter( f => f.name === 'balanceOf' )[0];
     const decimals = contract.abi.filter( f => f.name === 'decimals' )[0];
@@ -343,3 +343,4 @@ module.exports.callConstantFunction = callConstantFunction;
 module.exports.getBalance = getBalance;
 module.exports.toJson = toJson;
 module.exports.addMetadata = addMetadata;
+module.exports.isToken = isToken;
