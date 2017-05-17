@@ -2,11 +2,12 @@ const Contract = require('../models/contract');
 const contractService = require('./contractService');
 const LRU = require("lru-cache");
 const logger = require('../helpers/logger');
+const web3 = require('../helpers/web3');
 
 const cache = LRU({ maxAge: 1000 * 60 * 60 });
 const TOKEN_CONTRACTS_KEY = 'token_contracts';
 
-async function getBalances(address) {
+async function getBalances(address, includeEth = true) {
   const tokens = await getTokens();
 
   const balances = await Promise.all(tokens.map( async (t) => {
@@ -45,7 +46,17 @@ async function getBalances(address) {
     }
   }));
 
-  const nonZeroBalances = balances.filter( b => b.balance > 0);
+  let nonZeroBalances = balances.filter( b => b.balance > 0);
+
+  if (includeEth) {
+    const ethBalance = await web3.eth.getBalanceAsync(address);
+    nonZeroBalances.unshift({
+      balance: ethBalance,
+      symbol: 'ETH',
+      decimals: 18, // 10^18 wei to 1 eth
+      isEth: true
+    });
+  }
 
   return nonZeroBalances;
 }
