@@ -239,7 +239,8 @@ function toJson(contract) {
     libraries: contract.libraries,
     description: contract.description,
     link: contract.link,
-    score: contract.score.value
+    score: contract.score.value,
+    isToken: contract.isToken
   };
 
   if (contract.type) {
