@@ -37,7 +37,10 @@ async function getBalances(address) {
         tokenAddress: t.address,
         address: address,
         error: e.toString()
-      })
+      });
+      return {
+        balance: 0
+      }
     }
   }));
 
