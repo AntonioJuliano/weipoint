@@ -28,7 +28,8 @@ async function getBalances(address) {
       return {
         balance: balance,
         symbol: symbol,
-        decimals: decimals
+        decimals: decimals,
+        contractAddress: t.address
       };
     } catch(e) {
       logger.error({
