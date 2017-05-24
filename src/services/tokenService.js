@@ -30,6 +30,7 @@ async function getBalances(address, includeEth = true) {
         balance: balance,
         symbol: symbol,
         decimals: decimals,
+        contractABI: t.abi,
         contractAddress: t.address
       };
     } catch(e) {

@@ -312,6 +312,7 @@ function isToken(contract) {
     const balanceOf = contract.abi.filter( f => f.name === 'balanceOf' )[0];
     const decimals = contract.abi.filter( f => f.name === 'decimals' )[0];
     const symbol = contract.abi.filter( f => f.name === 'symbol' )[0];
+    const transfer = contract.abi.filter( f => f.name === 'transfer' )[0];
 
     if (balanceOf
         && decimals
@@ -328,7 +329,13 @@ function isToken(contract) {
         && balanceOf.inputs.length === 1
         && balanceOf.inputs[0].type === 'address'
         && balanceOf.outputs.length === 1
-        && balanceOf.outputs[0].type === 'uint256') {
+        && balanceOf.outputs[0].type === 'uint256'
+        && transfer
+        && !transfer.constant
+        && transfer.inputs.length === 2
+        && transfer.inputs[0].type === 'address'
+        && transfer.inputs[1].type === 'uint256'
+      ) {
 
       return true;
     }
