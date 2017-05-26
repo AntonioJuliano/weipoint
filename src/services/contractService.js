@@ -324,7 +324,7 @@ function isToken(contract) {
         && decimals.constant
         && decimals.inputs.length === 0
         && decimals.outputs.length === 1
-        && decimals.outputs[0].type === 'uint8'
+        && decimals.outputs[0].type.match(/^uint/)
         && balanceOf.constant
         && balanceOf.inputs.length === 1
         && balanceOf.inputs[0].type === 'address'
