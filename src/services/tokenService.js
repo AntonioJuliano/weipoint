@@ -18,7 +18,12 @@ async function getBalances(address, includeEth = true) {
       let decimals = cache.get(t.address + '_decimals');
 
       if (!symbol) {
-        symbol = await contractService.callConstantFunction(t, 'symbol', []);
+        // Augur defines symbol as a uint256 for some reason
+        if (t.address === '0x48c80F1f4D53D5951e5D5438B54Cba84f29F32a5') {
+          symbol = 'REP'
+        } else {
+          symbol = await contractService.callConstantFunction(t, 'symbol', []);
+        }
         cache.set(t.address + '_symbol', symbol);
       }
       if (!decimals) {
