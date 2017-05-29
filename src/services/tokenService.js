@@ -19,8 +19,8 @@ async function getBalances(address, includeEth = true) {
 
       if (!symbol) {
         // Augur defines symbol as a uint256 for some reason
-        if (t.address === '0x48c80F1f4D53D5951e5D5438B54Cba84f29F32a5') {
-          symbol = 'REP'
+        if (t.address.toLowerCase() === '0x48c80f1f4d53d5951e5d5438b54cba84f29f32a5') {
+          symbol = 'REP';
         } else {
           symbol = await contractService.callConstantFunction(t, 'symbol', []);
         }
