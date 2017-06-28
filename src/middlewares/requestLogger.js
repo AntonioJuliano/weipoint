@@ -7,7 +7,8 @@ module.exports = function(request, response, next) {
     url: request.url,
     method: request.method,
     headers: request.headers,
-    query: request.query
+    query: request.query,
+    body: request.body
   });
   return next();
 };

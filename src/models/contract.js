@@ -76,6 +76,9 @@ const contractSchema = new Schema({
   pendingLinks: {
     type: [String]
   },
+  pendingNames: {
+    type: [String]
+  },
   pendingMetadata: {
     type: Boolean,
     index: true,
