@@ -180,6 +180,9 @@ async function addMetadata(contract, metadata) {
   if (metadata.link) {
     _addLink(contract, metadata.link, true);
   }
+  if (metadata.name) {
+    _addName(contract, metadata.name, true);
+  }
 
   await contract.save();
   return contract;
@@ -222,6 +225,18 @@ function _addLink(contract, link, pending) {
   }
   if (!pending) {
     contract.link = link;
+  }
+  return contract;
+}
+
+function _addName(contract, name, pending) {
+  if (pending &&
+      !contract.pendingNames.includes(name)
+      && contract.name !== name) {
+    contract.pendingNames.push(name);
+  }
+  if (!pending) {
+    contract.name = name;
   }
   return contract;
 }

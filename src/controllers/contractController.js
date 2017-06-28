@@ -223,6 +223,12 @@ router.post('/metadata', async (request, response) => {
         optional: true,
         isString: true,
         errorMessage: 'Invalid Link'
+      },
+      'name': {
+        in: 'body',
+        optional: true,
+        isString: true,
+        errorMessage: 'Invalid Name'
       }
     });
     const validationResult = await request.getValidationResult();
@@ -256,7 +262,8 @@ router.post('/metadata', async (request, response) => {
       {
         tags: request.body.tags,
         description: request.body.description,
-        link: request.body.link
+        link: request.body.link,
+        name: request.body.name
       }
     );
 
