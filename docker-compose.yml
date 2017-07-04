@@ -1,7 +1,7 @@
 version: '3'
 services:
   parity:
-    image: ethcore/parity:v1.6.5
+    image: parity/parity:v1.6.8
     ports:
       - 8545:8545
     volumes:
@@ -30,7 +30,7 @@ services:
       - transport.host=127.0.0.1
       - xpack.security.enabled=false
     volumes:
-      - esdata1:/usr/share/elasticsearch/data
+      - ~/.esdata1:/usr/share/elasticsearch/data
   redis:
     image: redis:3.2.8-alpine
     ports:

@@ -7,7 +7,8 @@ const errorCodes = {
   sourceNotAvailable: 1005,
   contractFunctionThrewError: 1006,
   tooManyTags: 1007,
-  couldNotResolveDomain: 1008
+  couldNotResolveDomain: 1008,
+  invalidVerification: 1009
 };
 
 class ClientError {

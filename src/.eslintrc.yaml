@@ -44,7 +44,7 @@ rules:
     - declaration
     - allowArrowFunctions: true
   indent:
-    - error
+    - warn
     - 2
   linebreak-style:
     - error
@@ -53,12 +53,12 @@ rules:
     - error
     - 100
   no-tabs: error
-  no-trailing-spaces: error
+  no-trailing-spaces: warn
   arrow-spacing: error
   constructor-super: error
   no-const-assign: error
   no-duplicate-imports: error
   no-var: error
   no-unused-vars:
-    - error
+    - warn
     - argsIgnorePattern: "^_"

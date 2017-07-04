@@ -2,12 +2,12 @@ const mongoose = require('../helpers/db');
 const bluebird = require('bluebird');
 const Schema = mongoose.Schema;
 
-const targetSchema = new Schema({
+const serviceSchema = new Schema({
   type: {
     type: String,
     required: true
   },
-  value: {
+  userID: {
     type: String,
     required: true
   },
@@ -18,12 +18,12 @@ const targetSchema = new Schema({
 
 const verificationSchema = new Schema(
   {
-    owner: {
-      type: targetSchema,
+    services: {
+      type: [serviceSchema],
       required: true
     },
-    target: {
-      type: targetSchema,
+    message: {
+      type: String,
       required: true
     }
   },
@@ -32,8 +32,9 @@ const verificationSchema = new Schema(
   }
 );
 
-verificationSchema.index({ "owner.value": 1, 'owner.type': 1 });
-verificationSchema.index({ "target.value": 1, 'target.type': 1 });
+// TODO indexes
+// verificationSchema.index({ "owner.value": 1, 'owner.type': 1 });
+// verificationSchema.index({ "target.value": 1, 'target.type': 1 });
 
 const Verification = mongoose.model('Verification', verificationSchema);
 bluebird.promisifyAll(Verification);
