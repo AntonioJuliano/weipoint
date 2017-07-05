@@ -25,6 +25,9 @@ const verificationSchema = new Schema(
     message: {
       type: String,
       required: true
+    },
+    timestamp: {
+      type: Number
     }
   },
   {

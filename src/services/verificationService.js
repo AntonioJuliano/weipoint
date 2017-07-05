@@ -1,6 +1,8 @@
 const web3 = require('../helpers/web3');
 const Verification = require('../models/verification');
 const errors = require('../helpers/errors');
+const keybaseService = require('./keybaseService');
+const sigUtil = require('eth-sig-util');
 
 const VERIFICATION_TYPES = {
   KEYBASE: 'keybase',
@@ -10,7 +12,9 @@ const VERIFICATION_TYPES = {
 async function addVerification({ services, version, timestamp }) {
   _validateVerification(services, version, timestamp);
 
-  const verifyPromises = services.forEach( s => _verifyVerification(s));
+  const verifyPromises = services.map(
+    s => _verifyVerification(s, _getMessage(services, version, timestamp))
+  );
 
   await Promise.all(verifyPromises);
 
@@ -22,18 +26,21 @@ async function addVerification({ services, version, timestamp }) {
         proof: s.proof
       };
     }),
-    message: _getMessage(services, version, timestamp)
+    message: _getMessage(services, version, timestamp),
+    timestamp: timestamp
   });
 
   await verification.save();
+
+  return verification;
 }
 
-function _verifyVerification(v) {
+function _verifyVerification(v, message) {
   switch (v.type) {
   case VERIFICATION_TYPES.KEYBASE:
-    return _verifyKeybaseVerification(v);
+    return _verifyKeybaseVerification(v, message);
   case VERIFICATION_TYPES.ETHEREUM_ADDRESS:
-    return _verifyEthereumAddressVerification(v);
+    return _verifyEthereumAddressVerification(v, message);
   default:
     throw new errors.ClientError(
       "Invalid verification type",
@@ -42,12 +49,21 @@ function _verifyVerification(v) {
   }
 }
 
-function _verifyKeybaseVerification(v) {
-
+function _verifyKeybaseVerification(v, message) {
+  return keybaseService.verifySignature(v.proof, v.userID, message);
 }
 
-function _verifyEthereumAddressVerification(v) {
+function _verifyEthereumAddressVerification(v, message) {
+  const signingAddress = sigUtil.recoverPersonalSignature({ data: message, sig: v.proof });
 
+  if (signingAddress !== v.userID) {
+    throw new errors.ClientError(
+      'Incorrect signing ethereum address',
+      errors.errorCodes.invalidVerification
+    );
+  }
+
+  return true;
 }
 
 function _getMessage(services, version, timestamp) {
