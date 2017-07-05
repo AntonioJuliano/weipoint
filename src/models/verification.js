@@ -18,8 +18,14 @@ const serviceSchema = new Schema({
 
 const verificationSchema = new Schema(
   {
-    services: {
-      type: [serviceSchema],
+    // For now this is always the keybase one
+    serviceA: {
+      type: serviceSchema,
+      required: true
+    },
+    // For now this is always the ethereum address one
+    serviceB: {
+      type: serviceSchema,
       required: true
     },
     message: {
@@ -36,8 +42,15 @@ const verificationSchema = new Schema(
 );
 
 // TODO indexes
-// verificationSchema.index({ "owner.value": 1, 'owner.type': 1 });
-// verificationSchema.index({ "target.value": 1, 'target.type': 1 });
+verificationSchema.index({ 'serviceA.userID': 1, 'serviceA.type': 1 });
+verificationSchema.index({ 'serviceB.userID': 1, 'serviceB.type': 1 });
+verificationSchema.index({
+  'serviceA.userID': 1,
+  'serviceA.type': 1,
+  'serviceB.userID': 1,
+  'serviceB.type': 1 },
+  { unique: true }
+);
 
 const Verification = mongoose.model('Verification', verificationSchema);
 bluebird.promisifyAll(Verification);

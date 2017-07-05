@@ -18,14 +18,35 @@ async function addVerification({ services, version, timestamp }) {
 
   await Promise.all(verifyPromises);
 
+  const keybaseVerification = services.map( s => {
+    return {
+      type: s.type,
+      userID: s.userID,
+      proof: s.proof
+    };
+  }).find( s => s.type === VERIFICATION_TYPES.KEYBASE );
+  const ethereumAddressVerification = services.map( s => {
+    return {
+      type: s.type,
+      userID: s.userID,
+      proof: s.proof
+    };
+  }).find( s => s.type === VERIFICATION_TYPES.ETHEREUM_ADDRESS );
+
+  const existingVerification = await Verification.findOne({
+    'serviceA.userID': keybaseVerification.userID,
+    'serviceA.type': VERIFICATION_TYPES.KEYBASE,
+    'serviceB.userID': ethereumAddressVerification.userID,
+    'serviceB.type': VERIFICATION_TYPES.ETHEREUM_ADDRESS,
+  }).exec();
+
+  if (existingVerification) {
+    return existingVerification;
+  }
+
   const verification = new Verification({
-    services: services.map( s => {
-      return {
-        type: s.type,
-        userID: s.userID,
-        proof: s.proof
-      };
-    }),
+    serviceA: keybaseVerification,
+    serviceB: ethereumAddressVerification,
     message: _getMessage(services, version, timestamp),
     timestamp: timestamp
   });
@@ -69,6 +90,7 @@ function _verifyEthereumAddressVerification(v, message) {
 function _getMessage(services, version, timestamp) {
   const jsonMessage = {
     verifier: 'weipoint',
+    type: 'link',
     services: services.map( s => {
       return { type: s.type, userID: s.userID };
     }),
