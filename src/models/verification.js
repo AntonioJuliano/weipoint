@@ -41,7 +41,6 @@ const verificationSchema = new Schema(
   }
 );
 
-// TODO indexes
 verificationSchema.index({ 'serviceA.userID': 1, 'serviceA.type': 1 });
 verificationSchema.index({ 'serviceB.userID': 1, 'serviceB.type': 1 });
 verificationSchema.index({
