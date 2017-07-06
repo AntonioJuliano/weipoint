@@ -34,4 +34,29 @@ router.post('/', async (request, response) => {
   }
 });
 
+router.get('/', async (request, response) => {
+  try {
+    request.check({
+      type: {
+        in: 'query',
+        isString: true,
+      },
+      userID: {
+        in: 'query',
+        isString: true,
+      },
+    });
+    const validationResult = await request.getValidationResult();
+    if (!validationResult.isEmpty()) {
+      throw new errors.RequestError(validationResult.array());
+    }
+
+    const verifications = await verificationService.getVerifications(request.query);
+
+    response.status(200).json(verifications);
+  } catch (e) {
+    errorHandler.handle(e, response);
+  }
+});
+
 module.exports = router;
