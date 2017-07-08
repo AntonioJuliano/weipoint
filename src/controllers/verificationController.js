@@ -41,9 +41,8 @@ router.get('/', async (request, response) => {
         in: 'query',
         isString: true,
       },
-      userID: {
+      userIDs: {
         in: 'query',
-        isString: true,
       },
     });
     const validationResult = await request.getValidationResult();
@@ -51,7 +50,24 @@ router.get('/', async (request, response) => {
       throw new errors.RequestError(validationResult.array());
     }
 
-    const verifications = await verificationService.getVerifications(request.query);
+    let userIDs = request.query.userIDs;
+    if (!Array.isArray(request.query.userIDs)) {
+      userIDs = [request.query.userIDs];
+    }
+
+    userIDs.forEach( id => {
+      if (typeof id !== 'string') {
+        throw new errors.RequestError(['Invalid userIDs']);
+      }
+    });
+
+    const vPromises = userIDs.map(
+      id => verificationService.getVerifications({ type: request.query.type, userID: id })
+    );
+
+    const vPromised = await Promise.all(vPromises);
+
+    const verifications = vPromised.reduce( (p,c) => p.concat(c) );
 
     response.status(200).json(verifications);
   } catch (e) {
