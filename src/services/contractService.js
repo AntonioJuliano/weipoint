@@ -256,7 +256,8 @@ function toJson(contract) {
     description: contract.description,
     link: contract.link,
     score: contract.score.value,
-    isToken: contract.isToken
+    isToken: contract.isToken,
+    creator: contract.creator
   };
 
   if (contract.type) {
