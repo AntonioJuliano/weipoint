@@ -56,6 +56,33 @@ async function addVerification({ services, version, timestamp }) {
   return verification;
 }
 
+async function getVerifications({ type, userID }) {
+  const serviceAVerificationsPromise = Verification.find({
+    'serviceA.type': type,
+    'serviceA.userID': userID
+  }).exec();
+  const serviceBVerificationsPromise = Verification.find({
+    'serviceB.type': type,
+    'serviceB.userID': userID
+  }).exec();
+
+  const [serviceAVerifications, serviceBVerifications] = await Promise.all(
+    [serviceAVerificationsPromise, serviceBVerificationsPromise]
+  );
+
+  const verifications = serviceAVerifications.concat(serviceBVerifications);
+
+  return verifications.map(toJson);
+}
+
+function toJson(v) {
+  return {
+    services: [v.serviceA, v.serviceB],
+    message: v.message,
+    timestamp: v.timestamp
+  };
+}
+
 function _verifyVerification(v, message) {
   switch (v.type) {
   case VERIFICATION_TYPES.KEYBASE:
@@ -144,3 +171,4 @@ function _validateVerification(services, version, timestamp) {
 }
 
 module.exports.addVerification = addVerification;
+module.exports.getVerifications = getVerifications;

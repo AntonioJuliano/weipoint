@@ -34,4 +34,45 @@ router.post('/', async (request, response) => {
   }
 });
 
+router.get('/', async (request, response) => {
+  try {
+    request.check({
+      type: {
+        in: 'query',
+        isString: true,
+      },
+      userIDs: {
+        in: 'query',
+      },
+    });
+    const validationResult = await request.getValidationResult();
+    if (!validationResult.isEmpty()) {
+      throw new errors.RequestError(validationResult.array());
+    }
+
+    let userIDs = request.query.userIDs;
+    if (!Array.isArray(request.query.userIDs)) {
+      userIDs = [request.query.userIDs];
+    }
+
+    userIDs.forEach( id => {
+      if (typeof id !== 'string') {
+        throw new errors.RequestError(['Invalid userIDs']);
+      }
+    });
+
+    const vPromises = userIDs.map(
+      id => verificationService.getVerifications({ type: request.query.type, userID: id })
+    );
+
+    const vPromised = await Promise.all(vPromises);
+
+    const verifications = vPromised.reduce( (p,c) => p.concat(c) );
+
+    response.status(200).json(verifications);
+  } catch (e) {
+    errorHandler.handle(e, response);
+  }
+});
+
 module.exports = router;
